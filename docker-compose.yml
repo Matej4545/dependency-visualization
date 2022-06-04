@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  neo4j:
+    image: neo4j:4.4.7
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - ./runtime/data:/data
+      - ./runtime/logs:/logs
+    restart: always
+
+  dv-frontend:
+    depends_on:
+      - neo4j
+    build: ./src/dv-frontend
+    image: dv-frontend:latest
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
