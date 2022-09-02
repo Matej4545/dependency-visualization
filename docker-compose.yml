@@ -10,13 +10,15 @@ services:
       - ./runtime/data:/data
       - ./runtime/logs:/logs
     restart: always
+    environment:
+      - NEO4J_AUTH=neo4j/test
 
-  dv-frontend:
-    depends_on:
-      - neo4j
-    build: ./src/dv-frontend
-    image: dv-frontend:latest
-    ports:
-      - 80:80
-      - 443:443
-    restart: always
+  # depvis-frontend:
+  #   depends_on:
+  #     - neo4j
+  #   build: ./src/depvis-frontend
+  #   image: depvis-frontend:latest
+  #   ports:
+  #     - 80:80
+  #     - 443:443
+  #   restart: always
