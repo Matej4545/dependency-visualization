@@ -9,6 +9,7 @@ import ImportForm from './components/ImportForm/ImportForm';
 import PageNotFound from './components/Error/PageNotFound';
 import { Neo4jProvider, createDriver } from 'use-neo4j';
 import { ConnectDatabase } from './helpers/Neo4jHelper';
+import { SbomProvider } from './providers/SbomProvider';
 
 const driver = ConnectDatabase();
 const checkConnection = async () => {
@@ -21,14 +22,16 @@ checkConnection();
 root.render(
   <React.StrictMode>
     <Neo4jProvider driver={driver}>
-      <BrowserRouter>
-        <MainNavbar></MainNavbar>
-        <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="upload" element={<ImportForm />} />
-          <Route path="*" element={<PageNotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <SbomProvider>
+        <BrowserRouter>
+          <MainNavbar></MainNavbar>
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="upload" element={<ImportForm />} />
+            <Route path="*" element={<PageNotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </SbomProvider>
     </Neo4jProvider>
   </React.StrictMode>
 );

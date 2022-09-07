@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Container, Form } from 'react-bootstrap';
+import fs from 'fs';
 
 const ImportForm = () => {
   const [file, setFile] = useState<File>();
@@ -14,7 +15,8 @@ const ImportForm = () => {
   const handleSubmit = (e: any) => {
     e.preventDefault();
     console.log({ name: projectName, file: file });
-    console.log(file?.text());
+    const fileReader = new FileReader();
+    console.log(fileReader.readAsText(file!));
   };
 
   return (

@@ -3,17 +3,18 @@ import { Button, Col, Container, Form, Row } from 'react-bootstrap';
 import { useLazyReadCypher, useReadCypher } from 'use-neo4j';
 import './App.css';
 
+import { useSbomStore } from './providers/SbomProvider';
+
 const App = () => {
   const query = 'MATCH (n:Person)-[:KNOWS]->(m:Person) WHERE n.name = $name RETURN n,m';
   const [name, setName] = useState('Matej');
-  const { loading, records, run } = useReadCypher(query);
-  const [data, setData] = useState<any>();
-
+  const [response, setResponse] = useState('');
+  const sbomStore = useSbomStore();
   const runQuery = () => {
-    run({ name: name });
+    setResponse(sbomStore.executeReadQuery(name));
   };
 
-  return loading ? (
+  return sbomStore.isLoading ? (
     <div>Loading</div>
   ) : (
     <Container className="p-5">
@@ -32,10 +33,10 @@ const App = () => {
           </Button>
         </Col>
       </Row>
-      {records ? (
+      <Row>{response}</Row>
+      {/* {records ? (
         records.map((d: any) => (
           <Row>
-            {/* <pre>{JSON.stringify(d._fields, null, 4)}</pre> */}
             <p>
               {d._fields[0].properties.name} knows {d._fields[1].properties.name}
             </p>
@@ -44,7 +45,7 @@ const App = () => {
         ))
       ) : (
         <div>No data</div>
-      )}
+      )} */}
     </Container>
   );
 };
