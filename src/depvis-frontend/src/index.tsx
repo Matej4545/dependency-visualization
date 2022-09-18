@@ -7,21 +7,13 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainNavbar from './components/MainNavbar/MainNavbar';
 import ImportForm from './components/ImportForm/ImportForm';
 import PageNotFound from './components/Error/PageNotFound';
-import { Neo4jProvider, createDriver } from 'use-neo4j';
-import { ConnectDatabase } from './helpers/Neo4jHelper';
 import { SbomProvider } from './providers/SbomProvider';
-
-const driver = ConnectDatabase();
-const checkConnection = async () => {
-  const res = await driver.verifyConnectivity();
-  console.log(res);
-};
+import { NotificationProvider } from './providers/NotificationProvider';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-checkConnection();
 root.render(
   <React.StrictMode>
-    <Neo4jProvider driver={driver}>
+    <NotificationProvider>
       <SbomProvider>
         <BrowserRouter>
           <MainNavbar></MainNavbar>
@@ -32,7 +24,7 @@ root.render(
           </Routes>
         </BrowserRouter>
       </SbomProvider>
-    </Neo4jProvider>
+      </NotificationProvider>
   </React.StrictMode>
 );
 

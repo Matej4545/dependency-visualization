@@ -1,3 +1,4 @@
+import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
 import { Button, Col, Container, Form, Row } from 'react-bootstrap';
 import { useLazyReadCypher, useReadCypher } from 'use-neo4j';
@@ -5,13 +6,13 @@ import './App.css';
 
 import { useSbomStore } from './providers/SbomProvider';
 
-const App = () => {
-  const query = 'MATCH (n:Person)-[:KNOWS]->(m:Person) WHERE n.name = $name RETURN n,m';
+const App = observer(() => {
+  const query = 'MATCH (n:Person) WHERE n.name = $name RETURN n';
   const [name, setName] = useState('Matej');
   const [response, setResponse] = useState('');
   const sbomStore = useSbomStore();
   const runQuery = () => {
-    setResponse(sbomStore.executeReadQuery(name));
+    sbomStore.loadProjects();
   };
 
   return sbomStore.isLoading ? (
@@ -34,20 +35,20 @@ const App = () => {
         </Col>
       </Row>
       <Row>{response}</Row>
-      {/* {records ? (
-        records.map((d: any) => (
+      {sbomStore.projects ? (
+        sbomStore.projects.map((d: any) => (
           <Row>
-            <p>
-              {d._fields[0].properties.name} knows {d._fields[1].properties.name}
-            </p>
+            <pre>
+              {d}
+            </pre>
             <hr />
           </Row>
         ))
       ) : (
         <div>No data</div>
-      )} */}
+      )}
     </Container>
   );
-};
+});
 
 export default App;
