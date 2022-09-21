@@ -10,9 +10,6 @@ const App = observer(() => {
   const [name, setName] = useState('Matej');
   const [response, setResponse] = useState('');
   const sbomStore = useSbomStore();
-  const runQuery = () => {
-    sbomStore.loadProjects();
-  };
 
   return sbomStore.isLoading ? (
     <div>Loading</div>
@@ -28,7 +25,7 @@ const App = observer(() => {
           ></Form.Control>
         </Col>
         <Col xs={2}>
-          <Button variant="secondary" onClick={() => runQuery()}>
+          <Button variant="secondary" onClick={() => {}}>
             Run query
           </Button>
         </Col>

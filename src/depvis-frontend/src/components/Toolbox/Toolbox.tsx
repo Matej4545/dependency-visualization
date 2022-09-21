@@ -18,7 +18,7 @@ export const Toolbox = observer(() => {
       setNodes([node, ...nodes]);
     }
   };
-
+  console.log(sbomStore.projects);
   return (
     <Container>
       <h2>Test queries</h2>
@@ -41,17 +41,9 @@ export const Toolbox = observer(() => {
           <pre>{sbomStore.json ? sbomStore.json : ''}</pre>
         </Tab>
         <Tab eventKey="node" title="Node" style={{ display: 'flex', flexWrap: 'wrap' }}>
-          <button>Prepare data</button>
-          {sbomStore.projects.records &&
-            sbomStore.projects.records.map((r: any) => {
-              return (
-                <MyNode
-                  id={r._fields[0].elementId}
-                  name={r._fields[0].properties.name}
-                  properties={r._fields[0].properties}
-                  type={r._fields[0].labels[0]}
-                ></MyNode>
-              );
+          {sbomStore.projects &&
+            sbomStore.projects.map((r: any) => {
+              return <MyNode id={r.Id} name={r.name} properties={r.properties} type={r.label}></MyNode>;
             })}
         </Tab>
       </Tabs>

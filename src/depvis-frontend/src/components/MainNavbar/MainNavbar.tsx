@@ -17,6 +17,9 @@ const MainNavbar = () => {
             <Nav.Link as={Link} to="/upload">
               Upload
             </Nav.Link>
+            <Nav.Link as={Link} to="/toolbox">
+              Toolbox
+            </Nav.Link>
             <NavDropdown title="Other" id="basic-nav-dropdown">
               <NavDropdown.Item href="/update-db">Update Database</NavDropdown.Item>
               <NavDropdown.Item href="/projects">Manage Projects</NavDropdown.Item>

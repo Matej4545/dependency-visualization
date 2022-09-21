@@ -3,15 +3,21 @@ import { Neo4jHelper } from '../helpers/Neo4jHelper';
 import { CycloneDXHelper } from '../helpers/CycloneDXHelper';
 import { CypherQueryHelper } from './CypherQueryHelper';
 
+interface IResultNode {
+  name: string;
+  id: number;
+  properties?: any;
+  label?: string;
+  dependencies?: [any];
+}
 /**
  * This class provides functions for working with the input SBOM file.
  */
-
 export class SbomStore {
   /**
    * Store projects and all their components.
    */
-  projects: any; //Array<ISbomProject>;
+  projects: IResultNode[]; //Array<ISbomProject>;
   /**
    * Indicates whether the store is loading.
    */
@@ -47,7 +53,6 @@ export class SbomStore {
       projects: observable,
       json: observable,
       parseProject: action,
-      loadProjects: action,
     });
     this.checkConnection();
   }
@@ -78,10 +83,38 @@ export class SbomStore {
     // }
   };
 
-  parseResult = async (input: any) => {};
+  /**id={r._fields[0].elementId}
+                  name={r._fields[0].properties.name}
+                  properties={r._fields[0].properties}
+                  type={r._fields[0].labels[0]}
+   */
+
+  isInResult = (node: any) => {
+    return this.projects.find((n) => {
+      n.name === node.name;
+    });
+  };
+
+  parseResult = (input: any) => {
+    this.projects = [];
+    console.log(input);
+    input.records.map((res: any) => {
+      const nodeInfo = res._fields[0];
+      const newNode = {
+        name: nodeInfo.properties.name,
+        id: nodeInfo.elementId,
+        properties: nodeInfo.properties,
+        label: nodeInfo.labels[0],
+      };
+      if (!this.isInResult(newNode)) {
+        this.projects.push(newNode);
+      }
+    });
+  };
 
   runQuery = async (query: string) => {
-    this.projects = await this.n4jHelper.writeQuery(query, {});
+    const res = await this.n4jHelper.writeQuery(query, {});
+    this.parseResult(res);
     this.json = await JSON.stringify(this.projects, null, 2);
   };
 
@@ -142,15 +175,5 @@ export class SbomStore {
       console.error(error);
     }
     this.isLoading = false;
-  };
-
-  /** Retrieve existing project from the DB.*/
-  loadProjects = async () => {
-    const result = await this.n4jHelper.readQuery(this.cqh.getProjectsQuery, {});
-    if (result !== null) this.projects = [await JSON.stringify(result.records, null, 2)];
-  };
-
-  getComponent = async () => {
-    await this.n4jHelper.writeQuery(this.cqh.getComponentWithNeighboursQuery, {});
   };
 }
