@@ -11,6 +11,7 @@
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "bootstrap": "^5.2.0",
+    "cypher-query-builder": "^6.0.4",
     "fast-xml-parser": "^4.0.9",
     "mobx": "^6.6.1",
     "mobx-react-lite": "^3.4.0",
@@ -21,7 +22,6 @@
     "react-router-dom": "^6.3.0",
     "react-scripts": "^2.1.3",
     "typescript": "^4.7.4",
-    "use-neo4j": "^0.3.13",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

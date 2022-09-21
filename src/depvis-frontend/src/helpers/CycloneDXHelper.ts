@@ -1,4 +1,57 @@
-export {};
+import { BomFormat, ISbomProject } from '../interfaces/CycloneDX';
+import { XMLParser } from 'fast-xml-parser';
+
+const XMLParserOptions = {
+  ignoreAttributes: false,
+  attributeNamePrefix: '',
+  ignoreDeclaration: true,
+};
+
+/**
+ * Class for parsing and working with CycloneDX objects
+ */
+export class CycloneDXHelper {
+  xmlParser: XMLParser;
+
+  constructor() {
+    this.xmlParser = new XMLParser(XMLParserOptions);
+  }
+  parse = async (input: File) => {
+    let parsedContent = null;
+    if (!validateFileExtension(input.name)) {
+      throw Error('File extension is not xml');
+    }
+
+    try {
+      const xmlParsed = this.xmlParser.parse(await input.text());
+      console.log(xmlParsed);
+      // Currently only json
+      //parsedContent = await JSON.stringify(xmlParsed, null, 2);
+      parsedContent = xmlParsed;
+      //parsedContent = createProject(xmlParsed);
+    } catch {
+      throw Error('Could not parse the input!');
+    }
+    return parsedContent;
+  };
+}
+
+const createProject = (project: any) => {
+  const newProject: ISbomProject = {
+    bomFormat: BomFormat.CycloneDX,
+    specVersion: '1.4',
+    version: project.version,
+    components: [],
+  };
+  return newProject;
+};
+
+const createComponent = (component: any) => {};
+
+const validateFileExtension = (fileName: string) => {
+  const extension = fileName.split('.').pop();
+  return extension!.toLowerCase() === 'xml';
+};
 
 // import path from 'path';
 // const { XMLParser } = require('fast-xml-parser');

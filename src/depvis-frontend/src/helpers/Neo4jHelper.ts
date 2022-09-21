@@ -1,7 +1,4 @@
-import { useState } from 'react';
-import { createDriver, useReadCypher } from 'use-neo4j';
-import React from 'react'
-import neo4j from 'neo4j-driver'
+import neo4j from 'neo4j-driver';
 
 const DEFAULT_DB_SETTINGS = {
   neo4jHost: process.env.REACT_APP_NEO4J_HOST || 'neo4j://localhost:7687',
@@ -9,28 +6,35 @@ const DEFAULT_DB_SETTINGS = {
   neo4jPassword: process.env.REACT_APP_NEO4J_PASSWORD || 'test',
 };
 
-export const getDriver = () => {
-  return neo4j.driver(
-    DEFAULT_DB_SETTINGS.neo4jHost,
-    neo4j.auth.basic(
-        DEFAULT_DB_SETTINGS.neo4jUsername,
-        DEFAULT_DB_SETTINGS.neo4jPassword
-        )
-  );
-};
+export class Neo4jHelper {
+  driver: any;
 
-// async readQuery(query: string) {
-//   const session = this.driver.session();
+  constructor() {
+    this.driver = neo4j.driver(
+      DEFAULT_DB_SETTINGS.neo4jHost,
+      neo4j.auth.basic(DEFAULT_DB_SETTINGS.neo4jUsername, DEFAULT_DB_SETTINGS.neo4jPassword)
+    );
+  }
 
-//   try {
-//     const readResult = await session.readTransaction((tx) => tx.run(query));
-//     return readResult;
-//   } catch (error) {
-//     console.error('Something went wrong: ', error);
-//   } finally {
-//     await session.close();
-//   }
-// }
-// async close() {
-//   await this.driver.close();
-// }
+  writeQuery = async (query: string, params: Record<string, any>) => {
+    return await this.Query(query, params, { defaultAccessMode: neo4j.session.WRITE });
+  };
+
+  readQuery = async (query: string, params: Record<string, any>) => {
+    return await this.Query(query, params, { defaultAccessMode: neo4j.session.READ });
+  };
+
+  Query = async (query: string, params: Record<string, any>, sessionOptions: Record<string, any> | undefined) => {
+    const session = this.driver.session(sessionOptions);
+    var result = null;
+    try {
+      console.log({ query: query, params: params });
+      result = await session.run(query, params);
+    } catch (error) {
+      throw error;
+    }
+    session.close();
+    console.log(result);
+    return result;
+  };
+}

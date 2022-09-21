@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.3" serialNumber="urn:uuid:853d709c-08fd-4cbd-bd8b-55be219ce7f1" version="1">
+    <metadata>
+        <timestamp>2022-09-21T19:20:01.201Z</timestamp>
+        <tools>
+            <tool>
+                <vendor>CycloneDX</vendor>
+                <name>Node.js module</name>
+                <version>3.9.0</version>
+            </tool>
+        </tools>
+        <component type="library" bom-ref="pkg:npm/sample@1.0.0">
+            <name>sample</name>
+            <version>1.0.0</version>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/sample@1.0.0</purl>
+        </component>
+    </metadata>
+    <components>
+        <component type="library" bom-ref="pkg:npm/babel@6.23.0">
+            <author>Sebastian McKenzie</author>
+            <name>babel</name>
+            <version>6.23.0</version>
+            <description>
+                <![CDATA[Turn ES6 code into readable vanilla ES5 with source maps]]>
+            </description>
+            <hashes>
+                <hash alg="SHA-512">643702688f1595cb7c3c9dc3be6caa533fb95f6625cf766eb88b417bfef8c97a2c936770c95a3f68decc089f072738679c9fbac8fe28fa50e01bd3017bdd432c</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/babel@6.23.0</purl>
+            <externalReferences>
+                <reference type="website">
+                    <url>https://babeljs.io/</url>
+                </reference>
+                <reference type="vcs">
+                    <url>https://github.com/babel/babel/tree/master/packages/babel</url>
+                </reference>
+            </externalReferences>
+        </component>
+        <component type="library" bom-ref="pkg:npm/react-router-dom@6.4.0">
+            <author>Remix Software</author>
+            <name>react-router-dom</name>
+            <version>6.4.0</version>
+            <description>
+                <![CDATA[Declarative routing for React web applications]]>
+            </description>
+            <hashes>
+                <hash alg="SHA-512">e00c35c665ca7a5798610df1d0b725dae9dd1d1eb23235d98ddf43299779dd218e62a8abad44e1c946f4c30017e55640caf4aece3349999949deb47dfbfbf3aa</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/react-router-dom@6.4.0</purl>
+            <externalReferences>
+                <reference type="website">
+                    <url>https://github.com/remix-run/react-router#readme</url>
+                </reference>
+                <reference type="issue-tracker">
+                    <url>https://github.com/remix-run/react-router/issues</url>
+                </reference>
+                <reference type="vcs">
+                    <url>git+https://github.com/remix-run/react-router.git</url>
+                </reference>
+            </externalReferences>
+        </component>
+        <component type="library" bom-ref="pkg:npm/react-router@6.4.0">
+            <author>Remix Software</author>
+            <name>react-router</name>
+            <version>6.4.0</version>
+            <description>
+                <![CDATA[Declarative routing for React]]>
+            </description>
+            <hashes>
+                <hash alg="SHA-512">07ee5b117165811d5751d1d847a3fde20dbdf528eb7c204c9840c935c15ba40c911f58f5ef8f32b7d35d0e15b7fbe9f0d65937cd027a68e3baeb3531dca95366</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/react-router@6.4.0</purl>
+            <externalReferences>
+                <reference type="website">
+                    <url>https://github.com/remix-run/react-router#readme</url>
+                </reference>
+                <reference type="issue-tracker">
+                    <url>https://github.com/remix-run/react-router/issues</url>
+                </reference>
+                <reference type="vcs">
+                    <url>git+https://github.com/remix-run/react-router.git</url>
+                </reference>
+            </externalReferences>
+        </component>
+        <component type="library" bom-ref="pkg:npm/%40remix-run/router@1.0.0">
+            <author>Remix Software</author>
+            <group>@remix-run</group>
+            <name>router</name>
+            <version>1.0.0</version>
+            <description>
+                <![CDATA[Nested/Data-driven/Framework-agnostic Routing]]>
+            </description>
+            <hashes>
+                <hash alg="SHA-512">48247573145230d2a3695629b42cc10293c3a86c1adc519d8d51dcfab393a2870d3c741d2182d905fbffddff8abd8b970e45065485bd200ce63cd64344bd48e0</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40remix-run/router@1.0.0</purl>
+            <externalReferences>
+                <reference type="website">
+                    <url>https://github.com/remix-run/react-router#readme</url>
+                </reference>
+                <reference type="issue-tracker">
+                    <url>https://github.com/remix-run/react-router/issues</url>
+                </reference>
+                <reference type="vcs">
+                    <url>git+https://github.com/remix-run/react-router.git</url>
+                </reference>
+            </externalReferences>
+        </component>
+        <component type="library" bom-ref="pkg:npm/js-tokens@4.0.0">
+            <author>Simon Lydell</author>
+            <name>js-tokens</name>
+            <version>4.0.0</version>
+            <description>
+                <![CDATA[A regex that tokenizes JavaScript.]]>
+            </description>
+            <hashes>
+                <hash alg="SHA-512">45d2547e5704ddc5332a232a420b02bb4e853eef5474824ed1b7986cf84737893a6a9809b627dca02b53f5b7313a9601b690f690233a49bce0e026aeb16fcf29</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/js-tokens@4.0.0</purl>
+            <externalReferences>
+                <reference type="website">
+                    <url>https://github.com/lydell/js-tokens#readme</url>
+                </reference>
+                <reference type="issue-tracker">
+                    <url>https://github.com/lydell/js-tokens/issues</url>
+                </reference>
+                <reference type="vcs">
+                    <url>git+https://github.com/lydell/js-tokens.git</url>
+                </reference>
+            </externalReferences>
+        </component>
+        <component type="library" bom-ref="pkg:npm/react@18.2.0">
+            <name>react</name>
+            <version>18.2.0</version>
+            <description>
+                <![CDATA[React is a JavaScript library for building user interfaces.]]>
+            </description>
+            <hashes>
+                <hash alg="SHA-512">ff722331d6f62fd41b05d5a25b97b73f6fe7a70301694f661c24825333659f464261b71f4ec19b4c9ad4fe419e99d1f6216981da2a19fb3931b66aba834f5f19</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/react@18.2.0</purl>
+            <externalReferences>
+                <reference type="website">
+                    <url>https://reactjs.org/</url>
+                </reference>
+                <reference type="issue-tracker">
+                    <url>https://github.com/facebook/react/issues</url>
+                </reference>
+                <reference type="vcs">
+                    <url>git+https://github.com/facebook/react.git</url>
+                </reference>
+            </externalReferences>
+        </component>
+        <component type="library" bom-ref="pkg:npm/loose-envify@1.4.0">
+            <author>Andres Suarez</author>
+            <name>loose-envify</name>
+            <version>1.4.0</version>
+            <description>
+                <![CDATA[Fast (and loose) selective `process.env` replacer using js-tokens instead of an AST]]>
+            </description>
+            <hashes>
+                <hash alg="SHA-512">972bb13c6aff59f86b95e9b608bfd472751cd7372a280226043cee918ed8e45ff242235d928ebe7d12debe5c351e03324b0edfeb5d54218e34f04b71452a0add</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/loose-envify@1.4.0</purl>
+            <externalReferences>
+                <reference type="website">
+                    <url>https://github.com/zertosh/loose-envify</url>
+                </reference>
+                <reference type="issue-tracker">
+                    <url>https://github.com/zertosh/loose-envify/issues</url>
+                </reference>
+                <reference type="vcs">
+                    <url>git://github.com/zertosh/loose-envify.git</url>
+                </reference>
+            </externalReferences>
+        </component>
+        <component type="library" bom-ref="pkg:npm/react-dom@18.2.0">
+            <name>react-dom</name>
+            <version>18.2.0</version>
+            <description>
+                <![CDATA[React package for working with the DOM.]]>
+            </description>
+            <hashes>
+                <hash alg="SHA-512">e88313ae2526bec8c752336d103b9d65fb83414a165d5c4a1e194419293cd67e18152fabfca97df705e2c25557b4f06d25e9e8cefd8ffa1c43b30f5e03b5e8ea</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/react-dom@18.2.0</purl>
+            <externalReferences>
+                <reference type="website">
+                    <url>https://reactjs.org/</url>
+                </reference>
+                <reference type="issue-tracker">
+                    <url>https://github.com/facebook/react/issues</url>
+                </reference>
+                <reference type="vcs">
+                    <url>git+https://github.com/facebook/react.git</url>
+                </reference>
+            </externalReferences>
+        </component>
+        <component type="library" bom-ref="pkg:npm/scheduler@0.23.0">
+            <name>scheduler</name>
+            <version>0.23.0</version>
+            <description>
+                <![CDATA[Cooperative scheduler for the browser environment.]]>
+            </description>
+            <hashes>
+                <hash alg="SHA-512">0adb93866807360ef32195805e2dc0b322330379f8c71eda3728f00b654995d3b62cc5438452beeb7c46aaae82b091f8ad302debf33e3781a16620d83f1f5e53</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/scheduler@0.23.0</purl>
+            <externalReferences>
+                <reference type="website">
+                    <url>https://reactjs.org/</url>
+                </reference>
+                <reference type="issue-tracker">
+                    <url>https://github.com/facebook/react/issues</url>
+                </reference>
+                <reference type="vcs">
+                    <url>git+https://github.com/facebook/react.git</url>
+                </reference>
+            </externalReferences>
+        </component>
+    </components>
+    <dependencies>
+        <dependency ref="pkg:npm/babel@6.23.0"/>
+        <dependency ref="pkg:npm/%40remix-run/router@1.0.0"/>
+        <dependency ref="pkg:npm/react-router@6.4.0">
+            <dependency ref="pkg:npm/%40remix-run/router@1.0.0"/>
+        </dependency>
+        <dependency ref="pkg:npm/react-router-dom@6.4.0">
+            <dependency ref="pkg:npm/react-router@6.4.0"/>
+        </dependency>
+        <dependency ref="pkg:npm/js-tokens@4.0.0"/>
+        <dependency ref="pkg:npm/loose-envify@1.4.0"/>
+        <dependency ref="pkg:npm/react@18.2.0">
+            <dependency ref="pkg:npm/loose-envify@1.4.0"/>
+        </dependency>
+        <dependency ref="pkg:npm/scheduler@0.23.0"/>
+        <dependency ref="pkg:npm/react-dom@18.2.0">
+            <dependency ref="pkg:npm/scheduler@0.23.0"/>
+        </dependency>
+        <dependency ref="pkg:npm/sample@1.0.0">
+            <dependency ref="pkg:npm/babel@6.23.0"/>
+            <dependency ref="pkg:npm/react-router-dom@6.4.0"/>
+            <dependency ref="pkg:npm/js-tokens@4.0.0"/>
+            <dependency ref="pkg:npm/react@18.2.0"/>
+            <dependency ref="pkg:npm/react-dom@18.2.0"/>
+        </dependency>
+    </dependencies>
+</bom>

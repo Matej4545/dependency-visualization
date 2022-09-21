@@ -9,6 +9,7 @@ import ImportForm from './components/ImportForm/ImportForm';
 import PageNotFound from './components/Error/PageNotFound';
 import { SbomProvider } from './providers/SbomProvider';
 import { NotificationProvider } from './providers/NotificationProvider';
+import { Toolbox } from './components/Toolbox/Toolbox';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
@@ -20,11 +21,12 @@ root.render(
           <Routes>
             <Route path="/" element={<App />} />
             <Route path="upload" element={<ImportForm />} />
+            <Route path="toolbox" element={<Toolbox />} />
             <Route path="*" element={<PageNotFound />} />
           </Routes>
         </BrowserRouter>
       </SbomProvider>
-      </NotificationProvider>
+    </NotificationProvider>
   </React.StrictMode>
 );
 

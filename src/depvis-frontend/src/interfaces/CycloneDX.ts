@@ -1,10 +1,8 @@
 // interface Iis based on CycloneDX specification
 // see https://cyclonedx.org/specification/overview/ for more details
 
-import { StringLiteral, TypeReferenceType } from 'typescript';
-
 export enum BomFormat {
-  CycloneDX,
+  'CycloneDX',
 }
 
 export enum ComponentType {

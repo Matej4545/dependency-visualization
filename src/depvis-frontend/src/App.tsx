@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
 import { Button, Col, Container, Form, Row } from 'react-bootstrap';
-import { useLazyReadCypher, useReadCypher } from 'use-neo4j';
 import './App.css';
 
 import { useSbomStore } from './providers/SbomProvider';
@@ -38,9 +37,7 @@ const App = observer(() => {
       {sbomStore.projects ? (
         sbomStore.projects.map((d: any) => (
           <Row>
-            <pre>
-              {d}
-            </pre>
+            <pre>{d}</pre>
             <hr />
           </Row>
         ))
