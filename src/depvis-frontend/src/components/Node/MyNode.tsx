@@ -10,7 +10,6 @@ export interface INodeProps {
 }
 
 export const MyNode = (props: INodeProps) => {
-  console.log(props);
   return (
     <Card style={{ width: '10rem', margin: '0.5rem' }}>
       <Card.Title>{props.name}</Card.Title>

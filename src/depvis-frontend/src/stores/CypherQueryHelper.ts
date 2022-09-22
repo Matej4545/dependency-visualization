@@ -13,13 +13,15 @@ export class CypherQueryHelper {
   mergeProjectQuery = `MERGE (p:${CypherNodeTypes[CypherNodeTypes.Project]} {
                                     name: $name,
                                     version: $version,
-                                    purl: $purl
+                                    purl: $purl,
+                                    type: $type
                                 }) RETURN p`;
 
   mergeComponentQuery = `MERGE (c:${CypherNodeTypes[CypherNodeTypes.Component]} {
                                     name: $name,
                                     version: $version,
-                                    purl: $purl
+                                    purl: $purl,
+                                    type: $type
                                 }) RETURN c`;
 
   createDependencyQuery = `MATCH (p:${CypherNodeTypes[CypherNodeTypes.Project]} {

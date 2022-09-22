@@ -38,7 +38,7 @@ export interface ISbomProject {
 export interface IDependency {
   ref: string;
   properties?: Map<string, string>;
-  dependsOn?: Array<string>;
+  dependsOn?: Array<IDependency>;
 }
 
 export interface IComponent {

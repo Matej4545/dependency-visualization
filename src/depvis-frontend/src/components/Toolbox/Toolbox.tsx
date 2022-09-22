@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import React, { useEffect, useState } from 'react';
-import { Container, Tab, Tabs } from 'react-bootstrap';
+import { Button, Container, Tab, Tabs } from 'react-bootstrap';
 import { useSbomStore } from '../../providers/SbomProvider';
 import { MyNode, INodeProps } from '../Node/MyNode';
 
@@ -18,7 +18,6 @@ export const Toolbox = observer(() => {
       setNodes([node, ...nodes]);
     }
   };
-  console.log(sbomStore.projects);
   return (
     <Container>
       <h2>Test queries</h2>
@@ -29,20 +28,28 @@ export const Toolbox = observer(() => {
         }}
         value={query}
       />
-      <button
+      <Button
         onClick={() => {
           handleSubmit();
         }}
       >
         Send query
-      </button>
+      </Button>
+      <Button
+        variant="outline-danger"
+        onClick={() => {
+          sbomStore.removeAll();
+        }}
+      >
+        Remove all nodes
+      </Button>
       <Tabs>
         <Tab eventKey="json" title="Json">
           <pre>{sbomStore.json ? sbomStore.json : ''}</pre>
         </Tab>
         <Tab eventKey="node" title="Node" style={{ display: 'flex', flexWrap: 'wrap' }}>
-          {sbomStore.projects &&
-            sbomStore.projects.map((r: any) => {
+          {sbomStore.project &&
+            sbomStore.project.map((r: any) => {
               return <MyNode id={r.Id} name={r.name} properties={r.properties} type={r.label}></MyNode>;
             })}
         </Tab>

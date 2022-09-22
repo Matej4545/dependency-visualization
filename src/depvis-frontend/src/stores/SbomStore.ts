@@ -2,6 +2,7 @@ import { action, makeObservable, observable } from 'mobx';
 import { Neo4jHelper } from '../helpers/Neo4jHelper';
 import { CycloneDXHelper } from '../helpers/CycloneDXHelper';
 import { CypherQueryHelper } from './CypherQueryHelper';
+import { BomFormat, ComponentType, IComponent, IDependency, ISbomProject } from '../interfaces/CycloneDX';
 
 interface IResultNode {
   name: string;
@@ -17,7 +18,7 @@ export class SbomStore {
   /**
    * Store projects and all their components.
    */
-  projects: IResultNode[]; //Array<ISbomProject>;
+  project: IResultNode[]; //Array<ISbomProject>;
   /**
    * Indicates whether the store is loading.
    */
@@ -40,7 +41,7 @@ export class SbomStore {
   json: string = '';
 
   constructor() {
-    this.projects = [];
+    this.project = [];
     this.isLoading = false;
     this.state = '';
     this.isConnected = false;
@@ -50,37 +51,17 @@ export class SbomStore {
       isConnected: observable,
       isLoading: observable,
       state: observable,
-      projects: observable,
+      project: observable,
       json: observable,
       parseProject: action,
     });
-    this.checkConnection();
   }
-
-  checkConnection = async () => {
-    // try {
-    //   const res = await this.neo4jDriver.getServerInfo();
-    // } catch {
-    //   console.error('Could not make connection to the server!');
-    //   this.isConnected = false;
-    // }
-    this.isConnected = true;
-  };
 
   parseProject = async (input: File) => {
     const cdx = new CycloneDXHelper();
     const parsed = await cdx.parse(input);
 
     this.storeProject(parsed);
-    // const parser = new XMLParser(options);
-    // try {
-    //   this.state = "Parsing XML file"
-    //   const obj = parser.parse(input);
-    //   this.storeProject(obj)
-    // } catch (error) {
-    //   this.state = "Error - check console"
-    //   console.log(error)
-    // }
   };
 
   /**id={r._fields[0].elementId}
@@ -90,56 +71,75 @@ export class SbomStore {
    */
 
   isInResult = (node: any) => {
-    return this.projects.find((n) => {
+    return this.project.find((n) => {
       n.name === node.name;
     });
   };
 
   parseResult = (input: any) => {
-    this.projects = [];
+    this.project = [];
     console.log(input);
     input.records.map((res: any) => {
       const nodeInfo = res._fields[0];
-      const newNode = {
-        name: nodeInfo.properties.name,
-        id: nodeInfo.elementId,
-        properties: nodeInfo.properties,
-        label: nodeInfo.labels[0],
-      };
-      if (!this.isInResult(newNode)) {
-        this.projects.push(newNode);
-      }
+      this.parseResultNode(nodeInfo);
     });
+  };
+
+  parseResultNode = (resultNode: any) => {
+    const newNode = {
+      name: resultNode.properties.name,
+      id: resultNode.elementId,
+      properties: resultNode.properties,
+      label: resultNode.labels[0],
+    };
+    if (!this.isInResult(newNode)) {
+      this.project.push(newNode);
+    }
   };
 
   runQuery = async (query: string) => {
     const res = await this.n4jHelper.writeQuery(query, {});
     this.parseResult(res);
-    this.json = await JSON.stringify(this.projects, null, 2);
+    this.json = await JSON.stringify(this.project, null, 2);
   };
 
   storeProject = async (input: any) => {
     this.isLoading = true;
-    let components = input.bom.components ? input.bom.components.component : [];
-    let dependencies = input.bom.dependencies ? input.bom.dependencies.dependency : [];
-    const p = input.bom.metadata ? input.bom.metadata.component : undefined;
-    console.log({ components: components, deps: dependencies, p: p });
+
+    //Create main project
+    let project: ISbomProject;
+    project = {
+      bomFormat: BomFormat.CycloneDX,
+      specVersion: '1.3',
+      version: input.bom.version,
+    };
+
+    const bom = input.bom;
+    const mainComponentPath = input.bom.metadata ? input.bom.metadata.component : undefined;
+    const mainComponentType = mainComponentPath.type;
+    let mainComponent: IComponent = {
+      type: (mainComponentType as ComponentType) || ComponentType.application,
+      name: mainComponentPath.name,
+      purl: mainComponentPath.purl || '',
+      version: mainComponentPath.version || 'undefined',
+      bom_ref: mainComponentPath['bom-ref'],
+    };
+
+    let components = this.parseComponents(bom.components ? bom.components.component : []);
+
+    let dependencies = this.parseDependencies(bom.dependencies ? bom.dependencies.dependency : []);
+
+    console.log({ components: components, deps: dependencies, mainComponent: mainComponent });
 
     try {
-      this.state = `Creating project ${p.name}`;
-      console.log('Writing project');
-      p &&
-        (await this.n4jHelper.writeQuery(this.cqh.mergeProjectQuery, {
-          name: p.name,
-          version: p.version,
-          purl: p['bom-ref'],
-        }));
+      this.state = `Creating project ${mainComponent.name}`;
+      await this.n4jHelper.writeQuery(this.cqh.mergeProjectQuery, {
+        name: mainComponent.name,
+        version: mainComponent.version,
+        purl: mainComponent.purl,
+        type: mainComponent.type,
+      });
 
-      console.log('Writing components');
-
-      if (!(components instanceof Array)) {
-        components = [components];
-      }
       this.state = `Creating components - 0 of ${components.length}`;
       let counter = 0;
       for await (const component of components) {
@@ -147,24 +147,21 @@ export class SbomStore {
         await this.n4jHelper.writeQuery(this.cqh.mergeComponentQuery, {
           name: component.name,
           version: component.version,
-          purl: component['bom-ref'],
+          purl: component.purl,
+          type: component.type,
         });
       }
 
       counter = 0;
-      console.log('Writing dependencies');
+      this.state = `Creating dependencies - ${++counter} of ${dependencies.length}`;
       for await (const d1 of dependencies) {
         this.state = `Creating dependencies - ${++counter} of ${dependencies.length}`;
-        if (!('dependency' in d1)) continue;
-        let next_dependency = d1.dependency;
-        if (!(next_dependency instanceof Array)) {
-          next_dependency = [next_dependency];
-        }
-        for await (const d2 of next_dependency) {
+        if (!d1.dependsOn || d1.dependsOn.length == 0) continue;
+        for await (const d2 of d1.dependsOn) {
           await this.n4jHelper.writeQuery(this.cqh.createDependencyQuery, {
-            project: p['bom-ref'],
-            d1: d1['ref'],
-            d2: d2['ref'],
+            project: mainComponent.bom_ref,
+            d1: d1.ref,
+            d2: d2.ref,
           });
         }
       }
@@ -175,5 +172,50 @@ export class SbomStore {
       console.error(error);
     }
     this.isLoading = false;
+  };
+
+  parseComponents = (components: any) => {
+    let result: IComponent[] = [];
+    components.map((component: any) => {
+      result.push({
+        type: (component.type as ComponentType) || ComponentType.application,
+        name: component.name,
+        purl: component.purl || '',
+        version: component.version || 'undefined',
+      } as IComponent);
+    });
+    return result;
+  };
+
+  parseDependencies = (dependencies: any) => {
+    let result: IDependency[] = [];
+    dependencies.map((dependency: any) => {
+      const index = result.findIndex((d) => {
+        d.ref === dependency.ref;
+      });
+      if (index == -1) {
+        result.push({
+          ref: dependency.ref,
+          dependsOn: this.getDependsOn(dependency),
+        } as IDependency);
+      } else {
+        result[index].dependsOn = this.getDependsOn(dependency);
+      }
+    });
+    return result;
+  };
+
+  getDependsOn = (dependency: any) => {
+    let result: IDependency[] = [];
+    if (dependency.dependency == undefined) return result;
+    let dependsOnArray: any = dependency.dependency;
+    if (!(dependsOnArray instanceof Array)) dependsOnArray = [dependsOnArray];
+    dependsOnArray.map((dependency: any) => {
+      result.push({ ref: dependency.ref } as IDependency);
+    });
+    return result;
+  };
+  removeAll = () => {
+    this.runQuery('MATCH (n) DETACH DELETE n');
   };
 }

@@ -8,14 +8,25 @@ const DEFAULT_DB_SETTINGS = {
 
 export class Neo4jHelper {
   driver: any;
-
+  isConnected: boolean;
   constructor() {
     this.driver = neo4j.driver(
       DEFAULT_DB_SETTINGS.neo4jHost,
       neo4j.auth.basic(DEFAULT_DB_SETTINGS.neo4jUsername, DEFAULT_DB_SETTINGS.neo4jPassword)
     );
+    this.isConnected = false;
+    this.checkConnection();
   }
 
+  checkConnection = async () => {
+    try {
+      const res = await this.driver.getServerInfo();
+    } catch {
+      console.error('Could not make connection to the server!');
+      this.isConnected = false;
+    }
+    this.isConnected = true;
+  };
   writeQuery = async (query: string, params: Record<string, any>) => {
     return await this.Query(query, params, { defaultAccessMode: neo4j.session.WRITE });
   };
@@ -25,6 +36,9 @@ export class Neo4jHelper {
   };
 
   Query = async (query: string, params: Record<string, any>, sessionOptions: Record<string, any> | undefined) => {
+    if (!this.isConnected) {
+      throw Error('Database is not connected!');
+    }
     const session = this.driver.session(sessionOptions);
     var result = null;
     try {

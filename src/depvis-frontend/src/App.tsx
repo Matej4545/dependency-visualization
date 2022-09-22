@@ -31,8 +31,8 @@ const App = observer(() => {
         </Col>
       </Row>
       <Row>{response}</Row>
-      {sbomStore.projects ? (
-        sbomStore.projects.map((d: any) => (
+      {sbomStore.project ? (
+        sbomStore.project.map((d: any) => (
           <Row>
             <pre>{d}</pre>
             <hr />
