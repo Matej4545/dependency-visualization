@@ -1,0 +1,33 @@
+{
+  "name": "depvis-next",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.6.9",
+    "@neo4j/graphql": "^3.8.0",
+    "apollo-server-micro": "^3.10.2",
+    "bootstrap": "^5.2.1",
+    "fast-xml-parser": "^4.0.10",
+    "graphql": "^16.6.0",
+    "micro": "^9.4.1",
+    "multiparty": "^4.2.3",
+    "neo4j-driver": "^5.0.1",
+    "next": "12.3.1",
+    "next-connect": "^0.13.0",
+    "react": "18.2.0",
+    "react-bootstrap": "^2.5.0",
+    "react-dom": "18.2.0",
+    "react-force-graph-2d": "^1.23.11"
+  },
+  "devDependencies": {
+    "@types/node": "18.7.18",
+    "eslint": "8.23.1",
+    "eslint-config-next": "12.3.1"
+  }
+}
