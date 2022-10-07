@@ -1,21 +1,13 @@
 import React, { useState } from 'react';
 import { Alert, Button, Container, Form } from 'react-bootstrap';
-import { useSbomStore } from '../../providers/SbomProvider';
-import { observer } from 'mobx-react-lite';
-import { useNotification } from '../../providers/NotificationProvider';
-import { Notification } from '../Notification/Notification';
-import { useNavigate } from 'react-router-dom';
 
 const allowedExtensionsRegex = /(\.json|\.xml)$/i;
 
-const ImportForm = observer(() => {
+const ImportForm = () => {
   const [file, setFile] = useState<any>('');
   const [preview, setPreview] = useState<string>('');
-  const [projectName, setProjectName] = useState<string>('');
   const [validated, setValidated] = useState(false);
-  const sbomStore = useSbomStore();
-  let navigate = useNavigate();
-  const notification = useNotification();
+
   const handleFiles = (e: any) => {
     const files = e.target.files;
     if (!files) return;
@@ -30,6 +22,7 @@ const ImportForm = observer(() => {
   };
 
   const handleSubmit = async (e: any) => {
+    e.preventDefault();
     const form = e.currentTarget;
     if (form.checkValidity() === false) {
       e.preventDefault();
@@ -37,10 +30,14 @@ const ImportForm = observer(() => {
     }
 
     setValidated(true);
-    e.preventDefault();
-    console.log({ name: projectName, file: typeof file });
-    await sbomStore.parseProject(file);
-    //navigate('/');
+    console.log({ file: typeof file });
+    const res = await fetch('/api/sbom/import', {
+      body: await file.text(),
+      headers: { 'Content-Type': 'application/xml' },
+      method: 'POST',
+    });
+    console.log(res);
+    setPreview(await JSON.stringify(res.body));
   };
 
   const handlePreview = async (e: any) => {
@@ -78,9 +75,8 @@ const ImportForm = observer(() => {
           <pre>{preview}</pre>
         </Container>
       )}
-      <Alert>{sbomStore.state}</Alert>
     </Container>
   );
-});
+};
 
 export default ImportForm;
