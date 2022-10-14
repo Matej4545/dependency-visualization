@@ -1,5 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
-import { CreateComponents, ProjectExists } from '../../../helpers/DbDataHelper';
+import { CreateComponents, DeleteAllData, ProjectExists } from '../../../helpers/DbDataHelper';
 
 const XMLParserOptions = {
   ignoreAttributes: false,
@@ -13,8 +13,8 @@ export default async function handler(req, res) {
       res.status(500).json({ error: "Content type must be 'application/xml'" });
       return;
     }
-    const result = await parseFile(req.body);
-    res.status(200).json({ result });
+    const result = parseFile(req.body);
+    res.status(200).json({ status: 'file is being parsed.' });
   } catch (err) {
     res.status(500).json({ error: 'failed to load data', content: err });
   }
@@ -23,11 +23,14 @@ export default async function handler(req, res) {
 async function parseFile(body) {
   const parser = new XMLParser(XMLParserOptions);
   const xmlParsed = parser.parse(body);
-  //console.log(xmlParsed.bom);
-
-  //tmp
+  // Create project
+  let project = {
+    name: xmlParsed.bom.metadata.component.name,
+    version: xmlParsed.bom.metadata.component.version,
+    date: xmlParsed.metadata.timestamp,
+  };
   let components = xmlParsed.bom.components.component;
-  // we need to clean the components data
+  // we need to transform the components data
   components = components.map((c) => {
     return {
       purl: c.purl,
@@ -37,7 +40,9 @@ async function parseFile(body) {
       type: c.type,
     };
   });
-  console.log(components);
+  // Currently there is no support for managing older projects - import overwrites all data that are in DB
+  await DeleteAllData();
   await CreateComponents(components);
+
   return xmlParsed;
 }

@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 import { createApolloClient } from './ApolloClientHelper';
 
-const chunkSize = 100;
+const chunkSize = 10;
 
 export async function ProjectExists(projectName: string) {
   console.log(projectName);
@@ -15,8 +15,7 @@ export async function ProjectExists(projectName: string) {
       }
     }
   `;
-  const client = createApolloClient();
-  const { data } = await client.query({ query: query, variables: { projectName: projectName } });
+  const data = await sendQuery(query, { projectName: projectName });
   console.log(data);
   return data.projects.length > 0;
 }
@@ -33,15 +32,13 @@ export async function ComponentExists(componentName: string) {
       }
     }
   `;
-  const client = createApolloClient();
-  const { data } = await client.query({ query: query, variables: { componentName: componentName } });
+  const data = await sendQuery(query, { componentName: componentName });
   console.log(data);
   return data.projects.length > 0;
 }
 
-export async function CreateComponents(components: [any]) {
-  //if (components == null || components.length > 0) return;
-  console.log(`Creating components (len ${components.length})`);
+export async function CreateComponents(components: [any?]) {
+  if (components == null || components.length == 0) return;
   const mutation = gql`
     mutation CreateComponent($components: [ComponentCreateInput!]!) {
       createComponents(input: $components) {
@@ -77,7 +74,24 @@ export async function DeleteAllData() {
       }
     }
   `;
-  const client = createApolloClient();
-  const { data } = await client.mutate({ mutation: mutation });
+  const { data } = await sendMutation(mutation);
   console.log(data);
+}
+
+async function sendQuery(query, variables?) {
+  const client = createApolloClient();
+  const res = await client.query({ query: query, variables: variables });
+  if (res.errors) {
+    throw Error(res.errors.toString());
+  }
+  return res.data;
+}
+
+async function sendMutation(mutation, variables?) {
+  const client = createApolloClient();
+  const res = await client.mutate({ mutation: mutation, variables: variables });
+  if (res.errors) {
+    throw Error(res.errors.toString());
+  }
+  return res.data;
 }

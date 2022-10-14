@@ -37,7 +37,7 @@ const ImportForm = () => {
       method: 'POST',
     });
     console.log(res);
-    setPreview(await JSON.stringify(res.body));
+    setPreview(await JSON.stringify(await res.text()));
   };
 
   const handlePreview = async (e: any) => {
@@ -48,6 +48,7 @@ const ImportForm = () => {
   return (
     <Container fluid="xxs">
       <Container className="p-3">
+        <Alert variant="info">All data currently stored in DB will be overwritten.</Alert>
         <Form noValidate validated={validated}>
           <Form.Group controlId="file">
             <Form.Label>SBOM File</Form.Label>

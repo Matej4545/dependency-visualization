@@ -1,9 +1,0 @@
-.notification-container {
-    position: absolute;
-    display: flex;
-    flex-direction: column-reverse;
-}
-
-.notification {
-    margin-bottom: 0.5rem;
-}

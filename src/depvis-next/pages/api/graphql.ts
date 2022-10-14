@@ -64,8 +64,6 @@ const typeDefs = gql`
   }
 `;
 
-//components: [Component!]! @relationship(type: "HAS_COMPONENTS", direction: OUT)
-
 const driver = neo4j.driver(
   DEFAULT_DB_SETTINGS.neo4jHost,
   neo4j.auth.basic(DEFAULT_DB_SETTINGS.neo4jUsername, DEFAULT_DB_SETTINGS.neo4jPassword)
