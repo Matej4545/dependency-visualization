@@ -1,7 +1,7 @@
 import { gql, useQuery } from '@apollo/client';
 import { Container, Spinner } from 'react-bootstrap';
 import NoSSRGraph from '../components/Graph/NoSSRGraph';
-import ImportForm from '../components/ImportForm/ImportForm';
+import ImportForm from '../components/Import/ImportForm';
 import React, { useState } from 'react';
 
 const getAllComponentsQuery = gql`

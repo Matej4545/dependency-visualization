@@ -1,4 +1,4 @@
-import ImportForm from '../components/ImportForm/ImportForm';
+import ImportForm from '../components/Import/ImportForm';
 
 const Upload = () => {
   return <ImportForm />;

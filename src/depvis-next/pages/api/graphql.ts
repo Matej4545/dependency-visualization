@@ -10,12 +10,11 @@ const DEFAULT_DB_SETTINGS = {
 };
 
 // Declare here to handle cold start of serverless function
-let startServer;
 let apolloServer;
 
 const typeDefs = gql`
   type Component {
-    id: ID
+    id: ID @id
     purl: String
     name: String
     type: String
@@ -42,9 +41,9 @@ const typeDefs = gql`
   }
 
   type Project {
-    id: ID
+    id: ID @id
     name: String
-    version: Int
+    version: String
     components: [Component!]!
       @cypher(
         statement: """
@@ -71,24 +70,22 @@ const driver = neo4j.driver(
 
 const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
 
+neoSchema.getSchema().then((schema) => {
+  apolloServer = new ApolloServer({
+    schema: schema,
+    introspection: true,
+    plugins: [ApolloServerPluginLandingPageGraphQLPlayground],
+  });
+});
+
+const startServer = apolloServer.start();
+
 export default async function handler(req, res) {
-  if (!apolloServer) {
-    const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
-    const schema = await neoSchema.getSchema();
+  await startServer;
 
-    apolloServer = new ApolloServer({
-      schema,
-      introspection: true,
-      plugins: [ApolloServerPluginLandingPageGraphQLPlayground],
-    });
-
-    startServer = apolloServer.start();
-  } else {
-    await startServer;
-    await apolloServer.createHandler({
-      path: '/api/graphql',
-    })(req, res);
-  }
+  await apolloServer.createHandler({
+    path: '/api/graphql/',
+  })(req, res);
 }
 
 export const config = {
