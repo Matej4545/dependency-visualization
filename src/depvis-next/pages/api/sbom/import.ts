@@ -5,6 +5,7 @@ import {
   CreateProjecty,
   DeleteAllData,
   ProjectExists,
+  UpdateComponentDependencies,
 } from '../../../helpers/DbDataHelper';
 
 export const config = {
@@ -27,9 +28,10 @@ export default async function handler(req, res) {
       res.status(500).json({ error: "Content type must be 'application/xml'" });
       return;
     }
-    const result = parseFile(req.body);
-    return res.status(200).json({ status: 'file is being parsed.' });
+    const result = await parseFile(req.body);
+    return res.status(200).json(result);
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: 'failed to load data', content: err });
   }
 }
@@ -40,6 +42,7 @@ async function parseFile(body) {
   if (!xmlParsed.bom.metadata) {
     throw Error('Invalid file - project metadata are missing');
   }
+  //console.log(xmlParsed.bom.dependencies);
   // Prepare project
   const project = {
     name: xmlParsed.bom.metadata.component.name,
@@ -49,6 +52,7 @@ async function parseFile(body) {
 
   // Prepare components
   let components = xmlParsed.bom.components.component;
+  components.push(xmlParsed.bom.metadata.component);
   // we need to transform the components data
   components = components.map((c) => {
     return {
@@ -59,10 +63,34 @@ async function parseFile(body) {
       type: c.type,
     };
   });
+
+  let dependencies = getDependencies(xmlParsed.bom.dependencies.dependency);
   // Currently there is no support for managing older projects - import overwrites all data that are in DB
   await DeleteAllData();
   await CreateProject(project);
   await CreateComponents(components);
+  //dependencies = dependencies.slice(0, 50);
+  await UpdateComponentDependencies(dependencies);
   console.log('Done');
   return xmlParsed;
+}
+
+function getDependencies(dependencies: any) {
+  if (!dependencies) return;
+  const res = dependencies
+    .map((d) => {
+      if (d.dependency != undefined) {
+        if (!(d.dependency instanceof Array)) d.dependency = [d.dependency];
+        return {
+          purl: d.ref,
+          dependsOn: d.dependency.map((d) => {
+            return { purl: d.ref };
+          }),
+        };
+      }
+    })
+    .filter((d) => {
+      return d != undefined;
+    });
+  return res;
 }

@@ -3,12 +3,12 @@ import { Container, Spinner } from 'react-bootstrap';
 import NoSSRGraph from '../components/Graph/NoSSRGraph';
 import ImportForm from '../components/Import/ImportForm';
 import React, { useState } from 'react';
+import NoSSRGraphWrapper from '../components/Graph/NoSSRGraphWrapper';
 
 const getAllComponentsQuery = gql`
   {
     components {
       name
-      deps_count
       __typename
       purl
       version
@@ -78,7 +78,7 @@ function HomePage() {
           )}
         </Container>
       )}
-      <NoSSRGraph graphData={graphData} />
+      <NoSSRGraphWrapper graphData={graphData} />
     </>
   );
 }

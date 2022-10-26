@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 import { createApolloClient } from './ApolloClientHelper';
-
+import { randomBytes } from 'crypto';
 const chunkSize = 100;
 
 async function sendQuery(query, variables?) {
@@ -95,8 +95,53 @@ export async function CreateProject(project) {
   console.log(data);
 }
 
-export async function UpdateComponentDependencies(componentId, dependencyList) {
-  const mutation = gql``;
+function generateName() {
+  return 'gql' + randomBytes(8).toString('hex');
+}
+
+export async function UpdateComponentDependencies(dependencies) {
+  if (dependencies == null || dependencies.length == 0) return;
+  const client = createApolloClient();
+  for (let i = 0; i < dependencies.length; i += chunkSize) {
+    const chunk = dependencies.slice(i, i + chunkSize);
+    const chunkMutation = chunk
+      .map((dependency) => {
+        return getComponentUpdateGQLQuery(dependency, dependency.dependsOn, generateName());
+      })
+      .join('\n');
+    console.log(chunkMutation);
+    const mutation = gql`
+      mutation {
+        ${chunkMutation}
+      }
+    `;
+    const { data } = await sendMutation(mutation);
+    console.log(data);
+  }
+}
+
+function getComponentUpdateGQLQuery(dependency, dependsOn, name = 'updateComponent') {
+  const mutation_content = dependsOn
+    .map((d) => {
+      return `{ purl: \"${d.purl}\"}`;
+    })
+    .join(', ');
+
+  const mutation_part = `${name}: updateComponents(
+    where: { purl: \"${dependency.purl}\" }
+    update: {
+      depends_on: {
+        connect: {
+          where: { node: { OR: [${mutation_content}] } }
+        }
+      }
+    }
+  ) {
+    info {
+      relationshipsCreated
+    }
+  }`;
+  return mutation_part;
 }
 
 export async function DeleteAllData() {

@@ -37,7 +37,9 @@ const ImportForm = () => {
       method: 'POST',
     });
     console.log(res);
-    setPreview(await JSON.stringify(await res.text()));
+    const res2 = await JSON.parse(await res.text());
+    console.log(res2);
+    setPreview(await JSON.stringify(res2, null, 2));
   };
 
   const handlePreview = async (e: any) => {
