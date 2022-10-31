@@ -1,65 +1,34 @@
 import dynamic from 'next/dynamic';
-import { useQuery, gql } from '@apollo/client';
-import { useState } from 'react';
-
-const getAllComponentsQuery = gql`
-  {
-    components {
-      name
-      deps_count
-      __typename
-      purl
-      version
-      depends_on {
-        purl
-      }
-    }
-  }
-`;
-
-const NoSSRGraphComponent = dynamic(() => import('react-force-graph-2d'), { ssr: false });
-
-const formatData = (data) => {
-  const nodes = [];
-  const links = [];
-  console.log(data);
-  if (!data.components) return { nodes, links };
-  data.components.forEach((c) => {
-    nodes.push({
-      id: c.purl,
-      name: c.name,
-      deps_count: c.deps_count,
-      __typename: c.__typename,
-    });
-    if (c.depends_on) {
-      c.depends_on.forEach((d) => {
-        links.push({
-          source: c.purl,
-          target: d.purl,
-        });
-      });
-    }
-  });
-
-  return { nodes, links };
-};
+import { useCallback, useRef } from 'react';
+import { Button } from 'react-bootstrap';
+import ReactForceGraph2d, { ForceGraphMethods } from 'react-force-graph-2d';
 
 export default function NoSSRGraph(props) {
-  const [graphData, setGraphData] = useState({ nodes: [], links: [] });
+  const graphRef = useRef<ForceGraphMethods>();
 
-  const { data } = useQuery(getAllComponentsQuery, {
-    onCompleted: (data) => setGraphData(formatData(data)),
-  });
+  const handleClick = useCallback(
+    (node) => {
+      // Aim at node from outside it
+      console.log(node);
+      graphRef.current.centerAt(node.x, node.y, 500);
+      let zoom_level = 3 - node.deps_count / 100;
+      if (zoom_level < 0.5) zoom_level = 0.5;
+      graphRef.current.zoom(zoom_level, 500);
+      console.log(zoom_level);
+    },
+    [graphRef]
+  );
   return (
-    <NoSSRGraphComponent
-      graphData={graphData}
+    <ReactForceGraph2d
+      ref={graphRef}
       {...props}
-      linkDirectionalArrowLength={3.5}
-      linkDirectionalArrowRelPos={1}
+      linkDirectionalArrowLength={5}
+      linkDirectionalArrowRelPos={3}
       nodeLabel={'name'}
       nodeVal={'deps_count'}
-      backgroundColor={'#f0f0f0'}
+      // backgroundColor={'#f0f0f0'}
       linkColor={'#ff0000'}
+      onNodeClick={handleClick}
     />
   );
 }
