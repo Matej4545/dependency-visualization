@@ -133,3 +133,5 @@ dist
 .pnp.*
 
 /runtime
+
+*no_git*

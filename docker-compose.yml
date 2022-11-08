@@ -19,11 +19,11 @@ services:
       - NEO4JLABS_PLUGINS=["apoc"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,algo.*
 
-  # depvis-frontend:
+  # depvis-next:
   #   depends_on:
   #     - neo4j
-  #   build: ./src/depvis-frontend
-  #   image: depvis-frontend:latest
+  #   build: ./src/depvis-next
+  #   image: depvis-next:latest
   #   ports:
   #     - 80:80
   #     - 443:443
