@@ -1,96 +1,77 @@
-import { XMLParser } from 'fast-xml-parser';
-import {
-  CreateComponents,
-  CreateProject,
-  CreateProjecty,
-  DeleteAllData,
-  ProjectExists,
-  UpdateComponentDependencies,
-} from '../../../helpers/DbDataHelper';
+import Bull from "bull";
+import { XMLParser } from "fast-xml-parser";
+import { ImportQueueName } from "../../../queues/ImportQueue";
 
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '10mb',
+      sizeLimit: "10mb",
     },
   },
 };
 
 const XMLParserOptions = {
   ignoreAttributes: false,
-  attributeNamePrefix: '',
+  attributeNamePrefix: "",
   ignoreDeclaration: true,
 };
 
+//Bull queue
+const ImportQueue = new Bull(ImportQueueName);
+
+interface IImportResult {
+  isError: boolean;
+  errorMessage?: string;
+  jobId?: string;
+}
+
 export default async function handler(req, res) {
   try {
-    if (req.headers['content-type'] !== 'application/xml') {
-      res.status(500).json({ error: "Content type must be 'application/xml'" });
+    if (req.headers["content-type"] !== "application/xml") {
+      res.status(500).json({ error: "Content-type must be 'application/xml'" });
       return;
     }
-    const result = await parseFile(req.body);
+    //TODO: check if XML is even valid
+    const result = await parseXml(req.body);
     return res.status(200).json(result);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'failed to load data', content: err });
+    return res.status(500).json({ error: "failed to load data", content: err });
   }
 }
 
-async function parseFile(body) {
-  const parser = new XMLParser(XMLParserOptions);
-  const xmlParsed = parser.parse(body);
-  if (!xmlParsed.bom.metadata) {
-    throw Error('Invalid file - project metadata are missing');
-  }
-  //console.log(xmlParsed.bom.dependencies);
-  // Prepare project
-  const project = {
-    name: xmlParsed.bom.metadata.component.name,
-    version: xmlParsed.bom.metadata.component.version || 1,
-    date: xmlParsed.bom.metadata.timestamp || '1970-01-01',
-  };
-
-  // Prepare components
-  let components = xmlParsed.bom.components.component;
-  components.push(xmlParsed.bom.metadata.component);
-  // we need to transform the components data
-  components = components.map((c) => {
+// Function validates that object contains required properties
+function validateSbomXml(parsedXml): IImportResult {
+  const bom = parsedXml.bom;
+  if (!bom)
     return {
-      purl: c.purl,
-      name: c.name,
-      version: c.version,
-      author: c.author,
-      type: c.type,
+      isError: true,
+      errorMessage: "Validation failed - Missing 'bom' parameter in the file.",
     };
-  });
+  if (!bom.metadata)
+    return {
+      isError: true,
+      errorMessage:
+        "Validation failed - Missing 'metadata' parameter in the file.",
+    };
+  if (!bom.components)
+    return {
+      isError: true,
+      errorMessage:
+        "Validation failed - Missing 'components' parameter in the file.",
+    };
 
-  let dependencies = getDependencies(xmlParsed.bom.dependencies.dependency);
-  // Currently there is no support for managing older projects - import overwrites all data that are in DB
-  await DeleteAllData();
-  await CreateProject(project);
-  await CreateComponents(components);
-  //dependencies = dependencies.slice(0, 50);
-  await UpdateComponentDependencies(dependencies);
-  console.log('Done');
-  return xmlParsed;
+  return { isError: false };
 }
 
-function getDependencies(dependencies: any) {
-  if (!dependencies) return;
-  const res = dependencies
-    .map((d) => {
-      if (d.dependency != undefined) {
-        if (!(d.dependency instanceof Array)) d.dependency = [d.dependency];
-        return {
-          purl: d.ref,
-          dependsOn: d.dependency.map((d) => {
-            return { purl: d.ref };
-          }),
-        };
-      }
-    })
-    .filter((d) => {
-      return d != undefined;
-    });
-  return res;
+// Function takes XML in plain text and transforms it into object
+async function parseXml(inputXml: string) {
+  const parser = new XMLParser(XMLParserOptions);
+  const xmlParsed = parser.parse(inputXml);
+
+  const validateResult = validateSbomXml(xmlParsed);
+  if (validateResult.isError) return validateResult;
+
+  const job = await ImportQueue.add({ bom: xmlParsed.bom });
+  return { job: job };
 }
