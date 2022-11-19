@@ -1,5 +1,4 @@
 import Bull from "bull";
-import { env } from "process";
 import { ImportSbom } from "../helpers/ImportSbomHelper";
 
 export const ImportQueueName = "import-queue";

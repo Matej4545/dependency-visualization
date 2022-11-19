@@ -16,6 +16,12 @@
     "jsx": "preserve",
     "sourceMap": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/api/sbom/import.js", "middleware/middleware.js"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "pages/api/import/import.js",
+    "middleware/middleware.js"
+  ],
   "exclude": ["node_modules"]
 }

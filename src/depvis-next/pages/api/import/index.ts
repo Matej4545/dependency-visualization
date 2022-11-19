@@ -73,5 +73,5 @@ async function parseXml(inputXml: string) {
   if (validateResult.isError) return validateResult;
 
   const job = await ImportQueue.add({ bom: xmlParsed.bom });
-  return { job: job };
+  return { jobId: job.id };
 }
