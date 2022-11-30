@@ -1,6 +1,6 @@
-import { gql } from '@apollo/client';
-import { createApolloClient } from './ApolloClientHelper';
-import { randomBytes } from 'crypto';
+import { gql } from "@apollo/client";
+import { randomBytes } from "crypto";
+import { createApolloClient } from "./ApolloClientHelper";
 const chunkSize = 100;
 
 async function sendQuery(query, variables?) {
@@ -13,7 +13,11 @@ async function sendQuery(query, variables?) {
 }
 
 async function sendMutation(mutation, variables?) {
-  console.log(`Sending mutation ${mutation} with variables ${await JSON.stringify(variables)}`);
+  console.log(
+    `Sending mutation ${mutation} with variables ${await JSON.stringify(
+      variables
+    )}`
+  );
   const client = createApolloClient();
   const res = await client.mutate({ mutation: mutation, variables: variables });
   if (res.errors) {
@@ -61,7 +65,7 @@ export async function ComponentExists(componentName: string) {
 }
 
 export async function CreateComponents(components: [any?]) {
-  if (components == null || components.length == 0) return;
+  if (!components || components.length == 0) return;
   const mutation = gql`
     mutation CreateComponent($components: [ComponentCreateInput!]!) {
       createComponents(input: $components) {
@@ -75,7 +79,10 @@ export async function CreateComponents(components: [any?]) {
   const client = createApolloClient();
   for (let i = 0; i < components.length; i += chunkSize) {
     const chunk = components.slice(i, i + chunkSize);
-    const { data } = await client.mutate({ mutation: mutation, variables: { components: chunk } });
+    const { data } = await client.mutate({
+      mutation: mutation,
+      variables: { components: chunk },
+    });
     console.log({ chunk: i, result: data });
   }
 }
@@ -96,7 +103,7 @@ export async function CreateProject(project) {
 }
 
 function generateName() {
-  return 'gql' + randomBytes(8).toString('hex');
+  return "gql" + randomBytes(8).toString("hex");
 }
 
 export async function UpdateComponentDependencies(dependencies) {
@@ -106,9 +113,13 @@ export async function UpdateComponentDependencies(dependencies) {
     const chunk = dependencies.slice(i, i + chunkSize);
     const chunkMutation = chunk
       .map((dependency) => {
-        return getComponentUpdateGQLQuery(dependency, dependency.dependsOn, generateName());
+        return getComponentUpdateGQLQuery(
+          dependency,
+          dependency.dependsOn,
+          generateName()
+        );
       })
-      .join('\n');
+      .join("\n");
     console.log(chunkMutation);
     const mutation = gql`
       mutation {
@@ -120,12 +131,16 @@ export async function UpdateComponentDependencies(dependencies) {
   }
 }
 
-function getComponentUpdateGQLQuery(dependency, dependsOn, name = 'updateComponent') {
+function getComponentUpdateGQLQuery(
+  dependency,
+  dependsOn,
+  name = "updateComponent"
+) {
   const mutation_content = dependsOn
     .map((d) => {
       return `{ purl: \"${d.purl}\"}`;
     })
-    .join(', ');
+    .join(", ");
 
   const mutation_part = `${name}: updateComponents(
     where: { purl: \"${dependency.purl}\" }
