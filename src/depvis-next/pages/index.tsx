@@ -4,6 +4,7 @@ import NoSSRGraph from '../components/Graph/NoSSRGraph';
 import ImportForm from '../components/Import/ImportForm';
 import React, { useState } from 'react';
 import NoSSRGraphWrapper from '../components/Graph/NoSSRGraphWrapper';
+import NodeDetail from '../components/Layout/NodeDetail';
 
 const getAllComponentsQuery = gql`
   {
@@ -12,6 +13,7 @@ const getAllComponentsQuery = gql`
       __typename
       purl
       version
+      deps_count
       depends_on {
         purl
       }
@@ -47,11 +49,17 @@ const formatData = (data) => {
 function HomePage() {
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [selectedNode, setSelectedNode] = useState('');
 
   const { data } = useQuery(getAllComponentsQuery, {
     onCompleted: (data) => {
       setLoading(false);
       setGraphData(formatData(data));
+    },
+    onError: (err) => {
+      setLoading(false);
+      setErrorMessage(err.message);
     },
   });
   return (
@@ -67,6 +75,8 @@ function HomePage() {
               </Container>
               <p className="text-center fs-4 my-3">Loading data</p>
             </>
+          ) : errorMessage ? (
+            <h1>{errorMessage}</h1>
           ) : (
             <>
               <p className="text-center fs-2 fw-bold">No data!</p>
@@ -78,7 +88,8 @@ function HomePage() {
           )}
         </Container>
       )}
-      <NoSSRGraphWrapper graphData={graphData} />
+      <NoSSRGraphWrapper graphData={graphData} onNodeClick={selectedNode} />
+      {/* <NodeDetail name={selectedNode} /> */}
     </>
   );
 }
