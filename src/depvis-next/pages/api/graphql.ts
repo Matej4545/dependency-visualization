@@ -21,7 +21,9 @@ const typeDefs = gql`
     deps_count: Int
       @cypher(
         statement: """
-        MATCH(this)-[:DEPENDS_ON*]->(m:Component) RETURN count(m)
+        CALL apoc.neighbors.tohop.count(this, 'DEPENDS_ON>',100000)
+        YIELD value
+        RETURN value
         """
       )
     depends_on: [Component!]! @relationship(type: "DEPENDS_ON", direction: OUT)
