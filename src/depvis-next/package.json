@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@apollo/client": "^3.6.9",
+    "@apollo/client": "^3.7.1",
     "@neo4j/graphql": "^3.8.0",
     "apollo-server-micro": "^3.10.2",
     "bootstrap": "^5.2.1",
