@@ -23,7 +23,7 @@ async function sendMutation(mutation, variables?) {
   if (res.errors) {
     throw Error(res.errors.toString());
   }
-  return res.data;
+  return res;
 }
 
 export async function ProjectExists(projectName: string) {
@@ -106,6 +106,69 @@ function generateName() {
   return "gql" + randomBytes(8).toString("hex");
 }
 
+export async function CreateUpdateVulnerability(purl, vulnerabilities) {
+  if (!vulnerabilities || vulnerabilities.length == 0) return;
+
+  // const mutation = gql`
+  //   mutation CreateVulnerability(
+  //     $purl: String
+  //     $vuln_array: [ComponentVulnerabilitiesCreateFieldInput!]
+  //   ) {
+  //     updateComponents(
+  //       where: { purl: $purl }
+  //       update: { vulnerabilities: { create: $vuln_array } }
+  //     ) {
+  //       info {
+  //         nodesCreated
+  //         relationshipsCreated
+  //       }
+  //     }
+  //   }
+  // `;
+  const mutation = gql`
+    mutation CreateVulnerability(
+      $purl: String
+      $vuln_array: [ComponentVulnerabilitiesCreateFieldInput!]
+    ) {
+      updateComponents(
+        where: { purl: $purl }
+        update: { vulnerabilities: { create: $vuln_array } }
+      ) {
+        info {
+          nodesCreated
+          relationshipsCreated
+        }
+      }
+    }
+  `;
+
+  //Tranform for mutation compatibility
+  const vulnArray = vulnerabilities.map((v) => {
+    return { node: PrepareVulnAsGQL(v) };
+  });
+  const { data } = await sendMutation(mutation, {
+    purl: purl,
+    vuln_array: vulnArray,
+  });
+  console.log(data);
+}
+
+function PrepareVulnAsGQL(vuln) {
+  const refs = vuln.references
+    ? {
+        connectOrCreate: [
+          ...vuln.references.map((r) => {
+            return {
+              where: { node: { url: r.url } },
+              onCreate: { node: { url: r.url } },
+            };
+          }),
+        ],
+      }
+    : {};
+  return { ...vuln, references: refs };
+}
+
 export async function UpdateComponentDependencies(dependencies) {
   if (dependencies == null || dependencies.length == 0) return;
   const client = createApolloClient();
@@ -129,6 +192,17 @@ export async function UpdateComponentDependencies(dependencies) {
     const { data } = await sendMutation(mutation);
     console.log(data);
   }
+}
+export async function GetComponents() {
+  const query = gql`
+    {
+      components {
+        purl
+      }
+    }
+  `;
+  const data = await sendQuery(query);
+  return data;
 }
 
 function getComponentUpdateGQLQuery(
