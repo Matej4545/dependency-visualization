@@ -1,11 +1,10 @@
-import React from 'react';
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
-import Link from 'next/link';
-import { Button } from 'react-bootstrap';
-import { DeleteAllData } from '../../helpers/DbDataHelper';
+import Link from "next/link";
+import { Button } from "react-bootstrap";
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
+import NavDropdown from "react-bootstrap/NavDropdown";
+import { DeleteAllData } from "../../helpers/DbDataHelper";
 const MainNavbar = () => {
   return (
     <Navbar bg="dark" expand="lg" variant="dark">
@@ -32,8 +31,12 @@ const MainNavbar = () => {
               >
                 Delete all data in DB
               </Button>
-              <NavDropdown.Item href="/update-db">Update Database</NavDropdown.Item>
-              <NavDropdown.Item href="/projects">Manage Projects</NavDropdown.Item>
+              <NavDropdown.Item href="/update-db">
+                Update Database
+              </NavDropdown.Item>
+              <NavDropdown.Item href="/projects">
+                Manage Projects
+              </NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item href="/about">About</NavDropdown.Item>
             </NavDropdown>

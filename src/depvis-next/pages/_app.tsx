@@ -1,14 +1,13 @@
-import { Layout } from '../components/Layout/Layout';
-import '../styles/custom.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import SSRProvider from 'react-bootstrap/SSRProvider';
-import { useEffect } from 'react';
-import { createApolloClient } from '../helpers/ApolloClientHelper';
-import { ApolloProvider } from '@apollo/client';
-
+import { ApolloProvider } from "@apollo/client";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { useEffect } from "react";
+import SSRProvider from "react-bootstrap/SSRProvider";
+import { Layout } from "../components/Layout/Layout";
+import { createApolloClient } from "../helpers/ApolloClientHelper";
+import "../styles/custom.css";
 function MyApp({ Component, pageProps }) {
   useEffect(() => {
-    import('bootstrap/dist/js/bootstrap.js');
+    import("bootstrap/dist/js/bootstrap.js");
   }, []);
   return (
     <ApolloProvider client={createApolloClient()}>
