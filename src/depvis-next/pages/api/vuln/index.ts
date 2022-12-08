@@ -1,7 +1,27 @@
-export default function handler(req, res) {
-  res.status(200).json({ name: 'John Doe' });
-}
+import { processBatch } from "../../../helpers/BatchHelper";
+import {
+  CreateUpdateVulnerability,
+  GetComponents,
+} from "../../../helpers/DbDataHelper";
+import { VulnFetcherHandler } from "../../../vulnerability-mgmt/VulnFetcherHandler";
+export default async function handler(req, res) {
+  const { components } = await GetComponents();
+  const purlList = components.map((c) => c.purl);
+  const r = await processBatch(purlList, VulnFetcherHandler, 100);
 
-export function request(url: string, config: RequestInit = {}): Promise<any> {
-  return fetch(url, config).then((data) => data.json());
+  //Use queue here
+  r.forEach(async (component) => {
+    if (component.vulnerabilities.length > 0) {
+      console.log(
+        "Creating %d vulns for %s",
+        component.vulnerabilities.length,
+        component.coordinates
+      );
+      await CreateUpdateVulnerability(
+        component.coordinates,
+        component.vulnerabilities
+      );
+    }
+  });
+  res.status(200).json(r);
 }

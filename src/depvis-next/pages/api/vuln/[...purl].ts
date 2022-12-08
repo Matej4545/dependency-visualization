@@ -1,14 +1,16 @@
-import { VulnFetcherHandler } from '../../../vulnerability-mgmt/VulnFetcherHandler';
+import Bull from "bull";
+import { GetVulnQueueName } from "../../../queues/GetVulnQueue";
+
+const VulnQueue = new Bull(GetVulnQueueName);
 
 export default async function handler(req, res) {
   const { purl } = req.query;
-  const purl_j = purl.join('/');
-  console.log(purl_j);
+  const purl_j = purl.join("/");
   try {
-    const result = await VulnFetcherHandler(purl_j);
-    res.status(200).json(result);
+    const job = await VulnQueue.add({ purl: purl_j });
+    return res.status(200).json({ jobId: job.id });
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
     res.status(500).json({ error: error.message });
   }
 }

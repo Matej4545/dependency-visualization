@@ -1,5 +1,7 @@
 import Bull from "bull";
 import { XMLParser } from "fast-xml-parser";
+import { emptyQueue } from "../../../helpers/QueueHelper";
+import { GetVulnQueueName } from "../../../queues/GetVulnQueue";
 import { ImportQueueName } from "../../../queues/ImportQueue";
 
 export const config = {
@@ -18,7 +20,7 @@ const XMLParserOptions = {
 
 //Bull queue
 const ImportQueue = new Bull(ImportQueueName);
-
+const GetVulnQueue = new Bull(GetVulnQueueName);
 interface IImportResult {
   isError: boolean;
   errorMessage?: string;
@@ -72,6 +74,8 @@ async function parseXml(inputXml: string) {
   const validateResult = validateSbomXml(xmlParsed);
   if (validateResult.isError) return validateResult;
 
+  //Clear vuln queue
+  emptyQueue(GetVulnQueue);
   const job = await ImportQueue.add({ bom: xmlParsed.bom });
   return { jobId: job.id };
 }
