@@ -1,9 +1,19 @@
-import { gql } from "@apollo/client";
+import { DocumentNode, gql } from "@apollo/client";
 import { randomBytes } from "crypto";
+import { Component } from "../types/component";
+import { Project } from "../types/project";
+import { Vulnerability } from "../types/vulnerability";
 import { createApolloClient } from "./ApolloClientHelper";
 const chunkSize = 100;
 
-async function sendQuery(query, variables?) {
+/**
+ * Function wrapper responsible for sending GraphQL queries.
+ * @param query GraphQL query
+ * @param variables Optional variables that will be used in query
+ * @returns Data from successful query
+ * @throws Error if there were some error during fetch
+ */
+async function sendQuery(query: DocumentNode, variables?: Object) {
   const client = createApolloClient();
   const res = await client.query({ query: query, variables: variables });
   if (res.errors) {
@@ -12,7 +22,7 @@ async function sendQuery(query, variables?) {
   return res.data;
 }
 
-async function sendMutation(mutation, variables?) {
+async function sendMutation(mutation: any, variables?: Object) {
   console.log(
     `Sending mutation ${mutation} with variables ${await JSON.stringify(
       variables
@@ -21,6 +31,7 @@ async function sendMutation(mutation, variables?) {
   const client = createApolloClient();
   const res = await client.mutate({ mutation: mutation, variables: variables });
   if (res.errors) {
+    console.error(res.errors.map((e) => e.message).toString());
     throw Error(res.errors.toString());
   }
   return res;
@@ -43,13 +54,7 @@ export async function ProjectExists(projectName: string) {
   return data.projects.length > 0;
 }
 
-export async function CreateProjecty(project: any) {
-  const query = gql``;
-}
-
 export async function ComponentExists(componentName: string) {
-  console.log(componentName);
-
   const query = gql`
     query Component($componentName: String!) {
       components(where: { name_CONTAINS: $componentName }) {
@@ -60,11 +65,10 @@ export async function ComponentExists(componentName: string) {
     }
   `;
   const data = await sendQuery(query, { componentName: componentName });
-  console.log(data);
   return data.projects.length > 0;
 }
 
-export async function CreateComponents(components: [any?]) {
+export async function CreateComponents(components: [Component?]) {
   if (!components || components.length == 0) return;
   const mutation = gql`
     mutation CreateComponent($components: [ComponentCreateInput!]!) {
@@ -76,18 +80,20 @@ export async function CreateComponents(components: [any?]) {
       }
     }
   `;
-  const client = createApolloClient();
+
   for (let i = 0; i < components.length; i += chunkSize) {
     const chunk = components.slice(i, i + chunkSize);
-    const { data } = await client.mutate({
-      mutation: mutation,
-      variables: { components: chunk },
-    });
+    const { data } = await sendMutation(mutation, { components: chunk });
     console.log({ chunk: i, result: data });
   }
 }
 
-export async function CreateProject(project) {
+/**
+ * Function will create new project with optional first component
+ * @param project Project data
+ * @returns Data contained in server response
+ */
+export async function CreateProject(project: Project) {
   if (!project) return;
   const mutation = gql`
     mutation CreateProject($project: [ProjectCreateInput!]!) {
@@ -99,32 +105,49 @@ export async function CreateProject(project) {
     }
   `;
   const { data } = await sendMutation(mutation, { project: [project] });
-  console.log(data);
+  return data;
 }
 
 function generateName() {
   return "gql" + randomBytes(8).toString("hex");
 }
 
-export async function CreateUpdateVulnerability(purl, vulnerabilities) {
-  if (!vulnerabilities || vulnerabilities.length == 0) return;
+export async function GetVulnerability(vulnerabilityId) {
+  const query = gql`
+    query getVuln($vulnerabilityId: String) {
+      vulnerabilities(where: { id_CONTAINS: $vulnerabilityId }) {
+        id
+        name
+      }
+    }
+  `;
+  const data = await sendQuery(query, { vulnerabilityId: vulnerabilityId });
+  return data.vulnerabilities;
+}
+export async function CreateUpdateVulnerability(
+  purl: string,
+  vulnerabilities: [Vulnerability?]
+) {
+  console.log("Creating vulnerability for package %s", purl);
+  if (!vulnerabilities || vulnerabilities.length == 0 || !purl) return;
 
-  // const mutation = gql`
-  //   mutation CreateVulnerability(
-  //     $purl: String
-  //     $vuln_array: [ComponentVulnerabilitiesCreateFieldInput!]
-  //   ) {
-  //     updateComponents(
-  //       where: { purl: $purl }
-  //       update: { vulnerabilities: { create: $vuln_array } }
-  //     ) {
-  //       info {
-  //         nodesCreated
-  //         relationshipsCreated
-  //       }
-  //     }
-  //   }
-  // `;
+  const vulnExistsList = await Promise.all(
+    vulnerabilities.map(async (v) => {
+      const getVuln = await GetVulnerability(v.id);
+      return getVuln.length == 0;
+    })
+  );
+  const newVulnerabilities = vulnerabilities.filter(
+    (_v, index) => vulnExistsList[index]
+  );
+
+  if (newVulnerabilities.length == 0) {
+    console.log(
+      "All vulnerabilities for component %s already exists in DB",
+      purl
+    );
+    return;
+  }
   const mutation = gql`
     mutation CreateVulnerability(
       $purl: String
@@ -143,7 +166,7 @@ export async function CreateUpdateVulnerability(purl, vulnerabilities) {
   `;
 
   //Tranform for mutation compatibility
-  const vulnArray = vulnerabilities.map((v) => {
+  const vulnArray = newVulnerabilities.map((v) => {
     return { node: PrepareVulnAsGQL(v) };
   });
   const { data } = await sendMutation(mutation, {
@@ -153,7 +176,7 @@ export async function CreateUpdateVulnerability(purl, vulnerabilities) {
   console.log(data);
 }
 
-function PrepareVulnAsGQL(vuln) {
+function PrepareVulnAsGQL(vuln: Vulnerability) {
   const refs = vuln.references
     ? {
         connectOrCreate: [
@@ -169,10 +192,42 @@ function PrepareVulnAsGQL(vuln) {
   return { ...vuln, references: refs };
 }
 
+export async function UpdateProjectDependencies(
+  projectId: string,
+  components: [Component?]
+) {
+  if (!projectId || components.length == 0) return;
+  const mutation = gql`
+    mutation UpdateProjectDependencies(
+      $projectId: ID
+      $componentsPurl: [ComponentWhere!]!
+    ) {
+      updateProjects(
+        where: { id: $projectId }
+        update: {
+          component: { connect: { where: { node: { OR: $componentsPurl } } } }
+        }
+      ) {
+        __typename
+        info {
+          relationshipsCreated
+        }
+      }
+    }
+  `;
+
+  const { data } = await sendMutation(mutation, {
+    projectId: projectId,
+    componentsPurl: components.map((c) => {
+      return { purl: c.purl };
+    }),
+  });
+}
+
 export async function UpdateComponentDependencies(dependencies) {
   if (dependencies == null || dependencies.length == 0) return;
-  const client = createApolloClient();
   for (let i = 0; i < dependencies.length; i += chunkSize) {
+    //TODO: rewrite using variables
     const chunk = dependencies.slice(i, i + chunkSize);
     const chunkMutation = chunk
       .map((dependency) => {
@@ -205,23 +260,26 @@ export async function GetComponents() {
   return data;
 }
 
+function getComponentWherePurlPart(array: [Component?]) {
+  const res = array.map((c) => {
+    return `{purl: \"${c.purl}\"}`;
+  });
+  return `[${res.join(",")}]`;
+}
+
 function getComponentUpdateGQLQuery(
   dependency,
   dependsOn,
   name = "updateComponent"
 ) {
-  const mutation_content = dependsOn
-    .map((d) => {
-      return `{ purl: \"${d.purl}\"}`;
-    })
-    .join(", ");
+  const mutation_content = getComponentWherePurlPart(dependsOn);
 
   const mutation_part = `${name}: updateComponents(
     where: { purl: \"${dependency.purl}\" }
     update: {
-      depends_on: {
+      dependsOn: {
         connect: {
-          where: { node: { OR: [${mutation_content}] } }
+          where: { node: { OR: ${mutation_content} } }
         }
       }
     }

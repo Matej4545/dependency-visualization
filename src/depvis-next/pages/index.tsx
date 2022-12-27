@@ -12,14 +12,14 @@ const getAllComponentsQuery = gql`
       __typename
       purl
       version
-      deps_count
-      depends_on {
+      dependsOnCount
+      dependsOn {
         purl
       }
       vulnerabilities {
         cve
         name
-        cvss
+        cvssScore
       }
     }
   }
@@ -35,11 +35,11 @@ const formatData = (data) => {
     nodes.push({
       id: c.purl,
       name: c.name,
-      deps_count: c.deps_count,
+      dependsOnCount: c.dependsOnCount,
       __typename: c.__typename,
     });
-    if (c.depends_on) {
-      c.depends_on.forEach((d) => {
+    if (c.dependsOn) {
+      c.dependsOn.forEach((d) => {
         links.push({
           source: c.purl,
           target: d.purl,
@@ -56,8 +56,8 @@ const formatData = (data) => {
           id: v.cve,
           cve: v.cve,
           name: v.name,
-          cvss: v.cvss,
-          deps_count: 100,
+          cvssScore: v.cvssScore,
+          dependsOnCount: 100,
           __typename: v.__typename,
         });
       });
@@ -80,6 +80,7 @@ function HomePage() {
     },
     onError: (err) => {
       setLoading(false);
+      console.error(err);
       setError(err);
     },
   });

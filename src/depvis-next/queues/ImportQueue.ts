@@ -16,6 +16,10 @@ console.log(ImportQueueOptions);
 const ImportQueue = new Bull(ImportQueueName, ImportQueueOptions);
 
 ImportQueue.process(async (job) => {
-  console.log("process is running");
-  return ImportSbom(job.data.bom);
+  try {
+    const res = ImportSbom(job.data.bom);
+    return res;
+  } catch (e) {
+    console.error(e);
+  }
 });

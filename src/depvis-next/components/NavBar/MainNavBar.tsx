@@ -5,6 +5,7 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import { DeleteAllData } from "../../helpers/DbDataHelper";
+import { gqlUrlPath } from "../../pages/api/graphql";
 const MainNavbar = () => {
   return (
     <Navbar bg="dark" expand="lg" variant="dark">
@@ -20,6 +21,9 @@ const MainNavbar = () => {
             </Link>
             <Link href="/toolbox" passHref>
               <Nav.Link>Toolbox</Nav.Link>
+            </Link>
+            <Link href={gqlUrlPath} passHref>
+              <Nav.Link>GraphQL Playground</Nav.Link>
             </Link>
             <NavDropdown title="Other" id="basic-nav-dropdown">
               <Button

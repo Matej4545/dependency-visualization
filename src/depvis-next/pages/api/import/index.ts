@@ -1,5 +1,6 @@
 import Bull from "bull";
 import { XMLParser } from "fast-xml-parser";
+import { ImportSbom } from "../../../helpers/ImportSbomHelper";
 import { emptyQueue } from "../../../helpers/QueueHelper";
 import { GetVulnQueueName } from "../../../queues/GetVulnQueue";
 import { ImportQueueName } from "../../../queues/ImportQueue";
@@ -21,11 +22,11 @@ const XMLParserOptions = {
 //Bull queue
 const ImportQueue = new Bull(ImportQueueName);
 const GetVulnQueue = new Bull(GetVulnQueueName);
-interface IImportResult {
+type ImportResult = {
   isError: boolean;
   errorMessage?: string;
   jobId?: string;
-}
+};
 
 export default async function handler(req, res) {
   try {
@@ -43,7 +44,7 @@ export default async function handler(req, res) {
 }
 
 // Function validates that object contains required properties
-function validateSbomXml(parsedXml): IImportResult {
+function validateSbomXml(parsedXml): ImportResult {
   const bom = parsedXml.bom;
   if (!bom)
     return {
@@ -76,6 +77,7 @@ async function parseXml(inputXml: string) {
 
   //Clear vuln queue
   emptyQueue(GetVulnQueue);
-  const job = await ImportQueue.add({ bom: xmlParsed.bom });
-  return { jobId: job.id };
+  //const job = await ImportQueue.add({ bom: xmlParsed.bom });
+  //return { jobId: job.id };
+  return await ImportSbom(xmlParsed.bom);
 }
