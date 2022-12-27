@@ -19,7 +19,8 @@ export default function NoSSRGraph(props) {
     r.d3Force("y", forceY());
     r.d3Force("link")
       .distance(
-        (link) => 1 * (link.source.deps_count + link.target.deps_count * 2)
+        (link) =>
+          1 * (link.source.dependsOnCount + link.target.dependsOnCount * 2)
       )
       // .distance((link) => 1000)
       .strength(1);
@@ -29,7 +30,7 @@ export default function NoSSRGraph(props) {
     (node) => {
       // Aim at node from outside it
       graphRef.current.centerAt(node.x, node.y, 500);
-      let zoom_level = 3 - node.deps_count / 100;
+      let zoom_level = 3 - node.dependsOnCount / 100;
       if (zoom_level < 0.5) zoom_level = 0.5;
       graphRef.current.zoom(zoom_level, 500);
       console.log(node.neighbors);
@@ -42,8 +43,8 @@ export default function NoSSRGraph(props) {
       ref={graphRef}
       nodeCanvasObjectMode={() => "after"}
       nodeCanvasObject={(node, ctx, globalScale) => {
-        const label = `${node.name} | ${node.deps_count}`;
-        const fontSize = my_map(node.deps_count, 0, maxDepsCount, 5, 22);
+        const label = `${node.name} | ${node.dependsOnCount}`;
+        const fontSize = my_map(node.dependsOnCount, 0, maxDepsCount, 5, 22);
         ctx.font = `${fontSize}px Sans-Serif`;
         ctx.fillStyle = "#121212";
         ctx.textAlign = "center";
@@ -55,7 +56,7 @@ export default function NoSSRGraph(props) {
       linkDirectionalArrowRelPos={3}
       nodeAutoColorBy={"__typename"}
       nodeLabel={"name"}
-      nodeVal={"deps_count"}
+      nodeVal={"dependsOnCount"}
       // backgroundColor={'#f0f0f0'}
       linkColor={"#ff0000"}
       onNodeClick={(n) => {

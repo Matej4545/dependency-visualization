@@ -4,7 +4,7 @@ export type Project = {
   /**
    * Unique ID of project
    */
-  id: string;
+  id?: string;
   /**
    * Friendly name
    */

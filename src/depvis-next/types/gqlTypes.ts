@@ -34,7 +34,7 @@ export const typeDefs = gql`
     ghsa: String @unique
     name: String
     description: String
-    affectedVersion: String
+    affectedVersions: String
     cvssScore: Float
     cvssVector: String
     cwe: String
@@ -46,7 +46,7 @@ export const typeDefs = gql`
     id: ID @id
     name: String
     version: String
-    components: [Component!]!
+    allComponents: [Component!]!
       @cypher(
         statement: """
         MATCH (this)-->(c)-[:DEPENDS_ON*]->(c2)
@@ -55,6 +55,7 @@ export const typeDefs = gql`
         RETURN  distinct single
         """
       )
+    component: [Component!]! @relationship(type: "DEPENDS_ON", direction: OUT)
     date: Date
   }
 
