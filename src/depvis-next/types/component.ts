@@ -5,7 +5,7 @@ export type Component = {
   /**
    * Unique id of component
    */
-  id: string;
+  id?: string;
   /**
    * Package URL (PURL) representation of component
    */

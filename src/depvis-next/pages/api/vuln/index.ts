@@ -15,10 +15,10 @@ export default async function handler(req, res) {
       console.log(
         "Creating %d vulns for %s",
         component.vulnerabilities.length,
-        component.coordinates
+        component.purl
       );
       await CreateUpdateVulnerability(
-        component.coordinates,
+        component.purl,
         component.vulnerabilities
       );
     }
