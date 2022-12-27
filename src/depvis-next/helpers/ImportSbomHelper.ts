@@ -1,3 +1,5 @@
+import { VulnFetcherHandler } from "../vulnerability-mgmt/VulnFetcherHandler";
+import { processBatch } from "./BatchHelper";
 import {
   CreateComponents,
   CreateProject,
@@ -25,6 +27,13 @@ export async function ImportSbom(bom: any) {
   await CreateProject(project);
   await CreateComponents(components);
   await UpdateComponentDependencies(dependencies);
+  console.log("Now start processing vulnerabilities");
+
+  //Vulnerabilities
+  const purlList = components.map((c) => {
+    return c.purl;
+  });
+  processBatch(purlList, VulnFetcherHandler);
 }
 function GetComponents(bom: any) {
   let components = bom.components.component;

@@ -1,12 +1,12 @@
-import { gql, ApolloServer } from 'apollo-server-micro';
-import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
-import neo4j from 'neo4j-driver';
-import { Neo4jGraphQL } from '@neo4j/graphql';
+import { Neo4jGraphQL } from "@neo4j/graphql";
+import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
+import { ApolloServer, gql } from "apollo-server-micro";
+import neo4j from "neo4j-driver";
 
 const DEFAULT_DB_SETTINGS = {
-  neo4jHost: process.env.NEO4J_HOST || 'neo4j://localhost:7687',
-  neo4jUsername: process.env.NEO4J_USER || 'neo4j',
-  neo4jPassword: process.env.NEO4J_PASSWORD || '',
+  neo4jHost: process.env.NEO4J_HOST || "neo4j://localhost:7687",
+  neo4jUsername: process.env.NEO4J_USER || "neo4j",
+  neo4jPassword: process.env.NEO4J_PASSWORD || "",
 };
 
 const typeDefs = gql`
@@ -21,20 +21,26 @@ const typeDefs = gql`
     deps_count: Int
       @cypher(
         statement: """
-        MATCH(this)-[:DEPENDS_ON*]->(m:Component) RETURN count(m)
+        CALL apoc.neighbors.tohop.count(this, 'DEPENDS_ON>',100000)
+        YIELD value
+        RETURN value
         """
       )
     depends_on: [Component!]! @relationship(type: "DEPENDS_ON", direction: OUT)
-    references: [Reference!]! @relationship(type: "HAS_REFERENCE", direction: OUT)
-    vulnerabilities: [Vulnerability!]! @relationship(type: "HAS_VULNERABILITY", direction: OUT)
+    references: [Reference!]!
+      @relationship(type: "HAS_REFERENCE", direction: OUT)
+    vulnerabilities: [Vulnerability!]!
+      @relationship(type: "HAS_VULNERABILITY", direction: OUT)
   }
 
   type Vulnerability {
-    id: ID
+    cve: String @unique
     name: String
-    cvss: String
+    cvss: Float
     affectedVersion: String
-    references: [Reference!]! @relationship(type: "HAS_REFERENCE", direction: OUT)
+    description: String
+    references: [Reference!]!
+      @relationship(type: "HAS_REFERENCE", direction: OUT)
   }
 
   type Project {
@@ -54,15 +60,16 @@ const typeDefs = gql`
   }
 
   type Reference {
-    id: ID
-    name: String
-    url: String
+    url: String @unique
   }
 `;
 
 const driver = neo4j.driver(
   DEFAULT_DB_SETTINGS.neo4jHost,
-  neo4j.auth.basic(DEFAULT_DB_SETTINGS.neo4jUsername, DEFAULT_DB_SETTINGS.neo4jPassword)
+  neo4j.auth.basic(
+    DEFAULT_DB_SETTINGS.neo4jUsername,
+    DEFAULT_DB_SETTINGS.neo4jPassword
+  )
 );
 
 export default async function handler(req, res) {
@@ -74,7 +81,7 @@ export default async function handler(req, res) {
   });
   await apolloServer.start();
   await apolloServer.createHandler({
-    path: '/api/graphql',
+    path: "/api/graphql",
   })(req, res);
 }
 
