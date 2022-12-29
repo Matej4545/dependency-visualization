@@ -4,9 +4,18 @@
   height: 25%;
 }
 
-.border-box {
+.workspace-main {
+  overflow: hidden;
+  flex-wrap: nowrap;
+}
+
+.workspace-graph-nospace {
   margin: 0;
   padding: 0;
-  background-color: #eeeeee;
+  overflow-x: hidden;
+}
+
+.workspace-sidebar {
+  border-right: 1px #dedede solid;
   overflow-x: hidden;
 }

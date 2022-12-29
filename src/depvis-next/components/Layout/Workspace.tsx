@@ -1,7 +1,12 @@
 import { useQuery } from "@apollo/client";
 import { useEffect, useRef, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
-import { formatData, getAllComponentsQuery } from "../../helpers/GraphHelper";
+import { Button, Col, Container, Row } from "react-bootstrap";
+import {
+  formatData,
+  getAllComponentsQuery,
+  getNodeColor,
+  getNodeValue,
+} from "../../helpers/GraphHelper";
 import Details from "../Details/Details";
 import NoSSRGraphWrapper from "../Graph/NoSSRGraphWrapper";
 
@@ -28,7 +33,7 @@ const Workspace = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { data } = useQuery(getAllComponentsQuery, {
+  const { data, refetch } = useQuery(getAllComponentsQuery, {
     onCompleted: (data) => {
       setLoading(false);
       setGraphData(formatData(data));
@@ -56,34 +61,64 @@ const Workspace = () => {
       window.removeEventListener("resize", setSize);
     };
   }, []);
+
+  const handleVuln = async () => {
+    const res = await fetch("http://localhost:3000/api/vuln");
+    console.log(res);
+  };
+
+  const handleRefetch = async () => {
+    refetch();
+  };
+
   return (
     <Container fluid>
-      <Row>
-        <Col className="border-box" xl={3} md={4} sm={5}>
-          <Container fluid>
-            <h5>Sidebar</h5>
-            <p>Search</p>
+      <Row className="workspace-main">
+        <Col
+          className="workspace-fullscreen workspace-sidebar"
+          xl={3}
+          md={4}
+          sm={5}
+        >
+          <Row fluid id="control">
             <p>Select project</p>
             <p>Filter views</p>
-            <Container>
-              <Details data={node} />
-            </Container>
-          </Container>
+            <Button
+              onClick={() => {
+                handleVuln();
+              }}
+            >
+              Update Vulnerabilities
+            </Button>
+            <Button
+              onClick={() => {
+                handleRefetch();
+              }}
+            >
+              Refetch graph
+            </Button>
+          </Row>
+          <Row>
+            <Details data={node} />
+          </Row>
         </Col>
-        <Col className="border-box" ref={graphRef}>
-          <Container fluid>
-            {!loading && (
-              <NoSSRGraphWrapper
-                graphData={graphData}
-                backgroundColor={"#cccccc"}
-                width={graphDimensions.width}
-                height={graphDimensions.height}
-                onNodeClick={(node) => {
-                  setNode(node);
-                }}
-              />
-            )}
-          </Container>
+        <Col className="workspace-graph-nospace" ref={graphRef}>
+          {!loading && (
+            <NoSSRGraphWrapper
+              graphData={graphData}
+              backgroundColor={"--bs-red"}
+              width={graphDimensions.width}
+              height={graphDimensions.height}
+              nodeColor={(node) => {
+                return getNodeColor(node);
+              }}
+              nodeVal={(node) => getNodeValue(node)}
+              // nodeAutoColorBy={"__typename"}
+              onNodeClick={(node) => {
+                setNode(node);
+              }}
+            />
+          )}
         </Col>
       </Row>
     </Container>
