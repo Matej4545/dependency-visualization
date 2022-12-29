@@ -1,58 +1,73 @@
-import { useQuery } from "@apollo/client";
-import { useState } from "react";
-import { Button, Container, Row } from "react-bootstrap";
-import { formatData, getAllComponentsQuery } from "../../helpers/GraphHelper";
+import { useLazyQuery, useQuery } from "@apollo/client";
+import { useEffect, useState } from "react";
+import { Button, Container, Form, Row } from "react-bootstrap";
+import {
+  formatData,
+  getAllComponentsQuery,
+  getProjectsQuery,
+} from "../../helpers/GraphHelper";
 import Details from "../Details/Details";
+import Loading from "../Loading/Loading";
+import Search from "../Search/Search";
 import GraphContainer from "./GraphContainer";
 import Sidebar from "./Sidebar";
-
-function genRandomTree() {
-  return {
-    nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }],
-    links: [
-      { source: "A", target: "B" },
-      { source: "A", target: "C" },
-      { source: "B", target: "D" },
-      { source: "D", target: "C" },
-      { source: "C", target: "B" },
-    ],
-  };
-}
 
 const Workspace = () => {
   const [node, setNode] = useState(undefined);
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [selectedProject, setSelectedProject] = useState<string | undefined>();
+  const [getGraphData, { loading, error, data }] = useLazyQuery(
+    getAllComponentsQuery
+  );
+  const { data: projects, loading: projectsLoading } = useQuery(
+    getProjectsQuery,
+    {
+      onCompleted: (data) => {
+        console.log("Projects completed");
+        setSelectedProject(data.projects[1].id);
+      },
+    }
+  );
 
-  const { data, refetch } = useQuery(getAllComponentsQuery, {
-    onCompleted: (data) => {
-      setLoading(false);
-      setGraphData(formatData(data));
-    },
-    onError: (err) => {
-      setLoading(false);
-      console.error(err);
-      setError(err);
-    },
-  });
+  useEffect(() => {
+    console.log(`Detected change, val ${selectedProject}`);
+
+    if (selectedProject) {
+      console.log("Getting data");
+      getGraphData({ variables: { projectId: selectedProject } });
+    }
+  }, [selectedProject]);
 
   const handleVuln = async () => {
     const res = await fetch("http://localhost:3000/api/vuln");
     console.log(res);
   };
 
-  const handleRefetch = async () => {
-    refetch();
-  };
-
+  // const handleRefetch = async () => {
+  //   refetch();
+  // };
+  if (projectsLoading) return <Loading details="Loading projects" />;
   return (
     <Container fluid>
       <Row className="workspace-main">
         <Sidebar>
-          <Row fluid id="control">
+          <Search />
+          <Container fluid id="control">
             <p>Select project</p>
-            <p>Filter views</p>
+            <Form>
+              <Form.Select
+                value={selectedProject}
+                onChange={(e) => {
+                  setSelectedProject(e.target.value);
+                }}
+              >
+                {projects.projects.map((v, i) => (
+                  <option key={i} value={v.id}>
+                    {v.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form>
             <Button
               onClick={() => {
                 handleVuln();
@@ -62,21 +77,25 @@ const Workspace = () => {
             </Button>
             <Button
               onClick={() => {
-                handleRefetch();
+                getGraphData({
+                  variables: { projectId: selectedProject },
+                });
               }}
             >
               Refetch graph
             </Button>
-          </Row>
+          </Container>
           <Row>
             <Details data={node} />
           </Row>
         </Sidebar>
-        <GraphContainer
-          isLoading={loading}
-          graphData={graphData}
-          onNodeClick={(node) => setNode(node)}
-        />
+        {!loading && (
+          <GraphContainer
+            isLoading={loading}
+            graphData={formatData(data)}
+            onNodeClick={(node) => setNode(node)}
+          />
+        )}
       </Row>
     </Container>
   );

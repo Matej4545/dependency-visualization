@@ -5,7 +5,6 @@ import { processBatch } from "./BatchHelper";
 import {
   CreateComponents,
   CreateProject,
-  DeleteAllData,
   UpdateComponentDependencies,
   UpdateProjectDependencies,
 } from "./DbDataHelper";
@@ -39,7 +38,7 @@ export async function ImportSbom(bom: any) {
   let dependencies = GetDependencies(bom.dependencies.dependency);
 
   // Currently there is no support for managing older projects - we first need to clear the DB
-  await DeleteAllData();
+  //await DeleteAllData();
   // Create all objects in DB
   const projectResponse = await CreateProject(project);
   console.log(projectResponse);

@@ -1,12 +1,11 @@
 import { gql } from "@apollo/client";
 
 export const formatData = (data) => {
-  console.log(data);
   const nodes = [];
   const links = [];
-  console.log(data);
-  if (!data.components) return { nodes, links };
-  data.components.forEach((c) => {
+  if (!data || !data.projects || !data.projects[0].allComponents)
+    return { nodes, links };
+  data.projects[0].allComponents.forEach((c) => {
     nodes.push({
       id: c.purl,
       name: c.name,
@@ -54,31 +53,43 @@ export const formatData = (data) => {
 };
 
 export const getAllComponentsQuery = gql`
-  {
-    components {
-      name
-      __typename
-      purl
-      version
-      dependsOnCount
-      dependsOn {
-        purl
-      }
-      vulnerabilities {
-        __typename
+  query getProjectComponents($projectId: ID) {
+    projects(where: { id: $projectId }) {
+      allComponents {
         id
-        cve
         name
-        cvssScore
-        references {
+        version
+        __typename
+        purl
+        dependsOnCount
+        dependsOn {
+          purl
+        }
+        vulnerabilities {
           __typename
-          url
+          id
+          cve
+          name
+          description
+          cvssScore
+          references {
+            __typename
+            url
+          }
         }
       }
     }
   }
 `;
-
+export const getProjectsQuery = gql`
+  query Project {
+    projects {
+      id
+      name
+      version
+    }
+  }
+`;
 const componentColor = "#005f73";
 const vulnColor = "#ee9b00";
 const otherColor = "#001219";
@@ -96,3 +107,19 @@ export const getNodeValue = (node) => {
   if (node.__typename === "Vulnerability") return node.cvssScore * 3 || 5;
   return node.dependsOnCount || 1;
 };
+
+/**
+ * Can be used for graph testing purposes
+ */
+function genGraphTree() {
+  return {
+    nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }],
+    links: [
+      { source: "A", target: "B" },
+      { source: "A", target: "C" },
+      { source: "B", target: "D" },
+      { source: "D", target: "C" },
+      { source: "C", target: "B" },
+    ],
+  };
+}
