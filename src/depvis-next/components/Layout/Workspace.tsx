@@ -1,14 +1,10 @@
 import { useQuery } from "@apollo/client";
-import { useEffect, useRef, useState } from "react";
-import { Button, Col, Container, Row } from "react-bootstrap";
-import {
-  formatData,
-  getAllComponentsQuery,
-  getNodeColor,
-  getNodeValue,
-} from "../../helpers/GraphHelper";
+import { useState } from "react";
+import { Button, Container, Row } from "react-bootstrap";
+import { formatData, getAllComponentsQuery } from "../../helpers/GraphHelper";
 import Details from "../Details/Details";
-import NoSSRGraphWrapper from "../Graph/NoSSRGraphWrapper";
+import GraphContainer from "./GraphContainer";
+import Sidebar from "./Sidebar";
 
 function genRandomTree() {
   return {
@@ -24,10 +20,6 @@ function genRandomTree() {
 }
 
 const Workspace = () => {
-  const [graphDimensions, setGraphDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
   const [node, setNode] = useState(undefined);
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
@@ -45,23 +37,6 @@ const Workspace = () => {
     },
   });
 
-  const graphRef = useRef();
-
-  const setSize = () => {
-    setGraphDimensions({
-      width: graphRef.current && graphRef.current.clientWidth,
-      height: window.innerHeight - 56,
-    });
-  };
-
-  useEffect(() => {
-    setSize();
-    window.addEventListener("resize", setSize);
-    return () => {
-      window.removeEventListener("resize", setSize);
-    };
-  }, []);
-
   const handleVuln = async () => {
     const res = await fetch("http://localhost:3000/api/vuln");
     console.log(res);
@@ -74,12 +49,7 @@ const Workspace = () => {
   return (
     <Container fluid>
       <Row className="workspace-main">
-        <Col
-          className="workspace-fullscreen workspace-sidebar"
-          xl={3}
-          md={4}
-          sm={5}
-        >
+        <Sidebar>
           <Row fluid id="control">
             <p>Select project</p>
             <p>Filter views</p>
@@ -101,25 +71,12 @@ const Workspace = () => {
           <Row>
             <Details data={node} />
           </Row>
-        </Col>
-        <Col className="workspace-graph-nospace" ref={graphRef}>
-          {!loading && (
-            <NoSSRGraphWrapper
-              graphData={graphData}
-              backgroundColor={"--bs-red"}
-              width={graphDimensions.width}
-              height={graphDimensions.height}
-              nodeColor={(node) => {
-                return getNodeColor(node);
-              }}
-              nodeVal={(node) => getNodeValue(node)}
-              // nodeAutoColorBy={"__typename"}
-              onNodeClick={(node) => {
-                setNode(node);
-              }}
-            />
-          )}
-        </Col>
+        </Sidebar>
+        <GraphContainer
+          isLoading={loading}
+          graphData={graphData}
+          onNodeClick={(node) => setNode(node)}
+        />
       </Row>
     </Container>
   );
