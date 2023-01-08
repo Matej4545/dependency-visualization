@@ -1,13 +1,13 @@
-import { Component } from "../types/component";
-import { Project } from "../types/project";
-import { VulnFetcherHandler } from "../vulnerability-mgmt/VulnFetcherHandler";
-import { processBatch } from "./BatchHelper";
+import { Component } from '../types/component';
+import { Project } from '../types/project';
+import { VulnFetcherHandler } from '../vulnerability-mgmt/VulnFetcherHandler';
+import { processBatch } from './BatchHelper';
 import {
   CreateComponents,
   CreateProject,
   UpdateComponentDependencies,
   UpdateProjectDependencies,
-} from "./DbDataHelper";
+} from './DbDataHelper';
 
 export async function ImportSbom(bom: any) {
   // Prepare main component if exists
@@ -26,14 +26,10 @@ export async function ImportSbom(bom: any) {
   // Prepare project
   let project: Project = {
     name: bom.metadata.component.name,
-    version: bom.metadata.component.version || "n/a",
-    date: bom.metadata.timestamp || "1970-01-01",
+    version: bom.metadata.component.version || 'n/a',
+    date: bom.metadata.timestamp || '1970-01-01',
   };
 
-  // Prepare components
-  let components: [Component] = GetComponents(bom);
-  mainComponent && components.push(mainComponent);
-  console.log(components);
   // Prepare dependencies
   let dependencies = GetDependencies(bom.dependencies.dependency);
 
@@ -41,20 +37,22 @@ export async function ImportSbom(bom: any) {
   //await DeleteAllData();
   // Create all objects in DB
   const projectResponse = await CreateProject(project);
-  console.log(projectResponse);
-  await CreateComponents(components);
-  await UpdateProjectDependencies(
-    projectResponse.createProjects.projects[0].id,
-    [mainComponent]
-  );
-  await UpdateComponentDependencies(dependencies);
-  console.log("Now start processing vulnerabilities");
+  const projectId = projectResponse.createProjects.projects[0].id;
+
+  // Prepare components
+  let components: [Component] = GetComponents(bom);
+  mainComponent && components.push(mainComponent);
+  console.log(components);
+
+  await CreateComponents(components, projectId);
+  await UpdateProjectDependencies(projectId, [mainComponent]);
+  await UpdateComponentDependencies(dependencies, projectId);
 
   //Vulnerabilities
   const purlList = components.map((c) => {
     return c.purl;
   });
-  processBatch(purlList, VulnFetcherHandler);
+  await processBatch(purlList, VulnFetcherHandler);
 }
 function GetComponents(bom: any) {
   let components = bom.components.component;

@@ -1,21 +1,21 @@
-import Bull from "bull";
-import { XMLParser } from "fast-xml-parser";
-import { ImportSbom } from "../../../helpers/ImportSbomHelper";
-import { emptyQueue } from "../../../helpers/QueueHelper";
-import { GetVulnQueueName } from "../../../queues/GetVulnQueue";
-import { ImportQueueName } from "../../../queues/ImportQueue";
+import Bull from 'bull';
+import { XMLParser } from 'fast-xml-parser';
+import { ImportSbom } from '../../../helpers/ImportSbomHelper';
+import { emptyQueue } from '../../../helpers/QueueHelper';
+import { GetVulnQueueName } from '../../../queues/GetVulnQueue';
+import { ImportQueueName } from '../../../queues/ImportQueue';
 
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: "10mb",
+      sizeLimit: '10mb',
     },
   },
 };
 
 const XMLParserOptions = {
   ignoreAttributes: false,
-  attributeNamePrefix: "",
+  attributeNamePrefix: '',
   ignoreDeclaration: true,
 };
 
@@ -30,7 +30,7 @@ type ImportResult = {
 
 export default async function handler(req, res) {
   try {
-    if (req.headers["content-type"] !== "application/xml") {
+    if (req.headers['content-type'] !== 'application/xml') {
       res.status(500).json({ error: "Content-type must be 'application/xml'" });
       return;
     }
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     return res.status(200).json(result);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "failed to load data", content: err });
+    return res.status(500).json({ error: 'failed to load data', content: err });
   }
 }
 
@@ -54,14 +54,12 @@ function validateSbomXml(parsedXml): ImportResult {
   if (!bom.metadata)
     return {
       isError: true,
-      errorMessage:
-        "Validation failed - Missing 'metadata' parameter in the file.",
+      errorMessage: "Validation failed - Missing 'metadata' parameter in the file.",
     };
   if (!bom.components)
     return {
       isError: true,
-      errorMessage:
-        "Validation failed - Missing 'components' parameter in the file.",
+      errorMessage: "Validation failed - Missing 'components' parameter in the file.",
     };
 
   return { isError: false };
@@ -77,7 +75,7 @@ async function parseXml(inputXml: string) {
 
   //Clear vuln queue
   emptyQueue(GetVulnQueue);
-  //const job = await ImportQueue.add({ bom: xmlParsed.bom });
-  //return { jobId: job.id };
-  return await ImportSbom(xmlParsed.bom);
+  const job = await ImportQueue.add({ bom: xmlParsed.bom });
+  return { jobId: job.id };
+  //return await ImportSbom(xmlParsed.bom);
 }
