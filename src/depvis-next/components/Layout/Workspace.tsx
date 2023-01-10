@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Button, Container, Form, Row } from 'react-bootstrap';
 import { formatData, getAllComponentsQuery, getProjectsQuery } from '../../helpers/GraphHelper';
 import Details from '../Details/Details';
+import Dropdown from '../Dropdown/Dropdown';
 import ImportForm from '../Import/ImportForm';
 import Loading from '../Loading/Loading';
 import Search from '../Search/Search';
@@ -24,6 +25,11 @@ const Workspace = () => {
     },
   });
 
+  useEffect(() => {
+    if (data) {
+      setGraphData(formatData(data));
+    }
+  }, [data]);
   useEffect(() => {
     console.log(`Detected change, val ${selectedProject}`);
 
@@ -47,23 +53,10 @@ const Workspace = () => {
     <Container fluid>
       <Row className="workspace-main">
         <Sidebar>
-          <Search />
           <Container fluid id="control">
-            <p>Select project</p>
-            <Form>
-              <Form.Select
-                value={selectedProject}
-                onChange={(e) => {
-                  setSelectedProject(e.target.value);
-                }}
-              >
-                {projects.projects.map((v, i) => (
-                  <option key={i} value={v.id}>
-                    {v.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form>
+            <Search />
+
+            <Dropdown title="Project" options={projects.projects} onChange={(e) => setSelectedProject(e)} />
             <Button
               onClick={() => {
                 handleVuln();
@@ -86,9 +79,7 @@ const Workspace = () => {
             <Details data={node} />
           </Row>
         </Sidebar>
-        {!loading && (
-          <GraphContainer isLoading={loading} graphData={formatData(data)} onNodeClick={(node) => setNode(node)} />
-        )}
+        {!loading && <GraphContainer isLoading={loading} graphData={graphData} onNodeClick={(node) => setNode(node)} />}
       </Row>
     </Container>
   );
