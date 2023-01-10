@@ -1,6 +1,25 @@
-import ReactForceGraph2d from "react-force-graph-2d";
+import { forceCollide, forceManyBody, forceX, forceY } from "d3-force";
+import { useEffect, useRef } from "react";
+import ReactForceGraph2d, { ForceGraphMethods } from "react-force-graph-2d";
 
 export default function NoSSRGraph(props) {
+  const graphRef = useRef<ForceGraphMethods>();
+
+  // useEffect(() => {
+  //   const r = graphRef.current;
+  //   r.zoomToFit();
+  //   r.d3Force("collide", forceCollide(4));
+  //   r.d3Force("x", forceX());
+  //   r.d3Force("y", forceY());
+  //   r.d3Force("link")
+  //     .distance(
+  //       (link) => 1 * (props.linkLength || 1)
+  //     )
+  //     // .distance((link) => 1000)
+  //     .strength(1);
+  //   r.d3Force("charge", forceManyBody().strength(-70));
+  // }, []);
+
   return <ReactForceGraph2d {...props} />;
 }
 // const my_map = (value, x1, y1, x2, y2) =>

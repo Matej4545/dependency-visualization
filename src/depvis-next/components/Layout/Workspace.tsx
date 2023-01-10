@@ -1,17 +1,29 @@
 import { useLazyQuery, useQuery } from '@apollo/client';
 import { useEffect, useState } from 'react';
 import { Button, Container, Form, Row } from 'react-bootstrap';
-import { formatData, getAllComponentsQuery, getProjectsQuery } from '../../helpers/GraphHelper';
+import { formatData, getAllComponentsQuery, getNodeColor, getNodeValue, getProjectsQuery } from '../../helpers/GraphHelper';
 import Details from '../Details/Details';
 import Dropdown from '../Dropdown/Dropdown';
 import ImportForm from '../Import/ImportForm';
 import Loading from '../Loading/Loading';
 import Search from '../Search/Search';
 import GraphContainer from './GraphContainer';
+import { GraphConfig } from '../Graph/GraphConfig';
 import Sidebar from './Sidebar';
+
+const defaultGraphConfig: GraphConfig = {
+  zoomLevel: 1,
+  color: getNodeColor,
+  label: "id",
+  linkDirectionalArrowLength: 5,
+  linkDirectionalRelPos: 1,
+  linkLength: 10,
+  nodeVal: getNodeValue
+}
 
 const Workspace = () => {
   const [node, setNode] = useState(undefined);
+  const [graphConfig, setGraphConfig ] = useState<GraphConfig>(defaultGraphConfig)
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [selectedProject, setSelectedProject] = useState<string | undefined>();
   const [getGraphData, { loading, error, data }] = useLazyQuery(getAllComponentsQuery);
@@ -39,11 +51,24 @@ const Workspace = () => {
     }
   }, [selectedProject]);
 
+  const handleNodeClick = (node) => {
+    setNode(node)
+  }
+
   const handleVuln = async () => {
     const res = await fetch('http://localhost:3000/api/vuln');
     console.log(res);
   };
 
+  const handleNodeValToggle = (e) => {
+    console.log(e)
+    if (typeof(graphConfig.nodeVal) === "function") {
+      setGraphConfig({...graphConfig, nodeVal: 1})
+      console.log(graphConfig)
+    } else {
+      setGraphConfig({...graphConfig, nodeVal: getNodeValue})
+    }
+  }
   // const handleRefetch = async () => {
   //   refetch();
   // };
@@ -57,6 +82,15 @@ const Workspace = () => {
             <Search />
 
             <Dropdown title="Project" options={projects.projects} onChange={(e) => setSelectedProject(e)} />
+            
+            <Form>
+              <Form.Check type="switch"
+              label="Size by depCount"
+              onChange={(e) => {handleNodeValToggle(e)}}
+              value={1}
+              />
+            </Form>
+            <Form.Range onChange={(e) => {setGraphConfig({...graphConfig, linkLength: parseInt(e.target.value, 10)})}}/>
             <Button
               onClick={() => {
                 handleVuln();
@@ -79,7 +113,7 @@ const Workspace = () => {
             <Details data={node} />
           </Row>
         </Sidebar>
-        {!loading && <GraphContainer isLoading={loading} graphData={graphData} onNodeClick={(node) => setNode(node)} />}
+        {!loading && <GraphContainer isLoading={loading} graphData={graphData} onNodeClick={(node) => handleNodeClick(node)} graphConfig={graphConfig} />}
       </Row>
     </Container>
   );
