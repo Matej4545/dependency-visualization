@@ -1,7 +1,13 @@
 import { useLazyQuery, useQuery } from '@apollo/client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Button, Container, Form, Row } from 'react-bootstrap';
-import { formatData, getAllComponentsQuery, getNodeColor, getNodeValue, getProjectsQuery } from '../../helpers/GraphHelper';
+import {
+  formatData,
+  getAllComponentsQuery,
+  getNodeColor,
+  getNodeValue,
+  getProjectsQuery,
+} from '../../helpers/GraphHelper';
 import Details from '../Details/Details';
 import Dropdown from '../Dropdown/Dropdown';
 import ImportForm from '../Import/ImportForm';
@@ -14,16 +20,16 @@ import Sidebar from './Sidebar';
 const defaultGraphConfig: GraphConfig = {
   zoomLevel: 1,
   color: getNodeColor,
-  label: "id",
+  label: 'id',
   linkDirectionalArrowLength: 5,
   linkDirectionalRelPos: 1,
   linkLength: 10,
-  nodeVal: getNodeValue
-}
+  nodeVal: getNodeValue,
+};
 
 const Workspace = () => {
   const [node, setNode] = useState(undefined);
-  const [graphConfig, setGraphConfig ] = useState<GraphConfig>(defaultGraphConfig)
+  const [graphConfig, setGraphConfig] = useState<GraphConfig>(defaultGraphConfig);
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [selectedProject, setSelectedProject] = useState<string | undefined>();
   const [getGraphData, { loading, error, data }] = useLazyQuery(getAllComponentsQuery);
@@ -52,26 +58,41 @@ const Workspace = () => {
   }, [selectedProject]);
 
   const handleNodeClick = (node) => {
-    setNode(node)
-  }
+    setNode(node);
+  };
 
   const handleVuln = async () => {
     const res = await fetch('http://localhost:3000/api/vuln');
     console.log(res);
   };
 
+  const handleSelectedSearchResult = (object) => {
+    setNode(object);
+  };
+
   const handleNodeValToggle = (e) => {
-    console.log(e)
-    if (typeof(graphConfig.nodeVal) === "function") {
-      setGraphConfig({...graphConfig, nodeVal: 1})
-      console.log(graphConfig)
+    console.log(e);
+    if (typeof graphConfig.nodeVal === 'function') {
+      setGraphConfig({ ...graphConfig, nodeVal: 1 });
+      console.log(graphConfig);
     } else {
-      setGraphConfig({...graphConfig, nodeVal: getNodeValue})
+      setGraphConfig({ ...graphConfig, nodeVal: getNodeValue });
     }
-  }
-  // const handleRefetch = async () => {
-  //   refetch();
-  // };
+  };
+
+  const paintRing = useCallback(
+    (currNode, ctx) => {
+      if (node) {
+        // add ring just for highlighted nodes
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.size | 1, 0, 2 * Math.PI, false);
+        ctx.fillStyle = currNode === node ? 'red' : 'orange';
+        ctx.fill();
+      }
+    },
+    [node]
+  );
+
   if (projectsLoading) return <Loading details="Loading projects" />;
   if (!selectedProject) return <ImportForm />;
   return (
@@ -79,18 +100,25 @@ const Workspace = () => {
       <Row className="workspace-main">
         <Sidebar>
           <Container fluid id="control">
-            <Search />
+            <Search objects={graphData.nodes} searchResultCallback={(obj) => handleSelectedSearchResult(obj)} />
 
             <Dropdown title="Project" options={projects.projects} onChange={(e) => setSelectedProject(e)} />
-            
+
             <Form>
-              <Form.Check type="switch"
-              label="Size by depCount"
-              onChange={(e) => {handleNodeValToggle(e)}}
-              value={1}
+              <Form.Check
+                type="switch"
+                label="Size by depCount"
+                onChange={(e) => {
+                  handleNodeValToggle(e);
+                }}
+                value={1}
               />
             </Form>
-            <Form.Range onChange={(e) => {setGraphConfig({...graphConfig, linkLength: parseInt(e.target.value, 10)})}}/>
+            <Form.Range
+              onChange={(e) => {
+                setGraphConfig({ ...graphConfig, linkLength: parseInt(e.target.value, 10) });
+              }}
+            />
             <Button
               onClick={() => {
                 handleVuln();
@@ -113,7 +141,16 @@ const Workspace = () => {
             <Details data={node} />
           </Row>
         </Sidebar>
-        {!loading && <GraphContainer isLoading={loading} graphData={graphData} onNodeClick={(node) => handleNodeClick(node)} graphConfig={graphConfig} />}
+        {!loading && (
+          <GraphContainer
+            nodeCanvasObject={paintRing}
+            selectedNode={node}
+            isLoading={loading}
+            graphData={graphData}
+            onNodeClick={(node) => handleNodeClick(node)}
+            graphConfig={graphConfig}
+          />
+        )}
       </Row>
     </Container>
   );

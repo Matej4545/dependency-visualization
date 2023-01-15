@@ -1,26 +1,43 @@
-import { forceCollide, forceManyBody, forceX, forceY } from "d3-force";
-import { useEffect, useRef } from "react";
-import ReactForceGraph2d, { ForceGraphMethods } from "react-force-graph-2d";
+import { forceCollide, forceManyBody, forceX, forceY } from 'd3-force';
+import { useCallback, useEffect, useRef } from 'react';
+import ReactForceGraph2d, { ForceGraphMethods } from 'react-force-graph-2d';
 
 export default function NoSSRGraph(props) {
   const graphRef = useRef<ForceGraphMethods>();
 
-  // useEffect(() => {
-  //   const r = graphRef.current;
-  //   r.zoomToFit();
-  //   r.d3Force("collide", forceCollide(4));
-  //   r.d3Force("x", forceX());
-  //   r.d3Force("y", forceY());
-  //   r.d3Force("link")
-  //     .distance(
-  //       (link) => 1 * (props.linkLength || 1)
-  //     )
-  //     // .distance((link) => 1000)
-  //     .strength(1);
-  //   r.d3Force("charge", forceManyBody().strength(-70));
-  // }, []);
+  useEffect(() => {
+    const r = graphRef.current;
+    if (props.selectedNode) {
+      console.log(props.selectedNode);
+      r.centerAt(props.selectedNode.x, props.selectedNode.y, 500);
+      const zoom_level = 50 / (props.selectedNode.dependsOnCount || 30);
+      graphRef.current.zoom(zoom_level, 500);
+    }
+    r.d3Force(
+      'collide',
+      forceCollide(10)
+        .radius((node) => node.size | 1)
+        .strength(0.1)
+    );
+    r.d3Force('x', forceX());
+    r.d3Force('y', forceY());
+    r.d3Force('link')
+      .distance((link) => link.source.size + link.target.size + props.linkLength)
+      .strength(1);
+    r.d3Force('charge', forceManyBody().strength(-50));
+  }, [props, graphRef]);
 
-  return <ReactForceGraph2d {...props} />;
+  return (
+    <ReactForceGraph2d
+      {...props}
+      ref={graphRef}
+      // nodePointerAreaPaint={(node, color, ctx) => {
+      //   ctx.fillStyle = color;
+      //   const bckgDimensions = 1;
+      //   bckgDimensions && ctx.fillRect(5, 5, 10, 10);
+      // }}
+    />
+  );
 }
 // const my_map = (value, x1, y1, x2, y2) =>
 //   ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;

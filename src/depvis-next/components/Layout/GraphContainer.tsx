@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import { Col } from "react-bootstrap";
-import { ForceGraphMethods } from "react-force-graph-2d";
-import { getNodeColor, getNodeValue } from "../../helpers/GraphHelper";
-import { GraphConfig } from "../Graph/GraphConfig";
-import NoSSRGraphWrapper from "../Graph/NoSSRGraphWrapper";
-import Loading from "../Loading/Loading";
+import { useEffect, useRef, useState } from 'react';
+import { Col } from 'react-bootstrap';
+import { ForceGraphMethods } from 'react-force-graph-2d';
+import { getNodeColor, getNodeValue } from '../../helpers/GraphHelper';
+import { GraphConfig } from '../Graph/GraphConfig';
+import NoSSRGraphWrapper from '../Graph/NoSSRGraphWrapper';
+import Loading from '../Loading/Loading';
 const GraphContainer = (props) => {
   const [graphDimensions, setGraphDimensions] = useState({
     width: 0,
@@ -21,21 +21,20 @@ const GraphContainer = (props) => {
 
   useEffect(() => {
     setSize();
-    window.addEventListener("resize", setSize);
+    window.addEventListener('resize', setSize);
     return () => {
-      window.removeEventListener("resize", setSize);
+      window.removeEventListener('resize', setSize);
     };
   }, []);
 
+  const graphConfig: GraphConfig = props.graphConfig;
 
-
-  const graphConfig : GraphConfig = props.graphConfig
   return (
     <Col className="workspace-graph-nospace" ref={graphContainerRef}>
       {props.isLoading && <Loading detail="Retrieving data from server" />}
       {!props.isLoading && (
         <NoSSRGraphWrapper
-          nodeCanvasObjectMode={() => "after"}
+          nodeCanvasObjectMode={() => 'after'}
           linkLength={graphConfig.linkLength}
           {...props}
           width={graphDimensions.width}

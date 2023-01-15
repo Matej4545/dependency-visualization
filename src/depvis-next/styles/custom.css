@@ -19,3 +19,8 @@
   border-right: 2px #dedede solid;
   overflow-x: hidden;
 }
+
+.search-results-container {
+  overflow-y: scroll;
+  max-height: 30rem;
+}
