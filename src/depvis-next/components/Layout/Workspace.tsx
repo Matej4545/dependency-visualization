@@ -16,6 +16,7 @@ import Search from '../Search/Search';
 import GraphContainer from './GraphContainer';
 import { GraphConfig } from '../Graph/GraphConfig';
 import Sidebar from './Sidebar';
+import ComponentDetails from '../Details/ComponentDetails';
 
 const defaultGraphConfig: GraphConfig = {
   zoomLevel: 1,
@@ -103,8 +104,9 @@ const Workspace = () => {
             <Search objects={graphData.nodes} searchResultCallback={(obj) => handleSelectedSearchResult(obj)} />
 
             <Dropdown title="Project" options={projects.projects} onChange={(e) => setSelectedProject(e)} />
-
+              <h5>Graph settings</h5>
             <Form>
+              <Form.Label>Size by number of dependencies</Form.Label>
               <Form.Check
                 type="switch"
                 label="Size by depCount"
@@ -114,11 +116,13 @@ const Workspace = () => {
                 value={1}
               />
             </Form>
+            <Form.Label>Length of links</Form.Label>
             <Form.Range
               onChange={(e) => {
                 setGraphConfig({ ...graphConfig, linkLength: parseInt(e.target.value, 10) });
               }}
             />
+            
             <Button
               onClick={() => {
                 handleVuln();
@@ -138,6 +142,9 @@ const Workspace = () => {
             </Button>
           </Container>
           <Row>
+            {node && <ComponentDetails componentId={node.id} projectId={selectedProject}/>}
+              <p></p>
+            <h6>Development info</h6>
             <Details data={node} />
           </Row>
         </Sidebar>
