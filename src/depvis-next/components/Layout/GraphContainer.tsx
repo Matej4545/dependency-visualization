@@ -42,7 +42,7 @@ const GraphContainer = (props) => {
           nodeColor={graphConfig.color}
           nodeVal={graphConfig.nodeVal}
           linkDirectionalArrowLength={graphConfig.linkDirectionalArrowLength}
-          linkDirectionalRelPos={1}
+          linkDirectionalArrowRelPos={graphConfig.linkDirectionalArrowLength}
           label={graphConfig.label}
         />
       )}

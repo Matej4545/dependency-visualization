@@ -1,6 +1,6 @@
 import { useLazyQuery, useQuery } from '@apollo/client';
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { Button, Container, Form, Row } from 'react-bootstrap';
+import { Button, Container, Form, Row, Stack } from 'react-bootstrap';
 import {
   formatData,
   getAllComponentsQuery,
@@ -17,13 +17,14 @@ import GraphContainer from './GraphContainer';
 import { GraphConfig } from '../Graph/GraphConfig';
 import Sidebar from './Sidebar';
 import ComponentDetails from '../Details/ComponentDetails';
+import VulnerabilityDetails from '../Details/VulnerabilityDetails';
 
 const defaultGraphConfig: GraphConfig = {
   zoomLevel: 1,
   color: getNodeColor,
   label: 'id',
   linkDirectionalArrowLength: 5,
-  linkDirectionalRelPos: 1,
+  linkDirectionalRelPos: 0,
   linkLength: 10,
   nodeVal: getNodeValue,
 };
@@ -100,53 +101,55 @@ const Workspace = () => {
     <Container fluid>
       <Row className="workspace-main">
         <Sidebar>
-          <Container fluid id="control">
-            <Search objects={graphData.nodes} searchResultCallback={(obj) => handleSelectedSearchResult(obj)} />
+          <Dropdown title="Selected project" options={projects.projects} onChange={(e) => setSelectedProject(e)} />
 
-            <Dropdown title="Project" options={projects.projects} onChange={(e) => setSelectedProject(e)} />
-              <h5>Graph settings</h5>
-            <Form>
-              <Form.Label>Size by number of dependencies</Form.Label>
+          <Search objects={graphData.nodes} searchResultCallback={(obj) => handleSelectedSearchResult(obj)} />
+
+          <Container id="control" className="px-0">
+            <h5>Graph settings</h5>
+            <Stack direction="horizontal">
+              <Form.Label>Size by dependencies</Form.Label>
               <Form.Check
+                className="ms-auto"
                 type="switch"
-                label="Size by depCount"
                 onChange={(e) => {
                   handleNodeValToggle(e);
                 }}
-                value={1}
+                checked={typeof graphConfig.nodeVal === 'function'}
               />
-            </Form>
+            </Stack>
             <Form.Label>Length of links</Form.Label>
             <Form.Range
               onChange={(e) => {
                 setGraphConfig({ ...graphConfig, linkLength: parseInt(e.target.value, 10) });
               }}
             />
-            
-            <Button
-              onClick={() => {
-                handleVuln();
-              }}
-            >
-              Update Vulnerabilities
-            </Button>
-            <Button
-              onClick={() => {
-                getGraphData({
-                  variables: { projectId: selectedProject },
-                  fetchPolicy: 'no-cache',
-                });
-              }}
-            >
-              Refetch graph
-            </Button>
+            <Stack gap={2}>
+              <Button
+                onClick={() => {
+                  handleVuln();
+                }}
+              >
+                Update Vulnerabilities
+              </Button>
+              <Button
+                onClick={() => {
+                  getGraphData({
+                    variables: { projectId: selectedProject },
+                    fetchPolicy: 'no-cache',
+                  });
+                }}
+              >
+                Refetch graph
+              </Button>
+            </Stack>
           </Container>
-          <Row>
-            {node && <ComponentDetails componentId={node.id} projectId={selectedProject}/>}
-              <p></p>
-            <h6>Development info</h6>
-            <Details data={node} />
-          </Row>
+          {node && node.__typename === 'Component' && (
+            <ComponentDetails componentId={node.id} projectId={selectedProject} />
+          )}
+          {node && node.__typename === 'Vulnerability' && <VulnerabilityDetails vulnerabilityId={node.id} />}
+
+          <Details data={node} title="Development details" />
         </Sidebar>
         {!loading && (
           <GraphContainer

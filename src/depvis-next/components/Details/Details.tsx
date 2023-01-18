@@ -1,23 +1,41 @@
-import { isArray } from '@apollo/client/cache/inmemory/helpers';
-import { Container, Table } from 'react-bootstrap';
+import { useState } from 'react';
+import { Button, Col, Collapse, Container, Row, Stack, Table } from 'react-bootstrap';
 
 export default function Details(props) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Container className="my-1">
-      <h5>{props.title}</h5>
-      <Table bordered hover className={props.className || ''}>
-        <tbody>
-          {props.data &&
-            Object.entries(props.data).map(([key, value]) => (
-              <tr>
-                <td>
-                  <b>{key}</b>
-                </td>
-                <td>{typeof value === 'object' ? JSON.stringify(value) : (value as String)}</td>
-              </tr>
-            ))}
-        </tbody>
-      </Table>
+    <Container className="">
+      <Stack direction="horizontal">
+        <h5>{props.title}</h5>
+
+        <Button
+          className="ms-auto"
+          variant="outline-secondary"
+          onClick={() => {
+            setOpen(!open);
+          }}
+        >
+          Expand
+        </Button>
+      </Stack>
+      <Collapse in={open}>
+        <Table bordered hover className={props.className || ''}>
+          <tbody>
+            {props.data &&
+              Object.entries(props.data).map(([key, value]) => (
+                <tr>
+                  <td style={{ wordBreak: 'break-all' }}>
+                    <b>{key}</b>
+                  </td>
+                  <td style={{ wordBreak: 'break-all' }}>
+                    {typeof value === 'object' ? JSON.stringify(value) : (value as String)}
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </Table>
+      </Collapse>
     </Container>
   );
 }

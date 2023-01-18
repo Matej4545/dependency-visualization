@@ -1,17 +1,17 @@
-import { PackageURL } from "packageurl-js";
-import { useState } from "react";
-import { Button, Col, Container, Row, Stack } from "react-bootstrap";
-import { ParsePurl } from "../components/Toolbox/ParsePurl";
+import { PackageURL } from 'packageurl-js';
+import { useState } from 'react';
+import { Button, Col, Container, Row, Stack } from 'react-bootstrap';
+import { ParsePurl } from '../components/Toolbox/ParsePurl';
 
 const Toolbox = () => {
-  const [purlString, setPurlString] = useState("");
-  const [purlOutput, setPurlOutput] = useState("");
+  const [purlString, setPurlString] = useState('');
+  const [purlOutput, setPurlOutput] = useState('');
   const handlePurl = async () => {
     setPurlOutput(await JSON.stringify(PackageURL.fromString(purlString)));
     console.log(purlOutput);
   };
   const handleVuln = async () => {
-    const res = await fetch("http://localhost:3000/api/vuln");
+    const res = await fetch('http://localhost:3000/api/vuln');
     console.log(res);
   };
   return (
