@@ -1,11 +1,13 @@
 import { gql, useQuery } from '@apollo/client';
 import { Container } from 'react-bootstrap';
+import { GetComponentRepositoryURL } from '../../helpers/WorkspaceHelper';
 import Loading from '../Loading/Loading';
 
 const getComponentDetailsQuery = gql`
   query componentDetails($componentPurl: String, $projectId: ID) {
     components(where: { purl: $componentPurl, project_SINGLE: { id: $projectId } }) {
       name
+      purl
       author
       version
       dependsOnCount
@@ -28,6 +30,10 @@ const ComponentDetails = (props) => {
       </span>
       <br />
       <span>
+        <b>PURL:</b> {data.components[0].purl}
+      </span>
+      <br />
+      <span>
         <b>Version:</b> {data.components[0].version}
       </span>
       <br />
@@ -38,7 +44,10 @@ const ComponentDetails = (props) => {
       <span>
         <b>Dependencies:</b> {data.components[0].dependsOnCount}
       </span>
-
+      <br />
+        <span>
+            Link: <a href={GetComponentRepositoryURL(data.components[0].purl)} target="_blank">Repository</a>
+        </span>
       <br />
     </Container>
   );
