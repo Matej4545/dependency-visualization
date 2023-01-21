@@ -1,54 +1,71 @@
-import { gql, useQuery } from '@apollo/client';
-import { Container } from 'react-bootstrap';
-import { GetComponentRepositoryURL } from '../../helpers/WorkspaceHelper';
-import Loading from '../Loading/Loading';
+import { gql, useQuery } from "@apollo/client";
+import { Container } from "react-bootstrap";
+import { GetComponentRepositoryURL } from "../../helpers/WorkspaceHelper";
+import Loading from "../Loading/Loading";
+import { DL, DLItem } from "./DescriptionList";
 
 const getComponentDetailsQuery = gql`
   query componentDetails($componentPurl: String, $projectId: ID) {
-    components(where: { purl: $componentPurl, project_SINGLE: { id: $projectId } }) {
+    components(
+      where: { purl: $componentPurl, project_SINGLE: { id: $projectId } }
+    ) {
       name
       purl
       author
+      publisher
       version
       dependsOnCount
+      vulnerabilities {
+        id
+      }
     }
   }
 `;
 const ComponentDetails = (props) => {
   const { componentId, projectId } = props;
-  const { data, loading } = useQuery(getComponentDetailsQuery, {
+  const { data, loading, error } = useQuery(getComponentDetailsQuery, {
     variables: { componentPurl: componentId, projectId: projectId },
   });
 
+  const renderLink = () => {
+    const link = GetComponentRepositoryURL(data.components[0].purl);
+    return (
+      <a href={link} target="_blank">
+        {link}
+      </a>
+    );
+  };
   if (loading) return <Loading />;
-  if (!data.components[0]) return <b>No data found!</b>;
+  if (!data.components[0]) {
+    console.error(
+      "No data found when querying backend! Below is Apollo query result"
+    );
+    console.error({ data: data, error: error });
+    return <b>No data found!</b>;
+  }
+  const component = data.components[0];
   return (
-    <Container style={{ wordBreak: 'break-all' }} className="px-0">
-      <h5>Component details</h5>
-      <span>
-        <b>Name:</b> {data.components[0].name}
-      </span>
-      <br />
-      <span>
-        <b>PURL:</b> {data.components[0].purl}
-      </span>
-      <br />
-      <span>
-        <b>Version:</b> {data.components[0].version}
-      </span>
-      <br />
-      <span>
-        <b>Author:</b> {data.components[0].author}
-      </span>
-      <br />
-      <span>
-        <b>Dependencies:</b> {data.components[0].dependsOnCount}
-      </span>
-      <br />
-        <span>
-            Link: <a href={GetComponentRepositoryURL(data.components[0].purl)} target="_blank">Repository</a>
-        </span>
-      <br />
+    <Container style={{ wordBreak: "break-all" }} className="px-0">
+      <h4 className="pb-3">
+        <b>{component.name}</b>
+      </h4>
+      <DL>
+        <DLItem label="Version" value={component.version} />
+        <DLItem label="Author" value={component.author} />
+        <DLItem label="Publisher" value={component.publisher} />
+        <DLItem label="Purl" value={component.purl} />
+        <DLItem
+          label="Number of dependencies"
+          value={component.dependsOnCount}
+        />
+        <DLItem
+          label="Vulnerabilities"
+          value={component.vulnerabilities.map((v) => (
+            <p>{v.id}</p>
+          ))}
+        />
+        <DLItem label="External resources" value={renderLink()} />
+      </DL>
     </Container>
   );
 };
