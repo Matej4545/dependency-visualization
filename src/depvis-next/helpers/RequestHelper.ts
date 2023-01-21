@@ -4,17 +4,11 @@
  * @param config Standard request config. Same as with Fetch API
  * @returns Boolean status + json response data if available
  */
-export async function request(
-  url: string,
-  config: RequestInit = {}
-): Promise<any> {
+export async function request(url: string, config: RequestInit = {}): Promise<any> {
+  console.log('Response to %s with config\n%s', url, config);
   const response = await fetch(url, config);
   if (!response.ok) {
-    console.error(
-      "Response from %s returned status code %d",
-      url,
-      response.status
-    );
+    console.error('Response from %s returned status code %d', url, response.status);
     return { json: undefined, status: response.ok };
   }
   return { json: await response.json(), status: response.ok };

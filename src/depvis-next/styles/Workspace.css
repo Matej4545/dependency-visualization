@@ -1,0 +1,31 @@
+.workspace {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.sidebarContainer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  padding: 0;
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+
+.graph {
+  flex: 1 1 auto;
+  flex-basis: 0;
+  flex-grow: 999;
+  min-inline-size: 50%;
+  border: 1px black solid;
+  overflow: hidden;
+}
+
+.bordery {
+  border: 1px rgb(175, 164, 15) solid;
+}
+
+.borderr {
+  border: 1px rgb(139, 13, 13) solid;
+}

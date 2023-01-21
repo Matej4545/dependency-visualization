@@ -1,4 +1,4 @@
-import { gql } from "apollo-server-micro";
+import { gql } from 'apollo-server-micro';
 
 /**
  * Type definition for GraphQL server
@@ -7,12 +7,13 @@ import { gql } from "apollo-server-micro";
 export const typeDefs = gql`
   type Component {
     id: ID @id
+    project: [Project!]! @relationship(type: "BELONGS_TO", direction: OUT)
     purl: String
     name: String
     type: String
     version: String
     author: String
-    pubisher: String
+    publisher: String
     dependsOnCount: Int
       @cypher(
         statement: """
@@ -22,10 +23,8 @@ export const typeDefs = gql`
         """
       )
     dependsOn: [Component!]! @relationship(type: "DEPENDS_ON", direction: OUT)
-    references: [Reference!]!
-      @relationship(type: "HAS_REFERENCE", direction: OUT)
-    vulnerabilities: [Vulnerability!]!
-      @relationship(type: "HAS_VULNERABILITY", direction: OUT)
+    references: [Reference!]! @relationship(type: "HAS_REFERENCE", direction: OUT)
+    vulnerabilities: [Vulnerability!]! @relationship(type: "HAS_VULNERABILITY", direction: OUT)
   }
 
   type Vulnerability {
@@ -38,8 +37,7 @@ export const typeDefs = gql`
     cvssScore: Float
     cvssVector: String
     cwe: String
-    references: [Reference!]!
-      @relationship(type: "HAS_REFERENCE", direction: OUT)
+    references: [Reference!]! @relationship(type: "HAS_REFERENCE", direction: OUT)
   }
 
   type Project {
