@@ -1,6 +1,7 @@
 import { useLazyQuery, useQuery } from "@apollo/client";
 import { useCallback, useEffect, useState } from "react";
 import { Container, Row } from "react-bootstrap";
+import urlJoin from "url-join";
 import {
   formatData,
   getAllComponentsQuery,
@@ -8,6 +9,7 @@ import {
   getNodeValue,
   getProjectsQuery,
 } from "../../helpers/GraphHelper";
+import { getAPIBaseUrl } from "../../helpers/RequestHelper";
 import ComponentDetails from "../Details/ComponentDetails";
 import Details from "../Details/Details";
 import VulnerabilityDetails from "../Details/VulnerabilityDetails";
@@ -71,7 +73,7 @@ const Workspace = () => {
   };
 
   const handleVuln = async () => {
-    const res = await fetch("http://localhost:3000/api/vuln");
+    const res = await fetch(urlJoin(getAPIBaseUrl(), "/api/vuln"));
     console.log(res);
   };
 

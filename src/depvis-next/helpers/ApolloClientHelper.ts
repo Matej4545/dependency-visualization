@@ -1,13 +1,14 @@
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
+import urlJoin from "url-join";
 import { gqlUrlPath } from "../pages/api/graphql";
+import { getAPIBaseUrl } from "./RequestHelper";
 
 /**
  * Function responsible for initialization of new Apollo Client used for GraphQL
  * @returns ApolloClient object
  */
 export const createApolloClient = () => {
-  let baseUrl = process.env.API_URL || "http://localhost:3000/";
-  const uri = new URL(gqlUrlPath, baseUrl).href;
+  const uri = urlJoin(getAPIBaseUrl(), gqlUrlPath);
   const link = new HttpLink({
     uri: uri,
   });
