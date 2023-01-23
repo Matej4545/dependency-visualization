@@ -2,10 +2,10 @@ import { gql } from '@apollo/client';
 
 export const formatData = (data) => {
   const nodes = [];
-  const links = [];
-  if (!data || !data.projects || !data.projects[0].allComponents) return { nodes, links };
-  const componentsCount = data.projects[0].allComponents.length / 20;
-  data.projects[0].allComponents.forEach((c) => {
+  let links = [];
+  if (!data || !data.projects || !data.projects[0].allVulnerableComponents) return { nodes, links };
+  const componentsCount = data.projects[0].allVulnerableComponents.length / 20;
+  data.projects[0].allVulnerableComponents.forEach((c) => {
     nodes.push({
       id: c.purl,
       name: c.name,
@@ -19,6 +19,7 @@ export const formatData = (data) => {
           source: c.purl,
           target: d.purl,
           sourceDependsOnCount: c.dependsOnCount,
+          toVuln: false,
         });
       });
     }
@@ -27,6 +28,7 @@ export const formatData = (data) => {
         links.push({
           source: c.purl,
           target: v.id,
+          toVuln: true,
         });
         nodes.push({
           size: 1 + v.cvssScore,
@@ -52,6 +54,11 @@ export const formatData = (data) => {
       });
     }
   });
+  //Filter out links that are not connected
+  links = links.filter((l) => {
+    console.log(l);
+    if (l.toVuln || nodes.find((n) => n.id === l.target)) return true;
+  });
   console.log({ node: nodes, links: links });
   return { nodes, links };
 };
@@ -59,7 +66,7 @@ export const formatData = (data) => {
 export const getAllComponentsQuery = gql`
   query getProjectComponents($projectId: ID) {
     projects(where: { id: $projectId }) {
-      allComponents {
+      allVulnerableComponents {
         id
         name
         version
