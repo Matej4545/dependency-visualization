@@ -25,6 +25,15 @@ export const typeDefs = gql`
     dependsOn: [Component!]! @relationship(type: "DEPENDS_ON", direction: OUT)
     references: [Reference!]! @relationship(type: "HAS_REFERENCE", direction: OUT)
     vulnerabilities: [Vulnerability!]! @relationship(type: "HAS_VULNERABILITY", direction: OUT)
+    indirectVulnCount: Int
+      @cypher(
+        statement: """
+        MATCH (v:Vulnerability)
+        CALL apoc.algo.dijkstra(this,v, "DEPENDS_ON>|HAS_VULNERABILITY>", "count",1)
+        YIELD weight
+        RETURN count(weight)
+        """
+      )
   }
 
   type Vulnerability {
@@ -51,6 +60,17 @@ export const typeDefs = gql`
         WITH collect(c) + collect(c2) as all
         UNWIND all as single
         RETURN  distinct single
+        """
+      )
+    allVulnerableComponents: [Component!]!
+      @cypher(
+        statement: """
+        MATCH a=(v:Vulnerability)<-[:HAS_VULNERABILITY]-(c1:Component)<-[:DEPENDS_ON*]-(c2)<-[:DEPENDS_ON]-(this)
+        WITH NODES(a) AS nodes
+        UNWIND nodes AS n
+        WITH n
+        WHERE 'Component' IN LABELS(n)
+        RETURN distinct n;
         """
       )
     component: [Component!]! @relationship(type: "DEPENDS_ON", direction: OUT)
