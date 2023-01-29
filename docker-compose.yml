@@ -22,21 +22,20 @@ services:
   redis-cache:
     image: redis:alpine
     restart: unless-stopped
-    ports: 
+    ports:
       - 6379:6379
     command: redis-server --save 20 1 --loglevel notice
-    volumes: 
+    volumes:
       - cache:/data
+  depvis-next:
+    depends_on:
+      - neo4j
+      - redis-cache
+    build: ./src/depvis-next
+    image: depvis-next:latest
+    ports:
+      - 80:3000
+    restart: always
 volumes:
   cache:
     driver: local
-
-  # depvis-next:
-  #   depends_on:
-  #     - neo4j
-  #   build: ./src/depvis-next
-  #   image: depvis-next:latest
-  #   ports:
-  #     - 80:80
-  #     - 443:443
-  #   restart: always

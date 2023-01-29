@@ -4,6 +4,7 @@ const nextConfig = {
   // See https://github.com/vasturiano/react-force-graph/issues/390 for more details
   reactStrictMode: false,
   swcMinify: true,
+  output: 'standalone',
 };
 
 module.exports = nextConfig;
