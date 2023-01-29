@@ -1,10 +1,10 @@
-import Bull from "bull";
-import { VulnFetcherHandler } from "../vulnerability-mgmt/VulnFetcherHandler";
-export const GetVulnQueueName = "get-vuln-queue";
+import Bull from 'bull';
+import { VulnFetcherHandler } from '../vulnerability-mgmt/VulnFetcherHandler';
+export const GetVulnQueueName = 'get-vuln-queue';
 
-export const GetVulnQueueOptions = {
+export const GetVulnQueueOptions: Bull.QueueOptions = {
   redis: {
-    port: process.env.REDIS_PORT,
+    port: parseInt(process.env.REDIS_PORT, 10),
     host: process.env.REDIS_HOST,
     password: process.env.REDIS_PASSWORD,
   },

@@ -1,25 +1,23 @@
-import { Neo4jGraphQL } from "@neo4j/graphql";
-import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
-import { ApolloServer } from "apollo-server-micro";
-import neo4j from "neo4j-driver";
-import { env } from "process";
-import { typeDefs } from "../../types/gqlTypes";
+import { Neo4jGraphQL } from '@neo4j/graphql';
+import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
+import { ApolloServer } from 'apollo-server-micro';
+import neo4j from 'neo4j-driver';
+import { env } from 'process';
+import { typeDefs } from '../../types/gqlTypes';
 
-export const gqlUrlPath = "/api/graphql";
-const IsGQLDevToolsEnabled = env.GQL_ALLOW_DEV_TOOLS === "true";
+export const gqlUrlPath = '/api/graphql';
+const IsGQLDevToolsEnabled = env.GQL_ALLOW_DEV_TOOLS === 'true';
 
 /**
  * Neo4j configuration settings
  * Use .env file to provide custom values!
  */
 const NEO4J_CONFIG = {
-  neo4jHost: env.NEO4J_HOST || "neo4j://localhost:7687",
-  neo4jUsername: env.NEO4J_USER || "neo4j",
-  neo4jPassword: env.NEO4J_PASSWORD || "",
+  neo4jHost: env.NEO4J_HOST || 'neo4j://localhost:7687',
+  neo4jUsername: env.NEO4J_USER || 'neo4j',
+  neo4jPassword: env.NEO4J_PASSWORD || '',
   introspection: IsGQLDevToolsEnabled,
-  plugins: IsGQLDevToolsEnabled
-    ? [ApolloServerPluginLandingPageGraphQLPlayground]
-    : [],
+  plugins: IsGQLDevToolsEnabled ? [ApolloServerPluginLandingPageGraphQLPlayground] : [],
 };
 
 const driver = neo4j.driver(

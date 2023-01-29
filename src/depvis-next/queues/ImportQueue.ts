@@ -1,11 +1,11 @@
-import Bull from "bull";
-import { ImportSbom } from "../helpers/ImportSbomHelper";
+import Bull from 'bull';
+import { ImportSbom } from '../helpers/ImportSbomHelper';
 
-export const ImportQueueName = "import-queue";
+export const ImportQueueName = 'import-queue';
 
-export const ImportQueueOptions = {
+export const ImportQueueOptions: Bull.QueueOptions = {
   redis: {
-    port: process.env.REDIS_PORT,
+    port: parseInt(process.env.REDIS_PORT, 10),
     host: process.env.REDIS_HOST,
     password: process.env.REDIS_PASSWORD,
   },
