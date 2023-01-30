@@ -24,7 +24,7 @@ export default function Details(props) {
           <tbody>
             {props.data &&
               Object.entries(props.data).map(([key, value]) => (
-                <tr>
+                <tr key={key}>
                   <td style={{ wordBreak: 'break-all' }}>
                     <b>{key}</b>
                   </td>

@@ -11,7 +11,7 @@ const Toolbox = () => {
     console.log(purlOutput);
   };
   const handleVuln = async () => {
-    const res = await fetch('http://localhost:3000/api/vuln');
+    const res = await fetch('/api/vuln');
     console.log(res);
   };
   return (

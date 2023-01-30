@@ -1,3 +1,5 @@
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 /**
  * Function wrapper for better Fetch request support
  * @param url target URL where request will be sent
@@ -12,4 +14,11 @@ export async function request(url: string, config: RequestInit = {}): Promise<an
     return { json: undefined, status: response.ok };
   }
   return { json: await response.json(), status: response.ok };
+}
+
+export function getAPIBaseUrl() {
+  if (!API_URL) {
+    throw Error('No API base URL!');
+  }
+  return API_URL;
 }
