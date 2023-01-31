@@ -75,7 +75,7 @@ async function parseXml(inputXml: string) {
 
   //Clear vuln queue
   emptyQueue(GetVulnQueue);
-  const job = await ImportQueue.add({ bom: xmlParsed.bom });
-  return { jobId: job.id };
-  //return await ImportSbom(xmlParsed.bom);
+  // const job = await ImportQueue.add({ bom: xmlParsed.bom });
+  // return { jobId: job.id };
+  return await ImportSbom(xmlParsed.bom);
 }

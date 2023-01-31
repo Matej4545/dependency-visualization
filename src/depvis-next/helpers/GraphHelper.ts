@@ -1,11 +1,16 @@
 import { gql } from '@apollo/client';
 
-export const formatData = (data) => {
+/**
+ * Function responsible for transforming the data to format that can be visualized
+ * @param components List of components
+ * @returns Object containing list of nodes and links
+ */
+export const formatData = (components) => {
   const nodes = [];
   let links = [];
-  if (!data || !data.projects || !data.projects[0].allVulnerableComponents) return { nodes, links };
-  const componentsCount = data.projects[0].allVulnerableComponents.length / 20;
-  data.projects[0].allVulnerableComponents.forEach((c) => {
+  if (!components) return { nodes, links };
+  const componentsCount = components.length / 20;
+  components.forEach((c) => {
     nodes.push({
       id: c.purl,
       name: c.name,
@@ -67,6 +72,29 @@ export const getAllComponentsQuery = gql`
   query getProjectComponents($projectId: ID) {
     projects(where: { id: $projectId }) {
       allVulnerableComponents {
+        id
+        name
+        version
+        __typename
+        purl
+        dependsOnCount
+        dependsOn {
+          purl
+        }
+        vulnerabilities {
+          __typename
+          id
+          cve
+          name
+          description
+          cvssScore
+          references {
+            __typename
+            url
+          }
+        }
+      }
+      allComponents {
         id
         name
         version

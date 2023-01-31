@@ -28,6 +28,7 @@ const defaultGraphConfig: GraphConfig = {
   linkDirectionalRelPos: 0,
   linkLength: 10,
   nodeVal: getNodeValue,
+  showOnlyVulnerable: false,
 };
 
 const Workspace = () => {
@@ -48,7 +49,7 @@ const Workspace = () => {
 
   useEffect(() => {
     if (data) {
-      setGraphData(formatData(data));
+      setGraphData(formatData(data.projects[0].allComponents));
     }
   }, [data]);
   useEffect(() => {
@@ -59,14 +60,20 @@ const Workspace = () => {
       getGraphData({ variables: { projectId: selectedProject } });
     }
   }, [selectedProject]);
+  useEffect(() => {
+    handleShowOnlyVulnerableToggle();
+  }, [graphConfig]);
 
   const handleNodeClick = (node) => {
     setNode(node);
   };
 
-  const handleVuln = async () => {
-    const res = await fetch('/api/vuln');
-    console.log(res);
+  const handleShowOnlyVulnerableToggle = () => {
+    if (graphConfig.showOnlyVulnerable) {
+      setGraphData(formatData(data.projects[0].allVulnerableComponents));
+    } else {
+      setGraphData(formatData(data.projects[0].allComponents));
+    }
   };
 
   const handleSelectedSearchResult = (object) => {
