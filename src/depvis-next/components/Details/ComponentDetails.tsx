@@ -27,6 +27,7 @@ const ComponentDetails = (props) => {
 
   const renderLink = () => {
     const link = GetComponentRepositoryURL(data.components[0].purl);
+    if (!link) return;
     return (
       <a href={link} target="_blank" rel="noreferrer">
         {link}

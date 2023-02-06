@@ -1,15 +1,17 @@
-import { useState } from "react";
-import { Alert, Button, Container, Form } from "react-bootstrap";
-import { ImportResult } from "./ImportResult";
+import { useState } from 'react';
+import { Alert, Button, Container, Form } from 'react-bootstrap';
+import { ImportResult } from './ImportResult';
 
 const allowedExtensionsRegex = /(\.json|\.xml)$/i;
 
 const ImportForm = () => {
-  const [file, setFile] = useState<any>("");
-  const [preview, setPreview] = useState<string>("");
+  const [file, setFile] = useState<any>('');
+  const [preview, setPreview] = useState<string>('');
   const [validated, setValidated] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [jobId, setJobId] = useState(null);
+  const [projectName, setProjectName] = useState('');
+  const [projectVersion, setProjectVersion] = useState('1.0.0');
 
   const handleFiles = (e: any) => {
     const files = e.target.files;
@@ -17,8 +19,8 @@ const ImportForm = () => {
     const file = files[0];
     console.log(file);
     if (!allowedExtensionsRegex.exec(file.name)) {
-      alert("This extension is not allowed!");
-      setFile("");
+      alert('This extension is not allowed!');
+      setFile('');
       return;
     }
     setFile(file);
@@ -33,11 +35,16 @@ const ImportForm = () => {
     }
 
     setValidated(true);
-    console.log({ file: typeof file });
-    const res = await fetch("/api/import", {
-      body: await file.text(),
-      headers: { "Content-Type": "application/xml" },
-      method: "POST",
+    const body = {
+      projectName: projectName,
+      projectVersion: projectVersion,
+      sbom: await file.text(),
+    };
+    console.log(body);
+    const res = await fetch('/api/import', {
+      body: await JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
     });
     const json = await res.json();
     setJobId(json.jobId);
@@ -54,11 +61,35 @@ const ImportForm = () => {
   ) : (
     <Container fluid="xxs">
       <Container className="p-3">
-        <Alert variant="info">
-          All data currently stored in DB will be overwritten.
-        </Alert>
+        <Alert variant="info">All data currently stored in DB will be overwritten.</Alert>
         <Container className="w-50">
           <Form noValidate validated={validated}>
+            <Form.Group controlId="file">
+              <Form.Label>Project name</Form.Label>
+              <Form.Control
+                required
+                type="text"
+                placeholder="Project name"
+                onChange={(e) => {
+                  setProjectName(e.target.value);
+                }}
+                value={projectName}
+              ></Form.Control>
+              <Form.Control.Feedback type="invalid">Please select any XML / JSON file with SBOM.</Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group controlId="file">
+              <Form.Label>Project version</Form.Label>
+              <Form.Control
+                required
+                type="text"
+                placeholder="Project version"
+                onChange={(e) => {
+                  setProjectVersion(e.target.value);
+                }}
+                value={projectVersion}
+              ></Form.Control>
+              <Form.Control.Feedback type="invalid">Please select any XML / JSON file with SBOM.</Form.Control.Feedback>
+            </Form.Group>
             <Form.Group controlId="file">
               <Form.Label>SBOM File</Form.Label>
               <Form.Control
@@ -69,22 +100,12 @@ const ImportForm = () => {
                   handleFiles(e);
                 }}
               ></Form.Control>
-              <Form.Control.Feedback type="invalid">
-                Please select any XML / JSON file with SBOM.
-              </Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">Please select any XML / JSON file with SBOM.</Form.Control.Feedback>
             </Form.Group>
-            <Button
-              type="submit"
-              onClick={(e) => handleSubmit(e)}
-              className="my-3"
-            >
+            <Button type="submit" onClick={(e) => handleSubmit(e)} className="my-3">
               Submit form
             </Button>
-            <Button
-              variant="secondary"
-              onClick={(e) => handlePreview(e)}
-              className="mx-1"
-            >
+            <Button variant="secondary" onClick={(e) => handlePreview(e)} className="mx-1">
               Preview
             </Button>
           </Form>

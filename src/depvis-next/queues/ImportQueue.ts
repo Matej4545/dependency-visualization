@@ -1,22 +1,31 @@
-import Bull from 'bull';
+import { Worker } from 'bullmq';
 import { ImportSbom } from '../helpers/ImportSbomHelper';
+import { defaultBullConfig } from '../helpers/QueueHelper';
 
 export const ImportQueueName = 'import-queue';
 
-export const ImportQueueOptions: Bull.QueueOptions = {
-  redis: {
-    port: parseInt(process.env.REDIS_PORT, 10),
-    host: process.env.REDIS_HOST,
-    password: process.env.REDIS_PASSWORD,
-  },
-  limiter: { max: 2, duration: 3600 },
+export type ImportSbomJobData = {
+  projectName: string;
+  projectVersion: string;
+  sbom: string;
 };
 
-console.log(ImportQueueOptions);
-const ImportQueue = new Bull(ImportQueueName, ImportQueueOptions);
+const worker = new Worker(
+  ImportQueueName,
+  async (job) => {
+    const test = job.data;
+    console.log(test);
+    const res = ImportSbom(test.sbom, test.projectName, test.projectVersion);
+    return res;
+  },
+  defaultBullConfig
+);
 
-ImportQueue.process(async (job) => {
-  console.log('Starting processing job %s', job.id);
-  const res = ImportSbom(job.data.bom);
-  return res;
+worker.on('failed', (job, error) => {
+  console.log('Job %d failed with error %s', job.id, error.message);
+  console.error(error);
+});
+
+worker.on('completed', (job) => {
+  console.log('Job %d completed successfully!', job.id);
 });
