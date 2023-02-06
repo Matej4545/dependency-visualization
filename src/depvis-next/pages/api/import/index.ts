@@ -1,7 +1,7 @@
-import Bull from 'bull';
+import { Queue } from 'bullmq';
 import { XMLParser } from 'fast-xml-parser';
 import { ImportSbom } from '../../../helpers/ImportSbomHelper';
-import { emptyQueue } from '../../../helpers/QueueHelper';
+import { defaultBullConfig, emptyQueue } from '../../../helpers/QueueHelper';
 import { GetVulnQueueName } from '../../../queues/GetVulnQueue';
 import { ImportQueueName } from '../../../queues/ImportQueue';
 
@@ -20,23 +20,45 @@ const XMLParserOptions = {
 };
 
 //Bull queue
-const ImportQueue = new Bull(ImportQueueName);
-const GetVulnQueue = new Bull(GetVulnQueueName);
+const ImportQueue = new Queue(ImportQueueName, defaultBullConfig);
+const GetVulnQueue = new Queue(GetVulnQueueName, defaultBullConfig);
+
 type ImportResult = {
   isError: boolean;
   errorMessage?: string;
   jobId?: string;
+  sbom?: any;
+};
+
+type ImportRequestBody = {
+  projectName: string;
+  projectVersion: string;
+  sbom: string;
 };
 
 export default async function handler(req, res) {
   try {
-    if (req.headers['content-type'] !== 'application/xml') {
-      res.status(500).json({ error: "Content-type must be 'application/xml'" });
-      return;
+    // if (req.headers['content-type'] !== 'application/xml') {
+    //   res.status(500).json({ error: "Content-type must be 'application/xml'" });
+    //   return;
+    // }
+    const body = req.body as ImportRequestBody;
+    console.log('Recieved body: %s', body.projectName);
+    const result = await parseXml(body.sbom);
+    if (result.isError) {
+      console.log('Import failed with %s', result.errorMessage);
+      return res.status(400).json(result);
     }
-    //TODO: check if XML is even valid
-    const result = await parseXml(req.body);
-    return res.status(200).json(result);
+
+    //Clear vuln queue
+    emptyQueue(GetVulnQueue);
+    const job = await ImportQueue.add(body.projectName, {
+      bom: result.sbom,
+      projectName: body.projectName,
+      projectVersion: body.projectVersion,
+    });
+    const response: ImportResult = { jobId: job.id, isError: false };
+    return res.status(200).json(response);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'failed to load data', content: err });
@@ -45,37 +67,31 @@ export default async function handler(req, res) {
 
 // Function validates that object contains required properties
 function validateSbomXml(parsedXml): ImportResult {
-  const bom = parsedXml.bom;
-  if (!bom)
+  const sbom = parsedXml.bom;
+  if (!sbom)
     return {
       isError: true,
       errorMessage: "Validation failed - Missing 'bom' parameter in the file.",
     };
-  if (!bom.metadata)
+  if (!sbom.metadata)
     return {
       isError: true,
       errorMessage: "Validation failed - Missing 'metadata' parameter in the file.",
     };
-  if (!bom.components)
+  if (!sbom.components)
     return {
       isError: true,
       errorMessage: "Validation failed - Missing 'components' parameter in the file.",
     };
 
-  return { isError: false };
+  return { isError: false, sbom: sbom };
 }
 
 // Function takes XML in plain text and transforms it into object
 async function parseXml(inputXml: string) {
   const parser = new XMLParser(XMLParserOptions);
+  console.log('Input XML: %s', inputXml);
   const xmlParsed = parser.parse(inputXml);
 
-  const validateResult = validateSbomXml(xmlParsed);
-  if (validateResult.isError) return validateResult;
-
-  //Clear vuln queue
-  emptyQueue(GetVulnQueue);
-  const job = await ImportQueue.add({ bom: xmlParsed.bom });
-  return { jobId: job.id };
-  //return await ImportSbom(xmlParsed.bom);
+  return validateSbomXml(xmlParsed);
 }

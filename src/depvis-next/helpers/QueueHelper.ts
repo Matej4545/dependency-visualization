@@ -1,6 +1,8 @@
+import { Queue } from 'bullmq';
+
 const getKeys = async (q) => {
   const multi = q.multi();
-  multi.keys("*");
+  multi.keys('*');
   const keys = await multi.exec();
   return keys[0][1];
 };
@@ -16,9 +18,19 @@ const deleteKeys = async (q, keys) => {
   await multi.exec();
 };
 
-export const emptyQueue = async (q) => {
-  const keys = await getKeys(q);
-  const queueKeys = filterQueueKeys(q, keys);
-  await deleteKeys(q, queueKeys);
-  console.log(`Queue ${q.name} is empty`);
+export const emptyQueue = async (q: Queue) => {
+  q.drain();
+  // const keys = await getKeys(q);
+  // const queueKeys = filterQueueKeys(q, keys);
+  // await deleteKeys(q, queueKeys);
+  // console.log(`Queue ${q.name} is empty`);
+};
+
+export const defaultBullConfig = {
+  connection: {
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    password: process.env.REDIS_PASSWORD,
+    enableOfflineQueue: false,
+  },
 };
