@@ -3,7 +3,7 @@ import { XMLParser } from 'fast-xml-parser';
 import { ImportSbom } from '../../../helpers/ImportSbomHelper';
 import { defaultBullConfig, emptyQueue } from '../../../helpers/QueueHelper';
 import { GetVulnQueueName } from '../../../queues/GetVulnQueue';
-import { ImportQueueName } from '../../../queues/ImportQueue';
+import { ImportQueueName, ImportSbomJobData } from '../../../queues/ImportQueue';
 
 export const config = {
   api: {
@@ -53,10 +53,10 @@ export default async function handler(req, res) {
     //Clear vuln queue
     emptyQueue(GetVulnQueue);
     const job = await ImportQueue.add(body.projectName, {
-      bom: result.sbom,
+      sbom: result.sbom,
       projectName: body.projectName,
       projectVersion: body.projectVersion,
-    });
+    } as ImportSbomJobData);
     const response: ImportResult = { jobId: job.id, isError: false };
     return res.status(200).json(response);
   } catch (err) {

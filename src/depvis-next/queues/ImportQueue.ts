@@ -4,10 +4,18 @@ import { defaultBullConfig } from '../helpers/QueueHelper';
 
 export const ImportQueueName = 'import-queue';
 
+export type ImportSbomJobData = {
+  projectName: string;
+  projectVersion: string;
+  sbom: string;
+};
+
 const worker = new Worker(
   ImportQueueName,
   async (job) => {
-    const res = ImportSbom(job.data.bom);
+    const test = job.data;
+    console.log(test);
+    const res = ImportSbom(test.sbom, test.projectName, test.projectVersion);
     return res;
   },
   defaultBullConfig

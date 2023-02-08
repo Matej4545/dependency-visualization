@@ -9,7 +9,7 @@ import {
   UpdateProjectDependencies,
 } from './DbDataHelper';
 
-export async function ImportSbom(bom: any) {
+export async function ImportSbom(bom: any, projectName, projectVersion) {
   // Prepare main component if exists
   const mainComponentParsed = bom.metadata.component;
   const mainComponent: Component | undefined = mainComponentParsed
@@ -25,10 +25,11 @@ export async function ImportSbom(bom: any) {
 
   // Prepare project
   let project: Project = {
-    name: bom.metadata.component.name,
-    version: bom.metadata.component.version || 'n/a',
+    name: projectName || bom.metadata.component.name,
+    version: projectVersion || bom.metadata.component.version || '1.0.0',
     date: bom.metadata.timestamp || '1970-01-01',
   };
+  console.log(project);
 
   // Prepare dependencies
   let dependencies = GetDependencies(bom.dependencies.dependency);
