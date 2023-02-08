@@ -1,4 +1,5 @@
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
+import urlJoin from 'url-join';
 import { gqlUrlPath } from '../pages/api/graphql';
 
 /**
@@ -6,9 +7,13 @@ import { gqlUrlPath } from '../pages/api/graphql';
  * @returns ApolloClient object
  */
 export const createApolloClient = () => {
-  const uri = gqlUrlPath;
+  const uri = urlJoin(process.env.NEXT_PUBLIC_SERVER_URI || 'http://localhost:3000', gqlUrlPath);
+  console.log(`Creating GQL Client (connection to ${uri})`);
   const link = new HttpLink({
     uri: uri,
+    fetchOptions: {
+      mode: 'cors',
+    },
   });
   return new ApolloClient({
     link,

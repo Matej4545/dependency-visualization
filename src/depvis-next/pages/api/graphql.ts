@@ -25,7 +25,7 @@ const driver = neo4j.driver(
   neo4j.auth.basic(NEO4J_CONFIG.neo4jUsername, NEO4J_CONFIG.neo4jPassword)
 );
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
   const apolloServer = new ApolloServer({
     schema: await neoSchema.getSchema(),
@@ -38,6 +38,23 @@ export default async function handler(req, res) {
   })(req, res);
 }
 
+const allowCors = (fn) => async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  const origin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  return await fn(req, res);
+};
+
+export default allowCors(handler);
 export const config = {
   api: {
     bodyParser: false,
