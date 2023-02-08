@@ -1,6 +1,6 @@
 import { useLazyQuery, useQuery } from '@apollo/client';
 import { useCallback, useEffect, useState } from 'react';
-import { Container, Row } from 'react-bootstrap';
+import { Accordion, Container, Row } from 'react-bootstrap';
 import {
   formatData,
   getAllComponentsQuery,
@@ -101,8 +101,17 @@ const Workspace = () => {
     <Container fluid>
       <Row className="workspace-main">
         <Sidebar>
-          <Dropdown title="Selected project" options={projects.projects} onChange={(e) => setSelectedProject(e)} />
+          <Accordion defaultActiveKey={'0'} className="m-0 p-0">
+            <Accordion.Item eventKey='0'>
+            <Accordion.Header>Settings</Accordion.Header>
+            <Accordion.Body>
 
+            <Dropdown title="Selected project" options={projects.projects} onChange={(e) => setSelectedProject(e)} />
+          {data && <Container>
+            <h3>Project info</h3>
+            <p>Name: {data.projects[0].name}</p>
+            <p>Total components: {data.projects[0].allComponents.length}</p>
+          </Container>}
           <Search objects={graphData.nodes} searchResultCallback={(obj) => handleSelectedSearchResult(obj)} />
           <GraphControl
             defaultGraphConfig={defaultGraphConfig}
@@ -116,12 +125,25 @@ const Workspace = () => {
               });
             }}
           />
-          {node && node.__typename === 'Component' && (
+            </Accordion.Body>
+
+            </Accordion.Item>
+            <Accordion.Item eventKey='1'>
+            <Accordion.Header>Details</Accordion.Header>
+            <Accordion.Body>
+
+            {node && node.__typename === 'Component' &&(
             <ComponentDetails componentId={node.id} projectId={selectedProject} />
           )}
           {node && node.__typename === 'Vulnerability' && <VulnerabilityDetails vulnerabilityId={node.id} />}
 
           <Details data={node} title="Development details" />
+          </Accordion.Body>
+
+            </Accordion.Item>
+          </Accordion>
+
+          
         </Sidebar>
         {!loading && (
           <GraphContainer

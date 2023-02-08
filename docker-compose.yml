@@ -27,6 +27,22 @@ services:
     command: redis-server --save 20 1 --loglevel notice
     volumes:
       - cache:/data
+    links:
+      - redis-commander
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      REDIS_HOSTS: redis-cache
+      REDIS_HOST: redis-cache
+      REDIS_PORT: redis-cache:6379
+      REDIS_PASSWORD: 
+      HTTP_USER: root
+      HTTP_PASSWORD: root
+    ports:
+      - 8081:8081
+
   depvis-next:
     depends_on:
       - neo4j
@@ -34,7 +50,7 @@ services:
     build: ./src/depvis-next
     image: depvis-next:latest
     ports:
-      - 80:3000
+      - 8123:3000
     restart: always
 volumes:
   cache:

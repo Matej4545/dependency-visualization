@@ -59,6 +59,8 @@ export const formatData = (data) => {
 export const getAllComponentsQuery = gql`
   query getProjectComponents($projectId: ID) {
     projects(where: { id: $projectId }) {
+      name
+      version
       allComponents {
         id
         name

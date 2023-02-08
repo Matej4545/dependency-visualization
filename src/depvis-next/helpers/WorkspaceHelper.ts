@@ -8,16 +8,22 @@ const pypiUrlBase = "https://pypi.org/project/"
 
 
 export function GetComponentRepositoryURL(purl: string) {
-    const component = PackageURL.fromString(purl)
-
-    switch (component.type) {
-        case "npm":
-            return urlJoin(npmUrlBase, component.name, component.version ? urlJoin("v", component.version) : "")
-        case "nuget":
-            return urlJoin(nugetUrlBase, component.name, component.version)
-        case "pypi":
-            return urlJoin(pypiUrlBase, component.name, component.version)
-        default:
-            return urlJoin("https://www.google.com/search?q=", purl)
+    try {
+        const component = PackageURL.fromString(purl)
+        switch (component.type) {
+            case "npm":
+                return urlJoin(npmUrlBase, component.name, component.version ? urlJoin("v", component.version) : "")
+            case "nuget":
+                return urlJoin(nugetUrlBase, component.name, component.version)
+            case "pypi":
+                return urlJoin(pypiUrlBase, component.name, component.version)
+            default:
+                return urlJoin("https://www.google.com/search?q=", purl)
+        }
+    } catch {
+        console.error("Could not parse PackageURL from %s", purl)
+        return ""
     }
+
+    
 }   

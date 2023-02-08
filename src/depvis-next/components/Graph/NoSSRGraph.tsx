@@ -10,8 +10,8 @@ export default function NoSSRGraph(props) {
     if (props.selectedNode) {
       console.log(props.selectedNode);
       r.centerAt(props.selectedNode.x, props.selectedNode.y, 500);
-      const zoom_level = 50 / (props.selectedNode.dependsOnCount || 30);
-      graphRef.current.zoom(zoom_level, 500);
+      // const zoom_level = 50 / (props.selectedNode.dependsOnCount || 30);
+      // graphRef.current.zoom(zoom_level, 500);
     }
     r.d3Force(
       'collide',

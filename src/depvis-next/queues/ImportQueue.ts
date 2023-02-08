@@ -23,3 +23,8 @@ ImportQueue.process(async (job) => {
     console.error(e);
   }
 });
+
+
+ImportQueue.on("failed", (job, error) => {
+  console.log("Job %s failed with error: %s", job.id, error.message)
+})
