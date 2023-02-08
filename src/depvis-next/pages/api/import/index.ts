@@ -90,7 +90,6 @@ function validateSbomXml(parsedXml): ImportResult {
 // Function takes XML in plain text and transforms it into object
 async function parseXml(inputXml: string) {
   const parser = new XMLParser(XMLParserOptions);
-  console.log('Input XML: %s', inputXml);
   const xmlParsed = parser.parse(inputXml);
 
   return validateSbomXml(xmlParsed);

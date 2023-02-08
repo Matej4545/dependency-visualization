@@ -35,14 +35,15 @@ const ImportForm = () => {
     }
 
     setValidated(true);
-    console.log({ file: typeof file });
-    const formData = new FormData();
-    formData.append('projectName', projectName);
-    formData.append('projectVersion', projectVersion);
-    formData.append('sbom', await file.text());
+    const body = {
+      projectName: projectName,
+      projectVersion: projectVersion,
+      sbom: await file.text(),
+    };
+    console.log(body);
     const res = await fetch('/api/import', {
-      body: formData,
-      // headers: { 'Content-Type': 'application/xml' },
+      body: await JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
       method: 'POST',
     });
     const json = await res.json();
