@@ -92,13 +92,5 @@ async function parseXml(inputXml: string) {
   const parser = new XMLParser(XMLParserOptions);
   const xmlParsed = parser.parse(inputXml);
 
-  const validateResult = validateSbomXml(xmlParsed);
-  if (validateResult.isError) return validateResult;
-
-  //Clear vuln queue
-  emptyQueue(GetVulnQueue);
-  // const job = await ImportQueue.add({ bom: xmlParsed.bom });
-  // return { jobId: job.id };
-  return await ImportSbom(xmlParsed.bom);
   return validateSbomXml(xmlParsed);
 }
