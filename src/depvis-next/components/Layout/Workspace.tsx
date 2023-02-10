@@ -69,6 +69,7 @@ const Workspace = () => {
   };
 
   const handleShowOnlyVulnerableToggle = () => {
+    if (!data) return;
     if (graphConfig.showOnlyVulnerable) {
       setGraphData(formatData(data.projects[0].allVulnerableComponents));
     } else {

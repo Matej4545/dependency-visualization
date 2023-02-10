@@ -52,11 +52,11 @@ export default async function handler(req, res) {
 
     //Clear vuln queue
     emptyQueue(GetVulnQueue);
-    const job = await ImportQueue.add(body.projectName, {
+    const job = await ImportQueue.add(body.projectName.toString(), {
       sbom: result.sbom,
       projectName: body.projectName,
       projectVersion: body.projectVersion,
-    } as ImportSbomJobData);
+  });
     const response: ImportResult = { jobId: job.id, isError: false };
     return res.status(200).json(response);
   } catch (err) {

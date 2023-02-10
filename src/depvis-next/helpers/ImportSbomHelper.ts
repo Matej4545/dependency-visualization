@@ -16,7 +16,7 @@ export async function ImportSbom(bom: any, projectName, projectVersion) {
     ? {
         type: mainComponentParsed.type,
         name: mainComponentParsed.name,
-        purl: mainComponentParsed.purl,
+        purl: mainComponentParsed.purl || `${mainComponentParsed.name}@${mainComponentParsed.version}`,
         version: mainComponentParsed.version,
         author: mainComponentParsed.author,
         publisher: mainComponentParsed.publisher,
@@ -63,7 +63,7 @@ function GetComponents(bom: any) {
       type: c.type,
       name: c.name,
       purl: c.purl,
-      version: c.version,
+      version: `${c.version}`,
       author: c.author,
       publisher: c.publisher,
     };
