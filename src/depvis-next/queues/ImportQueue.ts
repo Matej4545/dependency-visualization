@@ -13,9 +13,11 @@ export type ImportSbomJobData = {
 const worker = new Worker(
   ImportQueueName,
   async (job) => {
-    const test = job.data;
-    console.log(test);
-    const res = ImportSbom(test.sbom, test.projectName, test.projectVersion);
+    const updateProgress = async (input) => {
+      await job.updateProgress(input);
+    };
+    const data = job.data;
+    const res = await ImportSbom(data.sbom, data.projectName, data.projectVersion, updateProgress);
     return res;
   },
   defaultBullConfig

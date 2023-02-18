@@ -33,9 +33,7 @@ async function sendMutation(mutation: any, variables?: Object) {
   return res;
 }
 
-export async function ProjectExists(projectName: string) {
-  console.log(projectName);
-
+export async function TryGetProjectByName(projectName: string) {
   const query = gql`
     query Project($projectName: String!) {
       projects(where: { name_CONTAINS: $projectName }) {
@@ -46,8 +44,7 @@ export async function ProjectExists(projectName: string) {
     }
   `;
   const data = await sendQuery(query, { projectName: projectName });
-  console.log(data);
-  return data.projects.length > 0;
+  return data.projects;
 }
 
 export async function ComponentExists(componentName: string) {

@@ -1,4 +1,6 @@
 import { useLazyQuery, useQuery } from '@apollo/client';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
 import { Container, Row } from 'react-bootstrap';
 import {
@@ -12,6 +14,7 @@ import ComponentDetails from '../Details/ComponentDetails';
 import Details from '../Details/Details';
 import VulnerabilityDetails from '../Details/VulnerabilityDetails';
 import Dropdown from '../Dropdown/Dropdown';
+import NoProjectFoundError from '../Error/NoProjectFoundError';
 import { GraphConfig } from '../Graph/GraphConfig';
 import GraphControl from '../GraphControl/GraphControl';
 import ImportForm from '../Import/ImportForm';
@@ -39,13 +42,12 @@ const Workspace = () => {
   const [getGraphData, { loading, error, data }] = useLazyQuery(getAllComponentsQuery);
   const { data: projects, loading: projectsLoading } = useQuery(getProjectsQuery, {
     onCompleted: (data) => {
-      if (data.projects.length > 0) {
-        setSelectedProject(data.projects[0].id);
-      } else {
-        setSelectedProject(undefined);
-      }
+      const project = selectProject(data.projects, router.query.projectName);
+      console.log(project);
+      setSelectedProject(project);
     },
   });
+  const router = useRouter();
 
   useEffect(() => {
     if (data) {
@@ -57,7 +59,7 @@ const Workspace = () => {
 
     if (selectedProject) {
       console.log('Getting data');
-      getGraphData({ variables: { projectId: selectedProject } });
+      getGraphData({ variables: { projectId: selectedProject }, pollInterval: 1000 });
     }
   }, [selectedProject]);
   useEffect(() => {
@@ -104,12 +106,17 @@ const Workspace = () => {
   );
 
   if (projectsLoading) return <Loading details="Loading projects" />;
-  if (!selectedProject) return <ImportForm />;
+  if (!selectedProject) return <NoProjectFoundError />;
   return (
     <Container fluid>
       <Row className="workspace-main">
         <Sidebar>
-          <Dropdown title="Selected project" options={projects.projects} onChange={(e) => setSelectedProject(e)} />
+          <Dropdown
+            title="Selected project"
+            options={projects.projects}
+            onChange={(e) => setSelectedProject(e)}
+            default={selectedProject}
+          />
 
           <Search objects={graphData.nodes} searchResultCallback={(obj) => handleSelectedSearchResult(obj)} />
           <GraphControl
@@ -147,3 +154,8 @@ const Workspace = () => {
 };
 
 export default Workspace;
+
+const selectProject = (projects, queryProjectName) => {
+  if (!queryProjectName || projects.filter((p) => p.name === queryProjectName).length == 0) return projects[0].id;
+  return projects.filter((p) => p.name === queryProjectName)[0].id;
+};
