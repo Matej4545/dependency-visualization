@@ -3,23 +3,28 @@ import { Project } from '../types/project';
 import { VulnFetcherHandler } from '../vulnerability-mgmt/VulnFetcherHandler';
 import { processBatch } from './BatchHelper';
 import {
-  CreateComponents,
-  CreateProject,
   CreateUpdateVulnerability,
+  TryGetProjectByName,
   UpdateComponentDependencies,
   UpdateProjectDependencies,
 } from './DbDataHelper';
+import { CreateProject, GetProjectById, GetProjectByName } from './DbDataProvider';
 
-export async function ImportSbom(bom: any, projectName, projectVersion, updateProgressCallback) {
+type ProjectInput = {
+  name: string;
+  id: string;
+};
+
+export async function ImportSbom(bom: any, projectInput: ProjectInput, projectVersion, updateProgressCallback) {
   try {
     // Prepare main component if exists
     const updateProgress = async (percent, message) => {
       console.log(message);
-
       await updateProgressCallback({ message: message, percent: percent });
       console.log(message);
     };
-    await updateProgress(1, 'Parsing main component');
+    const projectId = GetProjectId(projectInput);
+    const projectVersionId = await updateProgress(1, 'Parsing main component');
     const mainComponentParsed = bom.metadata.component;
     const mainComponent: Component | undefined = mainComponentParsed
       ? {
@@ -42,42 +47,36 @@ export async function ImportSbom(bom: any, projectName, projectVersion, updatePr
     await updateProgress(3, 'Preparing dependencies');
     // Prepare dependencies
     let dependencies = GetDependencies(bom.dependencies.dependency);
-
     // Currently there is no support for managing older projects - we first need to clear the DB
     //await DeleteAllData();
     await updateProgress(4, 'Creating project in DB');
     // Create all objects in DB
-    const projectResponse = await CreateProject(project);
-    const projectId = projectResponse.createProjects.projects[0].id;
-
-    await updateProgress(3, 'Preparing components');
-    // Prepare components
-    let components: [Component] = GetComponents(bom);
-    mainComponent && components.push(mainComponent);
-    console.log(components);
-
-    await updateProgress(10, 'Creating components');
-    await CreateComponents(components, projectId);
-    await updateProgress(50, 'Updating dependencies');
-
-    await UpdateProjectDependencies(projectId, [mainComponent]);
-    await UpdateComponentDependencies(dependencies, projectId);
-    await updateProgress(70, 'Fetching vulnerabilities');
-
-    //Vulnerabilities
-    const purlList = components.map((c) => {
-      return c.purl;
-    });
-    const r = await processBatch(purlList, VulnFetcherHandler);
-    await updateProgress(90, 'Creating vulnerabilities in DB');
-
-    r.forEach(async (component) => {
-      if (component.vulnerabilities.length > 0) {
-        console.log('Creating %d vulns for %s', component.vulnerabilities.length, component.purl);
-        await CreateUpdateVulnerability(component.purl, component.vulnerabilities);
-      }
-    });
-    await updateProgress(90, 'Creating vulnerabilities in DB');
+    //   const projectResponse = await CreateProject(project);
+    //   const projectId = projectResponse.createProjects.projects[0].id;
+    //   await updateProgress(3, 'Preparing components');
+    //   // Prepare components
+    //   let components: [Component] = GetComponents(bom);
+    //   mainComponent && components.push(mainComponent);
+    //   console.log(components);
+    //   await updateProgress(10, 'Creating components');
+    //   await CreateComponents(components, projectId);
+    //   await updateProgress(50, 'Updating dependencies');
+    //   await UpdateProjectDependencies(projectId, [mainComponent]);
+    //   await UpdateComponentDependencies(dependencies, projectId);
+    //   await updateProgress(70, 'Fetching vulnerabilities');
+    //   //Vulnerabilities
+    //   const purlList = components.map((c) => {
+    //     return c.purl;
+    //   });
+    //   const r = await processBatch(purlList, VulnFetcherHandler);
+    //   await updateProgress(90, 'Creating vulnerabilities in DB');
+    //   r.forEach(async (component) => {
+    //     if (component.vulnerabilities.length > 0) {
+    //       console.log('Creating %d vulns for %s', component.vulnerabilities.length, component.purl);
+    //       await CreateUpdateVulnerability(component.purl, component.vulnerabilities);
+    //     }
+    //   });
+    //   await updateProgress(90, 'Creating vulnerabilities in DB');
   } catch {
     console.error('Recovery needed');
   }
@@ -152,3 +151,34 @@ export function compareVersions(version1: string, version2: string): number {
   }
   return 0;
 }
+
+async function GetProjectId(project: ProjectInput) {
+  const { name, id } = project;
+  //We know exact ID
+  let existingProjects = [];
+  if (id) {
+    existingProjects = await GetProjectById(id);
+  } else {
+    existingProjects = await GetProjectByName(name);
+  }
+  // Project does not exist yet, so we need to create it first
+  if (existingProjects.length == 0) {
+    console.log('Creating new project with name %s', name);
+    const newProject: Project = { name: name };
+    const currentProjectId = await CreateProject(newProject);
+    return currentProjectId;
+  }
+  // Project exist, so we just return it
+  // Because there might be more projects, return the first one
+  const currentProjectId = existingProjects[0].id;
+  if (existingProjects.length > 1) {
+    console.warn(
+      'Multiple project was found for the name %s\nReturning the first one with id %s',
+      name,
+      existingProjects[0].id
+    );
+  }
+  return currentProjectId;
+}
+
+async function GetProjectVersionId(projectId) {}
