@@ -27,8 +27,10 @@ const driver = neo4j.driver(
 
 async function handler(req, res) {
   const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+  const schema = await neoSchema.getSchema();
+  await neoSchema.assertIndexesAndConstraints({ options: { create: true } });
   const apolloServer = new ApolloServer({
-    schema: await neoSchema.getSchema(),
+    schema: schema,
     introspection: NEO4J_CONFIG.introspection,
     plugins: NEO4J_CONFIG.plugins,
   });
