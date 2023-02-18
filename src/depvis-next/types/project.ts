@@ -1,4 +1,4 @@
-import { Component } from "./component";
+import { Component } from './component';
 
 export type Project = {
   /**
@@ -9,6 +9,13 @@ export type Project = {
    * Friendly name
    */
   name: string;
+  /**
+   * List of versions related to a given project
+   */
+  versions?: [ProjectVersion];
+};
+
+export type ProjectVersion = {
   /**
    * Project version
    */
@@ -21,4 +28,8 @@ export type Project = {
    * Date when SBOM was created for a given project
    */
   date?: Date;
+  /**
+   * Represents to which project a given version belongs
+   */
+  project: Project;
 };

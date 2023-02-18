@@ -7,7 +7,7 @@ import { gql } from 'apollo-server-micro';
 export const typeDefs = gql`
   type Component {
     id: ID @id
-    project: [Project!]! @relationship(type: "BELONGS_TO", direction: OUT)
+    project: [ProjectVersion!]! @relationship(type: "BELONGS_TO", direction: OUT)
     purl: String
     name: String
     type: String
@@ -51,7 +51,11 @@ export const typeDefs = gql`
 
   type Project {
     id: ID @id
-    name: String
+    name: String @unique
+    versions: [ProjectVersion!]! @relationship(type: "HAS_VERSION", direction: OUT)
+  }
+
+  type ProjectVersion {
     version: String
     allComponents: [Component!]!
       @cypher(
@@ -75,6 +79,7 @@ export const typeDefs = gql`
       )
     component: [Component!]! @relationship(type: "DEPENDS_ON", direction: OUT)
     date: Date
+    project: [Project!]! @relationship(type: "HAS_VERSION", direction: IN)
   }
 
   type Reference {
