@@ -1,6 +1,6 @@
 import { DocumentNode, gql } from '@apollo/client';
 import { randomBytes } from 'crypto';
-import { Component } from '../types/component';
+import { Component, ComponentDto } from '../types/component';
 import { Project } from '../types/project';
 import { Vulnerability } from '../types/vulnerability';
 import { createApolloClient } from './ApolloClientHelper';
@@ -13,16 +13,16 @@ const chunkSize = 100;
  * @returns Data from successful query
  * @throws Error if there were some error during fetch
  */
-async function sendQuery(query: DocumentNode, variables?: Object) {
+export async function sendGQLQuery(query: DocumentNode, variables?: Object) {
   const client = createApolloClient();
   const res = await client.query({ query: query, variables: variables });
   if (res.errors) {
     throw Error(res.errors.toString());
   }
-  return res.data;
+  return res;
 }
 
-async function sendMutation(mutation: any, variables?: Object) {
+export async function sendGQLMutation(mutation: any, variables?: Object) {
   console.log(`Sending mutation ${mutation} with variables ${await JSON.stringify(variables)}`);
   const client = createApolloClient();
   const res = await client.mutate({ mutation: mutation, variables: variables });
@@ -43,7 +43,7 @@ export async function TryGetProjectByName(projectName: string) {
       }
     }
   `;
-  const data = await sendQuery(query, { projectName: projectName });
+  const { data } = await sendGQLQuery(query, { projectName: projectName });
   return data.projects;
 }
 
@@ -57,7 +57,7 @@ export async function ComponentExists(componentName: string) {
       }
     }
   `;
-  const data = await sendQuery(query, { componentName: componentName });
+  const { data } = await sendGQLQuery(query, { componentName: componentName });
   return data.projects.length > 0;
 }
 
@@ -79,7 +79,7 @@ export async function CreateComponents(components: [Component?], projectId: stri
   for (let i = 0; i < components.length; i += chunkSize) {
     const chunk = components.slice(i, i + chunkSize);
     const chunkWithProjectId = AddProjectToComponents(chunk, projectId);
-    const { data } = await sendMutation(mutation, { components: chunkWithProjectId });
+    const { data } = await sendGQLMutation(mutation, { components: chunkWithProjectId });
     res.concat(data.components);
   }
   return res;
@@ -109,7 +109,7 @@ export async function CreateProject(project: Project) {
       }
     }
   `;
-  const { data } = await sendMutation(mutation, { project: [project] });
+  const { data } = await sendGQLMutation(mutation, { project: [project] });
   return data;
 }
 
@@ -126,7 +126,7 @@ export async function GetVulnerability(vulnerabilityId) {
       }
     }
   `;
-  const data = await sendQuery(query, { vulnerabilityId: vulnerabilityId });
+  const { data } = await sendGQLQuery(query, { vulnerabilityId: vulnerabilityId });
   return data.vulnerabilities;
 }
 export async function CreateUpdateVulnerability(purl: string, vulnerabilities: [Vulnerability?]) {
@@ -160,7 +160,7 @@ export async function CreateUpdateVulnerability(purl: string, vulnerabilities: [
   const vulnArray = newVulnerabilities.map((v) => {
     return { node: PrepareVulnAsGQL(v) };
   });
-  const { data } = await sendMutation(mutation, {
+  const { data } = await sendGQLMutation(mutation, {
     purl: purl,
     vuln_array: vulnArray,
   });
@@ -199,7 +199,7 @@ export async function UpdateProjectDependencies(projectId: string, components: [
     }
   `;
 
-  const { data } = await sendMutation(mutation, {
+  const { data } = await sendGQLMutation(mutation, {
     projectId: projectId,
     componentsPurl: components.map((c) => {
       return { purl: c.purl };
@@ -222,7 +222,7 @@ export async function UpdateComponentDependencies(dependencies, projectId: strin
         ${chunkMutation}
       }
     `;
-    const { data } = await sendMutation(mutation, { projectId: projectId });
+    const { data } = await sendGQLMutation(mutation, { projectId: projectId });
     console.log(data);
   }
 }
@@ -234,7 +234,7 @@ export async function GetComponents() {
       }
     }
   `;
-  const data = await sendQuery(query);
+  const { data } = await sendGQLQuery(query);
   return data;
 }
 
@@ -283,6 +283,17 @@ export async function DeleteAllData() {
       }
     }
   `;
-  const { data } = await sendMutation(mutation);
+  const { data } = await sendGQLMutation(mutation);
   console.log(data);
+}
+
+export function AddProjectVersionConnectProject(projectId: string) {
+  return { connect: { where: { node: { id: projectId } } } };
+}
+
+export function CreateComponentsConnectProjectVersion(components: [ComponentDto], projectVersionId: string) {
+  const ConnectProjectVersion = { connect: { where: { node: { id: projectVersionId } } } };
+  return components.map((c) => {
+    return { ...c, projectVersion: ConnectProjectVersion };
+  });
 }
