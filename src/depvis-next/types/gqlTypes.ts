@@ -7,7 +7,7 @@ import { gql } from 'apollo-server-micro';
 export const typeDefs = gql`
   type Component {
     id: ID @id
-    project: [ProjectVersion!]! @relationship(type: "BELONGS_TO", direction: OUT)
+    projectVersion: ProjectVersion @relationship(type: "BELONGS_TO", direction: OUT)
     purl: String
     name: String
     type: String
@@ -47,6 +47,7 @@ export const typeDefs = gql`
     cvssVector: String
     cwe: String
     references: [Reference!]! @relationship(type: "HAS_REFERENCE", direction: OUT)
+    affectedComponents: [Component!]! @relationship(type: "HAS_VULNERABILITY", direction: IN)
   }
 
   type Project {
@@ -56,11 +57,12 @@ export const typeDefs = gql`
   }
 
   type ProjectVersion {
+    id: ID @id
     version: String
     allComponents: [Component!]!
       @cypher(
         statement: """
-        MATCH (this)-->(c)-[:DEPENDS_ON*]->(c2)
+        MATCH (this)-->(c)-[:DEPENDS_ON*0..]->(c2)
         WITH collect(c) + collect(c2) as all
         UNWIND all as single
         RETURN  distinct single
@@ -69,7 +71,7 @@ export const typeDefs = gql`
     allVulnerableComponents: [Component!]!
       @cypher(
         statement: """
-        MATCH a=(v:Vulnerability)<-[:HAS_VULNERABILITY]-(c1:Component)<-[:DEPENDS_ON*]-(c2)<-[:DEPENDS_ON]-(this)
+        MATCH a=(v:Vulnerability)<-[:HAS_VULNERABILITY]-(c1:Component)<-[:DEPENDS_ON*0..]-(c2)<-[:DEPENDS_ON]-(this)
         WITH NODES(a) AS nodes
         UNWIND nodes AS n
         WITH n
@@ -79,7 +81,7 @@ export const typeDefs = gql`
       )
     component: [Component!]! @relationship(type: "DEPENDS_ON", direction: OUT)
     date: Date
-    project: [Project!]! @relationship(type: "HAS_VERSION", direction: IN)
+    project: Project! @relationship(type: "HAS_VERSION", direction: IN)
   }
 
   type Reference {

@@ -52,3 +52,7 @@ export type Component = {
    */
   project?: Project;
 };
+
+export type ComponentDto = Component & {
+  projectVersion: any;
+};

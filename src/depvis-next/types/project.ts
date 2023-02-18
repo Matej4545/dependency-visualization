@@ -15,7 +15,7 @@ export type Project = {
   versions?: [ProjectVersion];
 };
 
-export type ProjectVersion = {
+type ProjectVersionBase = {
   /**
    * Project version
    */
@@ -28,8 +28,18 @@ export type ProjectVersion = {
    * Date when SBOM was created for a given project
    */
   date?: Date;
+};
+
+export type ProjectVersion = ProjectVersionBase & {
   /**
    * Represents to which project a given version belongs
    */
   project: Project;
+};
+
+export type ProjectVersionDto = ProjectVersionBase & {
+  /**
+   * Represents graphql connection
+   */
+  project: any;
 };
