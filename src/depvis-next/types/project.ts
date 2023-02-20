@@ -12,7 +12,7 @@ export type Project = {
   /**
    * List of versions related to a given project
    */
-  versions?: [ProjectVersion];
+  versions?: ProjectVersion[];
 };
 
 type ProjectVersionBase = {
@@ -23,7 +23,7 @@ type ProjectVersionBase = {
   /**
    * List of all components in a given project
    */
-  components?: [Component];
+  components?: Component[];
   /**
    * Date when SBOM was created for a given project
    */

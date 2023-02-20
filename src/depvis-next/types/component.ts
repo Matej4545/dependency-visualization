@@ -38,15 +38,15 @@ export type Component = {
   /**
    * List of all components that are direct dependencies for given component
    */
-  dependsOn?: [Component];
+  dependsOn?: Component[];
   /**
    * References to external resources
    */
-  references?: [Reference];
+  references?: Reference[];
   /**
    * List of vulnerabilities for given component
    */
-  vulnerabilities?: [Vulnerability];
+  vulnerabilities?: Vulnerability[];
   /**
    * Reference to a project that contains given component
    */
