@@ -17,6 +17,10 @@ export type Project = {
 
 type ProjectVersionBase = {
   /**
+   * Project Version Id
+   */
+  id?: string;
+  /**
    * Project version
    */
   version?: string;

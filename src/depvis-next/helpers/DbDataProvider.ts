@@ -3,25 +3,31 @@ import { Component } from '../types/component';
 import { Project, ProjectVersion, ProjectVersionDto } from '../types/project';
 import { createApolloClient } from './ApolloClientHelper';
 import { sendGQLQuery, sendGQLMutation, AddProjectVersionConnectProject } from './DbDataHelper';
+import { ProjectVersionInput } from './ImportSbomHelper';
 
 /**
  * Function will create new project with optional first component
  * @param project Project data
- * @returns ID of newly created project
+ * @returns List containing new project object
  */
-export async function CreateProject(project: Project) {
+export async function CreateProject(project: Project): Promise<Project> {
   if (!project) return;
   const mutation = gql`
     mutation CreateProject($project: [ProjectCreateInput!]!) {
       createProjects(input: $project) {
         projects {
           id
+          name
+          versions {
+            id
+            version
+          }
         }
       }
     }
   `;
   const { data } = await sendGQLMutation(mutation, { project: [project] });
-  return data;
+  return data.projects[0];
 }
 
 /**
@@ -29,7 +35,7 @@ export async function CreateProject(project: Project) {
  * @param projectName Project name
  * @returns List of projects that match given name
  */
-export async function GetProjectByName(projectName: string) {
+export async function GetProjectByName(projectName: string): Promise<Project[]> {
   const query = gql`
     query Project($projectName: String!) {
       projects(where: { name: $projectName }) {
@@ -51,7 +57,7 @@ export async function GetProjectByName(projectName: string) {
  * @param projectId Project Id
  * @returns List of projects that match given Id
  */
-export async function GetProjectById(projectId: string) {
+export async function GetProjectById(projectId: string): Promise<Project[]> {
   const query = gql`
     query Project($projectName: String!) {
       projects(where: { id: $projectId }) {
@@ -74,7 +80,8 @@ export async function GetProjectById(projectId: string) {
  * @param version new version identificator
  * @returns ID of the new project version
  */
-export async function AddProjectVersion(projectId, version: string) {
+export async function CreateProjectVersion(projectId, projectVersionInput: ProjectVersionInput): Promise<string> {
+  const { version, date } = projectVersionInput;
   if (!projectId || !version) {
     console.log('AddProjectComponent is missing some inputs! %s, %s', projectId, version);
     return;
@@ -91,7 +98,11 @@ export async function AddProjectVersion(projectId, version: string) {
       }
     }
   `;
-  const projectVersion: ProjectVersionDto = { version: version, project: AddProjectVersionConnectProject(projectId) };
+  const projectVersion: ProjectVersionDto = {
+    version: version,
+    project: AddProjectVersionConnectProject(projectId),
+    date: new Date(date),
+  };
   const { data } = await sendGQLMutation(mutation, { projectVersion: projectVersion });
   return data.projectVersions.id;
 }
@@ -99,8 +110,9 @@ export async function AddProjectVersion(projectId, version: string) {
 /**
  * Deletes project version with all its connected components, references and vulnerabilities
  * @param projectVersionId ID of the project version
+ * @returns number of deleted nodes
  */
-export async function DeleteProjectVersion(projectVersionId: string) {
+export async function DeleteProjectVersion(projectVersionId: string): Promise<number> {
   const mutation = gql`
     mutation DeleteProjectVersion($projectVersionId: ID) {
       deleteProjectVersions(where: { id: $projectVersionId }, delete: { component: { where: {} } }) {
@@ -109,6 +121,7 @@ export async function DeleteProjectVersion(projectVersionId: string) {
     }
   `;
   const { data } = await sendGQLMutation(mutation, { projectVersionId: projectVersionId });
+  return data.nodesDeleted;
 }
 
 export async function CreateComponents(components: [Component?], projectVersionId: string) {
