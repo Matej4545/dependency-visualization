@@ -1,13 +1,14 @@
 import { Component } from '../types/component';
 import { Project, ProjectVersion } from '../types/project';
 import { VulnFetcherHandler } from '../vulnerability-mgmt/VulnFetcherHandler';
-import { processBatch } from './BatchHelper';
+import { processBatchAsync } from './BatchHelper';
 import {
   CreateProject,
   CreateProjectVersion,
   DeleteProjectVersion,
   GetProjectById,
   GetProjectByName,
+  CreateComponents,
 } from './DbDataProvider';
 
 type ProjectInput = {
@@ -20,54 +21,50 @@ export type ProjectVersionInput = {
   date: string;
 };
 
-const NotKnownPlaceholder = "n/a"
+const NotKnownPlaceholder = 'n/a';
 
 export async function ImportSbom(bom: any, projectInput: ProjectInput, projectVersion: string, updateProgressCallback) {
-  try {
-    /**
-     * Simple wrapper function that is responsible for updating status for job worker
-     * @param percent Status in percent (0-100)
-     * @param message Short description what is happening
-     */
-    const updateProgress = async (percent, message) => {
-      console.log(message);
-      await updateProgressCallback({ message: message, percent: percent });
-      console.log(message);
-    };
+  /**
+   * Simple wrapper function that is responsible for updating status for job worker
+   * @param percent Status in percent (0-100)
+   * @param message Short description what is happening
+   */
+  const updateProgress = async (percent, message) => {
+    console.log(message);
+    await updateProgressCallback({ message: message, percent: percent });
+    console.log(message);
+  };
 
+  const importInfo = {
+    project: undefined,
+    projectVersion: undefined,
+    createdComponents: [],
+    createdVulnerabilitiesIds: [],
+  };
+
+  try {
     // Find project information on backend
-    const project = await GetProject(projectInput);
+    await updateProgress(0, 'Creating new project version');
+    importInfo.project = await GetProject(projectInput);
+
     const projectVersionInput: ProjectVersionInput = {
       version: projectVersion || bom.metadata.component ? bom.metadata.component.version : NotKnownPlaceholder,
-      date: bom.metadata.timestamp || Date.now().toLocaleString()
-    }
-    const projectVersionId = GetProjectVersionId(project, projectVersionInput);
+      date: bom.metadata.timestamp || Date.now().toLocaleString(),
+    };
+    importInfo.projectVersion = await GetProjectVersionId(importInfo.project, projectVersionInput);
 
     // Create components for new version
-    const mainComponentParsed = bom.metadata.component;
-    const mainComponent: Component | undefined = mainComponentParsed
-      ? {
-          type: mainComponentParsed.type,
-          name: mainComponentParsed.name,
-          purl: mainComponentParsed.purl || `${mainComponentParsed.name}@${mainComponentParsed.version}`,
-          version: mainComponentParsed.version,
-          author: mainComponentParsed.author,
-          publisher: mainComponentParsed.publisher,
-        }
-      : undefined;
 
-    await updateProgress(3, 'Preparing dependencies');
     // Prepare dependencies
     let dependencies = GetDependencies(bom.dependencies.dependency);
-    await updateProgress(4, 'Creating project in DB');
     // Create all objects in DB
-    await updateProgress(3, 'Preparing components');
     // Prepare components
-    let components: Component[] = GetComponents(bom);
-    mainComponent && components.push(mainComponent);
-    await updateProgress(10, 'Creating components');
+    const components: Component[] = GetComponents(bom);
+    importInfo.createdComponents = await processBatchAsync(components, CreateComponents, 5, updateProgress);
+    console.log('Components created');
+    console.log(importInfo);
     // TODO: rewrite this using component IDs, not purl
-    
+
     //   await CreateComponents(components, projectId);
     //   await updateProgress(50, 'Updating dependencies');
     //   await UpdateProjectDependencies(projectId, [mainComponent]);
@@ -88,11 +85,11 @@ export async function ImportSbom(bom: any, projectInput: ProjectInput, projectVe
     //   await updateProgress(90, 'Creating vulnerabilities in DB');
   } catch (error) {
     console.error('Recovery needed');
-    console.error(error)
+    console.error(error);
   }
 }
 function GetComponents(bom: any) {
-  let components = bom.components.component;
+  let components: any[] = bom.components.component;
   // Component data transformation
   components = components.map((c) => {
     return {
@@ -104,6 +101,8 @@ function GetComponents(bom: any) {
       publisher: c.publisher,
     };
   });
+
+  bom.metadata.component && components.push(createMainComponent(bom.metadata.component));
   return components;
 }
 
@@ -208,7 +207,7 @@ async function GetProject(project: ProjectInput): Promise<Project> {
  * @returns ProjectVersion Id
  */
 async function GetProjectVersionId(project: Project, projectVersionInput: ProjectVersionInput) {
-  const {version, date } = projectVersionInput;
+  const { version, date } = projectVersionInput;
   if (!project || !version) {
     throw Error('Invalid information - missing project or project version');
   }
@@ -233,4 +232,16 @@ async function GetProjectVersionId(project: Project, projectVersionInput: Projec
   const newVersionId = await CreateProjectVersion(project.id, projectVersionInput);
   console.log('New version for project %s created with id %s', project.name, newVersionId);
   return newVersionId;
+}
+
+function createMainComponent(inputComponent) {
+  const purl = inputComponent.purl || `${inputComponent.name}@${inputComponent.version}`;
+  return {
+    type: inputComponent.type,
+    name: inputComponent.name,
+    purl: purl,
+    version: inputComponent.version,
+    author: inputComponent.author,
+    publisher: inputComponent.publisher,
+  };
 }

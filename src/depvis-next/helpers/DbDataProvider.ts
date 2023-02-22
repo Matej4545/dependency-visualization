@@ -1,7 +1,12 @@
 import { gql } from '@apollo/client';
 import { Component } from '../types/component';
 import { Project, ProjectVersion, ProjectVersionDto } from '../types/project';
-import { sendGQLQuery, sendGQLMutation, AddProjectVersionConnectProject } from './DbDataHelper';
+import {
+  sendGQLQuery,
+  sendGQLMutation,
+  AddProjectVersionConnectProject,
+  AddComponentsConnectProjectVersion,
+} from './DbDataHelper';
 import { ProjectVersionInput } from './ImportSbomHelper';
 
 /**
@@ -47,7 +52,7 @@ export async function GetProjectByName(projectName: string): Promise<Project[]> 
       }
     }
   `;
-  console.log(projectName)
+  console.log(projectName);
   const { data } = await sendGQLQuery(query, { projectName: projectName });
   return data.projects;
 }
@@ -104,7 +109,7 @@ export async function CreateProjectVersion(projectId, projectVersionInput: Proje
     date: new Date(date),
   };
   const { data } = await sendGQLMutation(mutation, { projectVersion: projectVersion });
-  console.log(data)
+  console.log(data);
   return data.createProjectVersions.projectVersions[0].id;
 }
 
@@ -144,5 +149,6 @@ export async function CreateComponents(components: Component[], projectVersionId
       }
     }
   `;
-  const { data } = await sendGQLMutation(mutation, { components: projectVersionId });
+  const componentsWithConnect = AddComponentsConnectProjectVersion(components, projectVersionId);
+  const { data } = await sendGQLMutation(mutation, { components: componentsWithConnect });
 }

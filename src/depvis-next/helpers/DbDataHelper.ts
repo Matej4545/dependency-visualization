@@ -15,7 +15,7 @@ const chunkSize = 100;
  */
 export async function sendGQLQuery(query: DocumentNode, variables?: Object) {
   console.log(`GQL Query: ${query} with variables ${await JSON.stringify(variables)}`);
-  console.dir({query: query, variables: variables})
+  console.dir({ query: query, variables: variables });
   const client = createApolloClient();
   const res = await client.query({ query: query, variables: variables });
   if (res.errors) {
@@ -26,7 +26,7 @@ export async function sendGQLQuery(query: DocumentNode, variables?: Object) {
 
 export async function sendGQLMutation(mutation: DocumentNode, variables?: Object) {
   console.log(`GQL Mutation: ${mutation} with variables ${await JSON.stringify(variables)}`);
-  console.dir({mutation: mutation, variables: variables})
+  console.dir({ mutation: mutation, variables: variables });
   const client = createApolloClient();
   const res = await client.mutate({ mutation: mutation, variables: variables });
   if (res.errors) {
@@ -300,5 +300,11 @@ export function CreateComponentsConnectProjectVersion(components: [ComponentDto]
   const ConnectProjectVersion = { connect: { where: { node: { id: projectVersionId } } } };
   return components.map((c) => {
     return { ...c, projectVersion: ConnectProjectVersion };
+  });
+}
+
+export function AddComponentsConnectProjectVersion(components: Component[], projectVersionId: string) {
+  return components.map((c) => {
+    return { ...c, projectVersion: { connect: { where: { node: { id: projectVersionId } } } } };
   });
 }
