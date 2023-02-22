@@ -3,12 +3,6 @@ import { Project, ProjectVersion } from '../types/project';
 import { VulnFetcherHandler } from '../vulnerability-mgmt/VulnFetcherHandler';
 import { processBatch } from './BatchHelper';
 import {
-  CreateUpdateVulnerability,
-  TryGetProjectByName,
-  UpdateComponentDependencies,
-  UpdateProjectDependencies,
-} from './DbDataHelper';
-import {
   CreateProject,
   CreateProjectVersion,
   DeleteProjectVersion,
@@ -17,8 +11,8 @@ import {
 } from './DbDataProvider';
 
 type ProjectInput = {
-  name: string;
-  id: string;
+  name?: string;
+  id?: string;
 };
 
 export type ProjectVersionInput = {
@@ -44,7 +38,7 @@ export async function ImportSbom(bom: any, projectInput: ProjectInput, projectVe
     // Find project information on backend
     const project = await GetProject(projectInput);
     const projectVersionInput: ProjectVersionInput = {
-      version: projectVersion || bom.metadata.component ? bom.metadata.component.version || NotKnownPlaceholder,
+      version: projectVersion || bom.metadata.component ? bom.metadata.component.version : NotKnownPlaceholder,
       date: bom.metadata.timestamp || Date.now().toLocaleString()
     }
     const projectVersionId = GetProjectVersionId(project, projectVersionInput);
@@ -92,8 +86,9 @@ export async function ImportSbom(bom: any, projectInput: ProjectInput, projectVe
     //     }
     //   });
     //   await updateProgress(90, 'Creating vulnerabilities in DB');
-  } catch {
+  } catch (error) {
     console.error('Recovery needed');
+    console.error(error)
   }
 }
 function GetComponents(bom: any) {
@@ -235,7 +230,7 @@ async function GetProjectVersionId(project: Project, projectVersionInput: Projec
     await DeleteProjectVersion(existingProjectVersion.id);
   }
 
-  const newVersionId = await CreateProjectVersion(project.id, version);
+  const newVersionId = await CreateProjectVersion(project.id, projectVersionInput);
   console.log('New version for project %s created with id %s', project.name, newVersionId);
   return newVersionId;
 }

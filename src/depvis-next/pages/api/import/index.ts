@@ -1,6 +1,6 @@
 import { Queue } from 'bullmq';
 import { XMLParser } from 'fast-xml-parser';
-import { TryGetProjectByName } from '../../../helpers/DbDataHelper';
+import { GetProjectByName } from '../../../helpers/DbDataProvider';
 import { compareVersions, getLatestProjectVersion, ImportSbom } from '../../../helpers/ImportSbomHelper';
 import { defaultBullConfig, emptyQueue } from '../../../helpers/QueueHelper';
 import { GetVulnQueueName } from '../../../queues/GetVulnQueue';
@@ -50,10 +50,10 @@ export default async function handler(req, res) {
     }
     console.log(body.projectName);
 
-    const projects = await TryGetProjectByName(body.projectName);
+    const projects = await GetProjectByName(body.projectName);
     console.log(projects);
-    if (projects.length != 0) {
-      const highestVersionProject = getLatestProjectVersion(projects);
+    if (projects.length != 0 && projects[0].versions) {
+      const highestVersionProject = getLatestProjectVersion(projects[0].versions);
       if (compareVersions(body.projectVersion, highestVersionProject.version) != 1) {
         return res
           .status(400)
@@ -76,7 +76,7 @@ export default async function handler(req, res) {
       sbom: result.sbom,
       projectName: body.projectName,
       projectVersion: body.projectVersion,
-    });
+    } as ImportSbomJobData);
 
     //Return response
     const response: ImportResult = { jobId: job.id, isError: false };

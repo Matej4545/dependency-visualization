@@ -12,7 +12,7 @@ const ImportForm = (props) => {
   const [preview, setPreview] = useState<string>('');
   const [validated, setValidated] = useState<boolean>(false);
   const [projectName, setProjectName] = useState<string>('');
-  const [projectVersion, setProjectVersion] = useState<string>('1.0.0');
+  const [projectVersion, setProjectVersion] = useState<string>('1.0.1');
 
   const handleFiles = (e: any) => {
     const files = e.target.files;

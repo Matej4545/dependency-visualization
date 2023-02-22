@@ -1,7 +1,6 @@
 import { gql } from '@apollo/client';
 import { Component } from '../types/component';
 import { Project, ProjectVersion, ProjectVersionDto } from '../types/project';
-import { createApolloClient } from './ApolloClientHelper';
 import { sendGQLQuery, sendGQLMutation, AddProjectVersionConnectProject } from './DbDataHelper';
 import { ProjectVersionInput } from './ImportSbomHelper';
 
@@ -27,7 +26,7 @@ export async function CreateProject(project: Project): Promise<Project> {
     }
   `;
   const { data } = await sendGQLMutation(mutation, { project: [project] });
-  return data.projects[0];
+  return data.createProjects.projects[0];
 }
 
 /**
@@ -48,6 +47,7 @@ export async function GetProjectByName(projectName: string): Promise<Project[]> 
       }
     }
   `;
+  console.log(projectName)
   const { data } = await sendGQLQuery(query, { projectName: projectName });
   return data.projects;
 }
@@ -104,7 +104,8 @@ export async function CreateProjectVersion(projectId, projectVersionInput: Proje
     date: new Date(date),
   };
   const { data } = await sendGQLMutation(mutation, { projectVersion: projectVersion });
-  return data.projectVersions.id;
+  console.log(data)
+  return data.createProjectVersions.projectVersions[0].id;
 }
 
 /**
@@ -124,7 +125,7 @@ export async function DeleteProjectVersion(projectVersionId: string): Promise<nu
   return data.nodesDeleted;
 }
 
-export async function CreateComponents(components: [Component?], projectVersionId: string) {
+export async function CreateComponents(components: Component[], projectVersionId: string) {
   if (!components || components.length == 0) {
     console.log('CreateComponents - No components provided!');
     return;

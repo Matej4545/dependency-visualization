@@ -14,6 +14,8 @@ const chunkSize = 100;
  * @throws Error if there were some error during fetch
  */
 export async function sendGQLQuery(query: DocumentNode, variables?: Object) {
+  console.log(`GQL Query: ${query} with variables ${await JSON.stringify(variables)}`);
+  console.dir({query: query, variables: variables})
   const client = createApolloClient();
   const res = await client.query({ query: query, variables: variables });
   if (res.errors) {
@@ -22,8 +24,9 @@ export async function sendGQLQuery(query: DocumentNode, variables?: Object) {
   return res;
 }
 
-export async function sendGQLMutation(mutation: any, variables?: Object) {
-  console.log(`Sending mutation ${mutation} with variables ${await JSON.stringify(variables)}`);
+export async function sendGQLMutation(mutation: DocumentNode, variables?: Object) {
+  console.log(`GQL Mutation: ${mutation} with variables ${await JSON.stringify(variables)}`);
+  console.dir({mutation: mutation, variables: variables})
   const client = createApolloClient();
   const res = await client.mutate({ mutation: mutation, variables: variables });
   if (res.errors) {
@@ -39,7 +42,9 @@ export async function TryGetProjectByName(projectName: string) {
       projects(where: { name_CONTAINS: $projectName }) {
         id
         name
-        version
+        versions {
+          version
+        }
       }
     }
   `;
