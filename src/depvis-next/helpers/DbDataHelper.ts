@@ -302,3 +302,16 @@ export function CreateComponentsConnectProjectVersion(components: [ComponentDto]
     return { ...c, projectVersion: ConnectProjectVersion };
   });
 }
+
+export function BuildAddDependencyQuery(dependencies: any[], projectVersionId: string) {
+  return dependencies.map((d) => {
+    if (!d.dependsOn) return; //No dependency
+    return {where: {purl: d.purl, projectVersion: {id: projectVersionId} }, connect: {dependsOn: {where: { node: {OR: getDependencyWherePurlPart(d.dependsOn)}}}}
+  }})
+}
+
+function getDependencyWherePurlPart(dependsOn: any[], projectVersionId) {
+  return dependsOn.map((d) => {
+    return {purl: d.purl, projectVersion: {id: projectVersionId}};
+  });
+}
