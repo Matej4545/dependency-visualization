@@ -308,3 +308,18 @@ export function AddComponentsConnectProjectVersion(components: Component[], proj
     return { ...c, projectVersion: { connect: { where: { node: { id: projectVersionId } } } } };
   });
 }
+export function BuildAddDependencyQuery(dependencies: any[], projectVersionId: string) {
+  return dependencies.map((d) => {
+    if (!d.dependsOn) return; //No dependency
+    return {
+      where: { purl: d.purl, projectVersion: { id: projectVersionId } },
+      connect: { dependsOn: { where: { node: { OR: getDependencyWherePurlPart(d.dependsOn, projectVersionId) } } } },
+    };
+  });
+}
+
+function getDependencyWherePurlPart(dependsOn: any[], projectVersionId) {
+  return dependsOn.map((d) => {
+    return { purl: d.purl, projectVersion: { id: projectVersionId } };
+  });
+}

@@ -5,6 +5,7 @@ import {
   sendGQLQuery,
   sendGQLMutation,
   AddProjectVersionConnectProject,
+  BuildAddDependencyQuery,
   AddComponentsConnectProjectVersion,
 } from './DbDataHelper';
 import { ProjectVersionInput } from './ImportSbomHelper';
@@ -151,4 +152,29 @@ export async function CreateComponents(components: Component[], projectVersionId
   `;
   const componentsWithConnect = AddComponentsConnectProjectVersion(components, projectVersionId);
   const { data } = await sendGQLMutation(mutation, { components: componentsWithConnect });
+}
+
+export async function updateComponentDependency(dependencies: any[], projectVersionId: string) {
+  if (!dependencies || dependencies.length == 0) {
+    console.log('Updating dependencies - No dependencies provided!');
+    return;
+  }
+
+  const mutation = gql`
+    mutation UpdateDependencies($where: ComponentWhere, $connect: ComponentConnectInput) {
+      name: updateComponents(where: $where, connect: $connect) {
+        info {
+          relationshipsCreated
+        }
+      }
+    }
+  `;
+  const dependencyQueryList: any[] = BuildAddDependencyQuery(dependencies, projectVersionId);
+  for (let index = 0; index < dependencyQueryList.length; index++) {
+    const { data } = await sendGQLMutation(mutation, {
+      where: dependencyQueryList[index].where,
+      connect: dependencyQueryList[index].connect,
+    });
+    console.log('Created %s relationships', data.info.relationshipsCreated);
+  }
 }
