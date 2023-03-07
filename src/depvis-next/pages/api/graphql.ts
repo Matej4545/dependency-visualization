@@ -43,6 +43,7 @@ async function handler(req, res) {
 const allowCors = (fn) => async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
   const origin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+  console.log(".env origin: %s", process.env.CORS_ORIGIN)
   res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(

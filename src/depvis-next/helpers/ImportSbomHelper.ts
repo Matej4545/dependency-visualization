@@ -1,7 +1,7 @@
-import { Component } from '../types/component';
-import { Project, ProjectVersion } from '../types/project';
-import { VulnFetcherHandler } from '../vulnerability-mgmt/VulnFetcherHandler';
-import { processBatchAsync } from './BatchHelper';
+import { Component } from "../types/component";
+import { Project, ProjectVersion } from "../types/project";
+import { VulnFetcherHandler } from "../vulnerability-mgmt/VulnFetcherHandler";
+import { processBatchAsync } from "./BatchHelper";
 import {
   CreateProject,
   CreateProjectVersion,
@@ -9,7 +9,8 @@ import {
   GetProjectById,
   GetProjectByName,
   CreateComponents,
-} from './DbDataProvider';
+  updateComponentDependency,
+} from "./DbDataProvider";
 
 type ProjectInput = {
   name?: string;
@@ -21,20 +22,23 @@ export type ProjectVersionInput = {
   date: string;
 };
 
-const NotKnownPlaceholder = 'n/a';
+const NotKnownPlaceholder = "n/a";
 
-export async function ImportSbom(bom: any, projectInput: ProjectInput, projectVersion: string, updateProgressCallback) {
+export async function ImportSbom(
+  bom: any,
+  projectInput: ProjectInput,
+  projectVersion: string,
+  updateProgressCallback
+) {
   /**
    * Simple wrapper function that is responsible for updating status for job worker
    * @param percent Status in percent (0-100)
    * @param message Short description what is happening
    */
   const updateProgress = async (percent, message) => {
-    console.log(message);
     await updateProgressCallback({ message: message, percent: percent });
-    console.log(message);
   };
-
+  console.log("Here the project version is: %s", projectVersion);
   const importInfo = {
     project: undefined,
     projectVersion: undefined,
@@ -44,32 +48,54 @@ export async function ImportSbom(bom: any, projectInput: ProjectInput, projectVe
 
   try {
     // Find project information on backend
-    await updateProgress(0, 'Creating new project version');
+    await updateProgress(0, "Creating new project version");
     importInfo.project = await GetProject(projectInput);
-
+    const tmpProjectVersion = projectVersion
+      ? projectVersion
+      : bom.metadata.component
+      ? (bom.metadata.component.version as string)
+      : NotKnownPlaceholder;
     const projectVersionInput: ProjectVersionInput = {
-      version: projectVersion || bom.metadata.component ? bom.metadata.component.version : NotKnownPlaceholder,
+      version: tmpProjectVersion,
       date: bom.metadata.timestamp || Date.now().toLocaleString(),
     };
-    importInfo.projectVersion = await GetProjectVersionId(importInfo.project, projectVersionInput);
+    importInfo.projectVersion = await GetProjectVersionId(
+      importInfo.project,
+      projectVersionInput
+    );
+    console.log(importInfo);
 
     // Create components for new version
 
     // Prepare dependencies
     let dependencies = GetDependencies(bom.dependencies.dependency);
+
     // Create all objects in DB
     // Prepare components
-    const components: Component[] = GetComponents(bom);
-    importInfo.createdComponents = await processBatchAsync(components, CreateComponents, 5, updateProgress);
-    console.log('Components created');
-    console.log(importInfo);
-    // TODO: rewrite this using component IDs, not purl
+    const mainComponent: Component = createMainComponent(
+      bom.metadata.component
+    );
+    let components: Component[] = GetComponents(bom);
+    components.push(mainComponent);
 
-    //   await CreateComponents(components, projectId);
-    //   await updateProgress(50, 'Updating dependencies');
+    importInfo.createdComponents = await processBatchAsync(
+      components,
+      CreateComponents,
+      {
+        chunkSize: 5,
+        updateProgressFn: updateProgress,
+        message: "Updating components",
+        fnArg2: importInfo.projectVersion,
+      }
+    );
+    const dependenciesResult = await updateComponentDependency(
+      dependencies,
+      importInfo.projectVersion,
+      mainComponent.purl
+    );
     //   await UpdateProjectDependencies(projectId, [mainComponent]);
     //   await UpdateComponentDependencies(dependencies, projectId);
-    await updateProgress(70, 'Fetching vulnerabilities');
+    await updateProgress(70, "Fetching vulnerabilities");
     //Vulnerabilities
     //  const purlList = components.map((c) => {
     //     return c.purl;
@@ -84,7 +110,7 @@ export async function ImportSbom(bom: any, projectInput: ProjectInput, projectVe
     //   });
     //   await updateProgress(90, 'Creating vulnerabilities in DB');
   } catch (error) {
-    console.error('Recovery needed');
+    console.error("Recovery needed");
     console.error(error);
   }
 }
@@ -101,8 +127,6 @@ function GetComponents(bom: any) {
       publisher: c.publisher,
     };
   });
-
-  bom.metadata.component && components.push(createMainComponent(bom.metadata.component));
   return components;
 }
 
@@ -132,9 +156,14 @@ function GetDependencies(dependencies: any) {
  * @param ProjectVersionList List of projects
  * @returns The largest project
  */
-export function getLatestProjectVersion(ProjectVersionList: ProjectVersion[]): ProjectVersion {
+export function getLatestProjectVersion(
+  ProjectVersionList: ProjectVersion[]
+): ProjectVersion {
   return ProjectVersionList.reduce((highestVersionObj, currentObj) => {
-    if (!highestVersionObj || compareVersions(currentObj.version, highestVersionObj.version) > 0) {
+    if (
+      !highestVersionObj ||
+      compareVersions(currentObj.version, highestVersionObj.version) > 0
+    ) {
       return currentObj;
     } else {
       return highestVersionObj;
@@ -149,10 +178,10 @@ export function getLatestProjectVersion(ProjectVersionList: ProjectVersion[]): P
  * @returns 1 if version1 > version2, -1 if version1 < version2, 0 if they are equal
  */
 export function compareVersions(version1: string, version2: string): number {
-  const arr1 = version1.split('.').map((num) => parseInt(num, 10));
-  const arr2 = version2.split('.').map((num) => parseInt(num, 10));
-  const num1 = parseInt(arr1.join(''), 10);
-  const num2 = parseInt(arr2.join(''), 10);
+  const arr1 = version1.split(".").map((num) => parseInt(num, 10));
+  const arr2 = version2.split(".").map((num) => parseInt(num, 10));
+  const num1 = parseInt(arr1.join(""), 10);
+  const num2 = parseInt(arr2.join(""), 10);
   if (num1 > num2) {
     return 1;
   } else if (num1 < num2) {
@@ -179,10 +208,10 @@ async function GetProject(project: ProjectInput): Promise<Project> {
   }
   // Project does not exist yet, so we need to create it first
   if (existingProjects.length == 0) {
-    console.log('Creating new project with name %s', name);
+    console.log("Creating new project with name %s", name);
     const newProjectObj: Project = { name: name };
     const newProject = await CreateProject(newProjectObj);
-    console.log('Project created with id: %s', newProject!.id);
+    console.log("Project created with id: %s", newProject!.id);
     return newProject;
   }
   // Project exist, so we just return it
@@ -190,7 +219,7 @@ async function GetProject(project: ProjectInput): Promise<Project> {
   const currentProject = existingProjects[0];
   if (existingProjects.length > 1) {
     console.warn(
-      'Multiple project was found for the name %s\nReturning the first one with id %s',
+      "Multiple project was found for the name %s\nReturning the first one with id %s",
       name,
       currentProject.id
     );
@@ -206,36 +235,46 @@ async function GetProject(project: ProjectInput): Promise<Project> {
  * @param projectVersion Version represented as string, e.g. "1.0.0"
  * @returns ProjectVersion Id
  */
-async function GetProjectVersionId(project: Project, projectVersionInput: ProjectVersionInput) {
+async function GetProjectVersionId(
+  project: Project,
+  projectVersionInput: ProjectVersionInput
+) {
   const { version, date } = projectVersionInput;
   if (!project || !version) {
-    throw Error('Invalid information - missing project or project version');
+    throw Error("Invalid information - missing project or project version");
   }
 
-  if (!project.versions || project.versions.length == 0) {
-  }
-
-  //Version already exists
   const existingProjectVersion = project.versions.find((pv) => {
     pv.version === version;
   });
   if (existingProjectVersion) {
     console.log(
-      'Version %s for project %s already exists with id %s, it will be removed.',
+      "Version %s for project %s already exists with id %s, it will be removed.",
       version,
       project.name,
       existingProjectVersion.id
     );
     await DeleteProjectVersion(existingProjectVersion.id);
   }
-
-  const newVersionId = await CreateProjectVersion(project.id, projectVersionInput);
-  console.log('New version for project %s created with id %s', project.name, newVersionId);
+  const newVersionId = await CreateProjectVersion(
+    project.id,
+    projectVersionInput
+  );
+  console.log(
+    "New version (%s) for project %s created with id %s",
+    projectVersionInput.version,
+    project.name,
+    newVersionId
+  );
   return newVersionId;
 }
 
 function createMainComponent(inputComponent) {
-  const purl = inputComponent.purl || `${inputComponent.name}@${inputComponent.version}`;
+  if (!inputComponent) {
+    throw Error("No main component was provided!");
+  }
+  const purl =
+    inputComponent.purl || `${inputComponent.name}@${inputComponent.version}`;
   return {
     type: inputComponent.type,
     name: inputComponent.name,

@@ -1,14 +1,14 @@
-import { gql } from '@apollo/client';
-import { Component } from '../types/component';
-import { Project, ProjectVersion, ProjectVersionDto } from '../types/project';
+import { gql } from "@apollo/client";
+import { Component } from "../types/component";
+import { Project, ProjectVersion, ProjectVersionDto } from "../types/project";
 import {
   sendGQLQuery,
   sendGQLMutation,
   AddProjectVersionConnectProject,
   BuildAddDependencyQuery,
   AddComponentsConnectProjectVersion,
-} from './DbDataHelper';
-import { ProjectVersionInput } from './ImportSbomHelper';
+} from "./DbDataHelper";
+import { ProjectVersionInput } from "./ImportSbomHelper";
 
 /**
  * Function will create new project with optional first component
@@ -40,7 +40,9 @@ export async function CreateProject(project: Project): Promise<Project> {
  * @param projectName Project name
  * @returns List of projects that match given name
  */
-export async function GetProjectByName(projectName: string): Promise<Project[]> {
+export async function GetProjectByName(
+  projectName: string
+): Promise<Project[]> {
   const query = gql`
     query Project($projectName: String!) {
       projects(where: { name: $projectName }) {
@@ -53,7 +55,6 @@ export async function GetProjectByName(projectName: string): Promise<Project[]> 
       }
     }
   `;
-  console.log(projectName);
   const { data } = await sendGQLQuery(query, { projectName: projectName });
   return data.projects;
 }
@@ -86,10 +87,17 @@ export async function GetProjectById(projectId: string): Promise<Project[]> {
  * @param version new version identificator
  * @returns ID of the new project version
  */
-export async function CreateProjectVersion(projectId, projectVersionInput: ProjectVersionInput): Promise<string> {
+export async function CreateProjectVersion(
+  projectId,
+  projectVersionInput: ProjectVersionInput
+): Promise<string> {
   const { version, date } = projectVersionInput;
   if (!projectId || !version) {
-    console.log('AddProjectComponent is missing some inputs! %s, %s', projectId, version);
+    console.log(
+      "AddProjectComponent is missing some inputs! %s, %s",
+      projectId,
+      version
+    );
     return;
   }
   const mutation = gql`
@@ -109,8 +117,9 @@ export async function CreateProjectVersion(projectId, projectVersionInput: Proje
     project: AddProjectVersionConnectProject(projectId),
     date: new Date(date),
   };
-  const { data } = await sendGQLMutation(mutation, { projectVersion: projectVersion });
-  console.log(data);
+  const { data } = await sendGQLMutation(mutation, {
+    projectVersion: projectVersion,
+  });
   return data.createProjectVersions.projectVersions[0].id;
 }
 
@@ -119,21 +128,31 @@ export async function CreateProjectVersion(projectId, projectVersionInput: Proje
  * @param projectVersionId ID of the project version
  * @returns number of deleted nodes
  */
-export async function DeleteProjectVersion(projectVersionId: string): Promise<number> {
+export async function DeleteProjectVersion(
+  projectVersionId: string
+): Promise<number> {
   const mutation = gql`
     mutation DeleteProjectVersion($projectVersionId: ID) {
-      deleteProjectVersions(where: { id: $projectVersionId }, delete: { component: { where: {} } }) {
+      deleteProjectVersions(
+        where: { id: $projectVersionId }
+        delete: { component: { where: {} } }
+      ) {
         nodesDeleted
       }
     }
   `;
-  const { data } = await sendGQLMutation(mutation, { projectVersionId: projectVersionId });
+  const { data } = await sendGQLMutation(mutation, {
+    projectVersionId: projectVersionId,
+  });
   return data.nodesDeleted;
 }
 
-export async function CreateComponents(components: Component[], projectVersionId: string) {
+export async function CreateComponents(
+  components: Component[],
+  projectVersionId: string
+) {
   if (!components || components.length == 0) {
-    console.log('CreateComponents - No components provided!');
+    console.log("CreateComponents - No components provided!");
     return;
   }
   const mutation = gql`
@@ -150,18 +169,47 @@ export async function CreateComponents(components: Component[], projectVersionId
       }
     }
   `;
-  const componentsWithConnect = AddComponentsConnectProjectVersion(components, projectVersionId);
-  const { data } = await sendGQLMutation(mutation, { components: componentsWithConnect });
+  const componentsWithConnect = AddComponentsConnectProjectVersion(
+    components,
+    projectVersionId
+  );
+  const { data } = await sendGQLMutation(mutation, {
+    components: componentsWithConnect,
+  });
 }
 
-export async function updateComponentDependency(dependencies: any[], projectVersionId: string) {
+export async function updateComponentDependency(
+  dependencies: any[],
+  projectVersionId: string,
+  mainComponentPurl: string
+) {
   if (!dependencies || dependencies.length == 0) {
-    console.log('Updating dependencies - No dependencies provided!');
+    console.log("Updating dependencies - No dependencies provided!");
     return;
   }
-
+  const mainComponentsMutation = gql`
+    mutation UpdateProjectVersion($projectVersionId: ID, $purl: String) {
+      updateProjectVersions(
+        where: { id: $projectVersionId }
+        connect: {
+          component: {
+            where: {
+              node: { purl: $purl, projectVersion: { id: $projectVersionId } }
+            }
+          }
+        }
+      ) {
+        info {
+          relationshipsCreated
+        }
+      }
+    }
+  `;
   const mutation = gql`
-    mutation UpdateDependencies($where: ComponentWhere, $connect: ComponentConnectInput) {
+    mutation UpdateDependencies(
+      $where: ComponentWhere
+      $connect: ComponentConnectInput
+    ) {
       name: updateComponents(where: $where, connect: $connect) {
         info {
           relationshipsCreated
@@ -169,12 +217,24 @@ export async function updateComponentDependency(dependencies: any[], projectVers
       }
     }
   `;
-  const dependencyQueryList: any[] = BuildAddDependencyQuery(dependencies, projectVersionId);
+  // Connect main component
+  const mainComponentRes = await sendGQLMutation(mainComponentsMutation, {
+    projectVersionId: projectVersionId,
+    purl: mainComponentPurl,
+  });
+  const dependencyQueryList: any[] = BuildAddDependencyQuery(
+    dependencies,
+    projectVersionId
+  );
   for (let index = 0; index < dependencyQueryList.length; index++) {
     const { data } = await sendGQLMutation(mutation, {
       where: dependencyQueryList[index].where,
       connect: dependencyQueryList[index].connect,
     });
-    console.log('Created %s relationships', data.info.relationshipsCreated);
+    console.log(data);
+    console.log(
+      "Created %s relationships",
+      data.name.info.relationshipsCreated
+    );
   }
 }

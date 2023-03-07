@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 /**
  * Function responsible for transforming the data to format that can be visualized
@@ -61,10 +61,8 @@ export const formatData = (components) => {
   });
   //Filter out links that are not connected
   links = links.filter((l) => {
-    console.log(l);
     if (l.toVuln || nodes.find((n) => n.id === l.target)) return true;
   });
-  console.log({ node: nodes, links: links });
   return { nodes, links };
 };
 
@@ -129,22 +127,27 @@ export const getProjectsQuery = gql`
     }
   }
 `;
-const componentColor = '#005f73';
-const vulnColor = '#ee9b00';
-const otherColor = '#001219';
-const severeVulnColor = '#bb3e03';
-const systemComponent = '#0f0f0f';
+const componentColor = "#005f73";
+const vulnColor = "#ee9b00";
+const otherColor = "#001219";
+const severeVulnColor = "#bb3e03";
+const systemComponent = "#0f0f0f";
 
 export const getNodeColor = (node) => {
   if (!node) return otherColor;
-  if (node.__typename === 'Vulnerability') return node.cvssScore > 5 ? severeVulnColor : vulnColor;
-  if (node.selected) return '#6500ff';
-  if (node.name && node.name.toLowerCase().includes('system')) return systemComponent;
-  if (node.__typename === 'Component') return componentColor;
+  if (node.__typename === "Vulnerability")
+    return node.cvssScore > 5 ? severeVulnColor : vulnColor;
+  if (node.selected) return "#6500ff";
+  if (node.name && node.name.toLowerCase().includes("system"))
+    return systemComponent;
+  if (node.__typename === "Component") return componentColor;
   return otherColor;
 };
 
-const getNodeTier = (score: number, tresholds: { 1: 10; 0.75: 7; 0.5: 5; 0.25: 3; 0.1: 1 }) => {
+const getNodeTier = (
+  score: number,
+  tresholds: { 1: 10; 0.75: 7; 0.5: 5; 0.25: 3; 0.1: 1 }
+) => {
   const limits = Object.keys(tresholds);
   limits.forEach((l) => {
     if (score < Number.parseFloat(l)) return tresholds[l];
@@ -162,13 +165,13 @@ export const getNodeValue = (node) => {
  */
 function genGraphTree() {
   return {
-    nodes: [{ id: 'A' }, { id: 'B' }, { id: 'C' }, { id: 'D' }],
+    nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }],
     links: [
-      { source: 'A', target: 'B' },
-      { source: 'A', target: 'C' },
-      { source: 'B', target: 'D' },
-      { source: 'D', target: 'C' },
-      { source: 'C', target: 'B' },
+      { source: "A", target: "B" },
+      { source: "A", target: "C" },
+      { source: "B", target: "D" },
+      { source: "D", target: "C" },
+      { source: "C", target: "B" },
     ],
   };
 }
