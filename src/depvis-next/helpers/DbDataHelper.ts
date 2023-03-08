@@ -152,59 +152,28 @@ export async function GetVulnerability(vulnerabilityId) {
   });
   return data.vulnerabilities;
 }
-export async function CreateUpdateVulnerability(
-  purl: string,
-  vulnerabilities: [Vulnerability?]
-) {
-  console.log("Creating vulnerability for package %s", purl);
-  if (!vulnerabilities || vulnerabilities.length == 0 || !purl) return;
 
-  const vulnExistsList = await Promise.all(
-    vulnerabilities.map(async (v) => {
-      const getVuln = await GetVulnerability(v.id);
-      return getVuln.length == 0;
-    })
-  );
-  const newVulnerabilities = vulnerabilities.filter(
-    (_v, index) => vulnExistsList[index]
-  );
-
-  if (newVulnerabilities.length == 0) {
-    console.log(
-      "All vulnerabilities for component %s already exists in DB",
-      purl
-    );
-    return;
-  }
+export async function CreateVulnerability(vulnList: Vulnerability[]) {
   const mutation = gql`
-    mutation CreateVulnerability(
-      $purl: String
-      $vuln_array: [ComponentVulnerabilitiesCreateFieldInput!]
-    ) {
-      updateComponents(
-        where: { purl: $purl }
-        update: { vulnerabilities: { create: $vuln_array } }
-      ) {
+    mutation CreateVulnerability($input: [VulnerabilityCreateInput!]!) {
+      createVulnerabilities(input: $input) {
         info {
           nodesCreated
-          relationshipsCreated
         }
       }
     }
   `;
 
-  //Tranform for mutation compatibility
-  const vulnArray = newVulnerabilities.map((v) => {
-    return { node: PrepareVulnAsGQL(v) };
+  const input = vulnList.map((v) => {
+    return VulnToGQL(v);
   });
   const { data } = await sendGQLMutation(mutation, {
-    purl: purl,
-    vuln_array: vulnArray,
+    input: input,
   });
   return data;
 }
 
-function PrepareVulnAsGQL(vuln: Vulnerability) {
+export function VulnToGQL(vuln: Vulnerability) {
   const refs = vuln.references
     ? {
         connectOrCreate: [

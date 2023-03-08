@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server-micro';
+import { gql } from "apollo-server-micro";
 
 /**
  * Type definition for GraphQL server
@@ -7,7 +7,8 @@ import { gql } from 'apollo-server-micro';
 export const typeDefs = gql`
   type Component {
     id: ID @id
-    projectVersion: ProjectVersion @relationship(type: "BELONGS_TO", direction: OUT)
+    projectVersion: ProjectVersion
+      @relationship(type: "BELONGS_TO", direction: OUT)
     purl: String
     name: String
     type: String
@@ -23,8 +24,10 @@ export const typeDefs = gql`
         """
       )
     dependsOn: [Component!]! @relationship(type: "DEPENDS_ON", direction: OUT)
-    references: [Reference!]! @relationship(type: "HAS_REFERENCE", direction: OUT)
-    vulnerabilities: [Vulnerability!]! @relationship(type: "HAS_VULNERABILITY", direction: OUT)
+    references: [Reference!]!
+      @relationship(type: "HAS_REFERENCE", direction: OUT)
+    vulnerabilities: [Vulnerability!]!
+      @relationship(type: "HAS_VULNERABILITY", direction: OUT)
     indirectVulnCount: Int
       @cypher(
         statement: """
@@ -38,22 +41,25 @@ export const typeDefs = gql`
 
   type Vulnerability {
     id: String @unique
-    cve: String @unique
-    ghsa: String @unique
+    cve: String
+    ghsa: String
     name: String
     description: String
     affectedVersions: String
     cvssScore: Float
     cvssVector: String
     cwe: String
-    references: [Reference!]! @relationship(type: "HAS_REFERENCE", direction: OUT)
-    affectedComponents: [Component!]! @relationship(type: "HAS_VULNERABILITY", direction: IN)
+    references: [Reference!]!
+      @relationship(type: "HAS_REFERENCE", direction: OUT)
+    affectedComponents: [Component!]!
+      @relationship(type: "HAS_VULNERABILITY", direction: IN)
   }
 
   type Project {
     id: ID @id
     name: String @unique
-    versions: [ProjectVersion!]! @relationship(type: "HAS_VERSION", direction: OUT)
+    versions: [ProjectVersion!]!
+      @relationship(type: "HAS_VERSION", direction: OUT)
   }
 
   type ProjectVersion {

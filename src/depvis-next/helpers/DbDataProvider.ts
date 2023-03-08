@@ -1,12 +1,15 @@
 import { gql } from "@apollo/client";
 import { Component } from "../types/component";
 import { Project, ProjectVersion, ProjectVersionDto } from "../types/project";
+import { Vulnerability } from "../types/vulnerability";
 import {
   sendGQLQuery,
   sendGQLMutation,
   AddProjectVersionConnectProject,
   BuildAddDependencyQuery,
   AddComponentsConnectProjectVersion,
+  GetVulnerability,
+  CreateVulnerability as CreateVulnerabilities,
 } from "./DbDataHelper";
 import { ProjectVersionInput } from "./ImportSbomHelper";
 
@@ -237,4 +240,54 @@ export async function updateComponentDependency(
       data.name.info.relationshipsCreated
     );
   }
+}
+
+export async function CreateUpdateVulnerability(
+  purl: string,
+  vulnerabilities: Vulnerability[]
+) {
+  console.log("Creating vulnerability for package %s", purl);
+  if (!vulnerabilities || vulnerabilities.length == 0 || !purl) return;
+
+  const vulnExistsList = await Promise.all(
+    vulnerabilities.map(async (v) => {
+      const getVuln = await GetVulnerability(v.id);
+      return getVuln.length == 0;
+    })
+  );
+  const newVulnerabilities = vulnerabilities.filter(
+    (_v, index) => vulnExistsList[index]
+  );
+  const newVulnsUnique = newVulnerabilities.filter(
+    (v, index, arr) => arr.indexOf(v) == index
+  );
+  //Create new vulnerabilities
+  await CreateVulnerabilities(newVulnsUnique);
+
+  const mutation = gql`
+    mutation CreateVulnerability(
+      $purl: String
+      $vuln_array: [ComponentVulnerabilitiesConnectFieldInput!]
+    ) {
+      updateComponents(
+        where: { purl: $purl }
+        connect: { vulnerabilities: $vuln_array }
+      ) {
+        info {
+          nodesCreated
+          relationshipsCreated
+        }
+      }
+    }
+  `;
+
+  //Connect vulnerabilities to component
+  const vulnArray = vulnerabilities.map((v) => {
+    return { where: { node: { id: v.id } } };
+  });
+  const { data } = await sendGQLMutation(mutation, {
+    purl: purl,
+    vuln_array: vulnArray,
+  });
+  return data;
 }

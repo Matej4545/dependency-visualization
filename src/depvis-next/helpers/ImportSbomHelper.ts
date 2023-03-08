@@ -10,6 +10,7 @@ import {
   GetProjectByName,
   CreateComponents,
   updateComponentDependency,
+  CreateUpdateVulnerability,
 } from "./DbDataProvider";
 
 type ProjectInput = {
@@ -93,22 +94,28 @@ export async function ImportSbom(
       importInfo.projectVersion,
       mainComponent.purl
     );
-    //   await UpdateProjectDependencies(projectId, [mainComponent]);
-    //   await UpdateComponentDependencies(dependencies, projectId);
     await updateProgress(70, "Fetching vulnerabilities");
     //Vulnerabilities
-    //  const purlList = components.map((c) => {
-    //     return c.purl;
-    //   });
-    //   const r = await processBatch(purlList, VulnFetcherHandler);
-    //   await updateProgress(90, 'Creating vulnerabilities in DB');
-    //   r.forEach(async (component) => {
-    //     if (component.vulnerabilities.length > 0) {
-    //       console.log('Creating %d vulns for %s', component.vulnerabilities.length, component.purl);
-    //       await CreateUpdateVulnerability(component.purl, component.vulnerabilities);
-    //     }
-    //   });
-    //   await updateProgress(90, 'Creating vulnerabilities in DB');
+    const purlList = components.map((c) => {
+      return c.purl;
+    });
+    const r = await processBatchAsync<any[]>(purlList, VulnFetcherHandler, {
+      chunkSize: 10,
+    });
+    await updateProgress(90, "Creating vulnerabilities in DB");
+    r.forEach(async (component) => {
+      if (component.vulnerabilities.length > 0) {
+        console.log(
+          "Creating %d vulns for %s",
+          component.vulnerabilities.length,
+          component.purl
+        );
+        await CreateUpdateVulnerability(
+          component.purl,
+          component.vulnerabilities
+        );
+      }
+    });
   } catch (error) {
     console.error("Recovery needed");
     console.error(error);
