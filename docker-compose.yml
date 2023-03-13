@@ -1,8 +1,8 @@
-version: '3'
+version: "3"
 
 services:
   neo4j:
-    image: neo4j:4.4.7
+    image: neo4j:latest
     ports:
       - 7474:7474
       - 7687:7687
@@ -22,6 +22,7 @@ services:
   redis-cache:
     image: redis:latest
     command: redis-server --requirepass ${REDIS_PASSWORD}
+    restart: unless-stopped
     volumes:
       - cache:/data
     ports:
@@ -31,7 +32,7 @@ services:
 
   redis-commander:
     image: rediscommander/redis-commander:latest
-    restart: always
+    restart: unless-stopped
     environment:
       REDIS_HOSTS: redis-cache
       REDIS_HOST: redis-cache

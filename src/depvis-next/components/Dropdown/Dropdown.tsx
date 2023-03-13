@@ -1,24 +1,37 @@
-import { useState } from 'react';
-import { Container, Form } from 'react-bootstrap';
+import { useEffect, useState } from "react";
+import { Container, Form } from "react-bootstrap";
 
+export type DropdownItem = {
+  displayName: string;
+  id: string;
+};
+
+/**
+ * Dropdown component, renders set of options and fires a callback on change
+ * @param props one of title, onChange, defaultValue, options, disabled
+ * @returns
+ */
 export default function Dropdown(props) {
-  const [selected, setSelected] = useState(props.default);
+  const { title, onChange, defaultValue, options, disabled } = props;
+  const [selectedId, setSelectedId] = useState(defaultValue);
   return (
     <Container>
       <Form>
-        {props.title && <Form.Label>{props.title}</Form.Label>}
+        {title && <Form.Label>{title}</Form.Label>}
         <Form.Select
-          value={selected}
+          value={selectedId && selectedId}
+          disabled={disabled}
           onChange={(e) => {
-            props.onChange(e.target.value);
-            setSelected(e.target.value);
+            setSelectedId(e.target.value);
+            onChange(e.target.value);
           }}
         >
-          {props.options.map((v, i) => (
-            <option key={i} value={v.id}>
-              {v.name}
-            </option>
-          ))}
+          {options &&
+            options.map((v: DropdownItem, i: number) => (
+              <option key={i} value={v.id}>
+                {v.displayName}
+              </option>
+            ))}
         </Form.Select>
       </Form>
     </Container>

@@ -1,6 +1,6 @@
-import { Project } from './project';
-import { Reference } from './reference';
-import { Vulnerability } from './vulnerability';
+import { Project } from "./project";
+import { Reference } from "./reference";
+import { Vulnerability } from "./vulnerability";
 
 export type Component = {
   /**
@@ -55,4 +55,11 @@ export type Component = {
 
 export type ComponentDto = Component & {
   projectVersion: any;
+};
+
+export type Dependency = {
+  purl: string;
+  dependsOn: {
+    purl: string;
+  }[];
 };

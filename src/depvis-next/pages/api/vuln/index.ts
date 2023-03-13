@@ -1,8 +1,6 @@
 import { processBatchAsync } from "../../../helpers/BatchHelper";
-import {
-  CreateUpdateVulnerability,
-  GetComponents,
-} from "../../../helpers/DbDataHelper";
+import { GetComponents } from "../../../helpers/DbDataHelper";
+import { CreateUpdateVulnerability } from "../../../helpers/DbDataProvider";
 import { VulnFetcherHandler } from "../../../vulnerability-mgmt/VulnFetcherHandler";
 export default async function handler(req, res) {
   const { components } = await GetComponents();

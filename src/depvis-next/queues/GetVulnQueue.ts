@@ -1,8 +1,8 @@
-import { Job, Worker } from 'bullmq';
-import { CreateUpdateVulnerability } from '../helpers/DbDataHelper';
-import { defaultBullConfig } from '../helpers/QueueHelper';
-import { VulnFetcherHandler } from '../vulnerability-mgmt/VulnFetcherHandler';
-export const GetVulnQueueName = 'get-vuln-queue';
+import { Job, Worker } from "bullmq";
+import { CreateUpdateVulnerability } from "../helpers/DbDataProvider";
+import { defaultBullConfig } from "../helpers/QueueHelper";
+import { VulnFetcherHandler } from "../vulnerability-mgmt/VulnFetcherHandler";
+export const GetVulnQueueName = "get-vuln-queue";
 
 const worker = new Worker(
   GetVulnQueueName,
@@ -15,11 +15,11 @@ const worker = new Worker(
   defaultBullConfig
 );
 
-worker.on('failed', (job, error) => {
-  console.log('Job %d failed with error %s', job.id, error.message);
+worker.on("failed", (job, error) => {
+  console.log("Job %d failed with error %s", job.id, error.message);
   console.error(error);
 });
 
-worker.on('completed', (job) => {
-  console.log('Job %d completed successfully!', job.id);
+worker.on("completed", (job) => {
+  console.log("Job %d completed successfully!", job.id);
 });

@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client";
-import { Component } from "../types/component";
+import { Component, Dependency } from "../types/component";
 import { Project, ProjectVersion, ProjectVersionDto } from "../types/project";
 import { Vulnerability } from "../types/vulnerability";
 import {
@@ -150,6 +150,12 @@ export async function DeleteProjectVersion(
   return data.nodesDeleted;
 }
 
+/**
+ * Creates components in database and connects them with projectVersion
+ * @param components List of components
+ * @param projectVersionId ID of the project version
+ * @returns List of created components
+ */
 export async function CreateComponents(
   components: Component[],
   projectVersionId: string
@@ -179,10 +185,18 @@ export async function CreateComponents(
   const { data } = await sendGQLMutation(mutation, {
     components: componentsWithConnect,
   });
+  return data.createComponents.components;
 }
 
+/**
+ * Adds dependency relationship for components and connects main component to project version
+ * @param dependencies List of dependencies
+ * @param projectVersionId ID of the project version
+ * @param mainComponentPurl purl of the main component that will be connected to projectVersion
+ * @returns number of dependencies created
+ */
 export async function updateComponentDependency(
-  dependencies: any[],
+  dependencies: Dependency[],
   projectVersionId: string,
   mainComponentPurl: string
 ) {
@@ -229,17 +243,16 @@ export async function updateComponentDependency(
     dependencies,
     projectVersionId
   );
+  let dependencyCount = 0;
   for (let index = 0; index < dependencyQueryList.length; index++) {
     const { data } = await sendGQLMutation(mutation, {
       where: dependencyQueryList[index].where,
       connect: dependencyQueryList[index].connect,
     });
-    console.log(data);
-    console.log(
-      "Created %s relationships",
-      data.name.info.relationshipsCreated
-    );
+    dependencyCount += data.name.info.relationshipsCreated;
   }
+  console.log("Created %s relationships", dependencyCount);
+  return dependencyCount;
 }
 
 export async function CreateUpdateVulnerability(

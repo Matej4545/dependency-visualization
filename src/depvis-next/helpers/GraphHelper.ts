@@ -67,8 +67,8 @@ export const formatData = (components) => {
 };
 
 export const getAllComponentsQuery = gql`
-  query getProjectComponents($projectId: ID) {
-    projects(where: { id: $projectId }) {
+  query getProjectComponents($projectVersionId: ID) {
+    projectVersions(where: { id: $projectVersionId }) {
       allVulnerableComponents {
         id
         name
@@ -123,7 +123,23 @@ export const getProjectsQuery = gql`
     projects {
       id
       name
+      versions {
+        id
+        version
+      }
+    }
+  }
+`;
+
+export const getProjectVersionsQuery = gql`
+  {
+    projectVersions {
+      id
       version
+      project {
+        name
+        id
+      }
     }
   }
 `;

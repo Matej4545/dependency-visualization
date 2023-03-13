@@ -1,4 +1,4 @@
-import { Component } from "../types/component";
+import { Component, Dependency } from "../types/component";
 import { Project, ProjectVersion } from "../types/project";
 import { VulnFetcherHandler } from "../vulnerability-mgmt/VulnFetcherHandler";
 import { processBatchAsync } from "./BatchHelper";
@@ -137,9 +137,9 @@ function GetComponents(bom: any) {
   return components;
 }
 
-function GetDependencies(dependencies: any) {
+function GetDependencies(dependencies: any): Dependency[] {
   if (!dependencies) return;
-  const res = dependencies
+  const res: Dependency[] = dependencies
     .map((d) => {
       if (d.dependency != undefined) {
         if (!(d.dependency instanceof Array)) d.dependency = [d.dependency];

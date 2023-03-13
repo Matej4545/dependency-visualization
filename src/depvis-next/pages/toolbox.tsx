@@ -1,19 +1,28 @@
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { PackageURL } from 'packageurl-js';
-import { useEffect, useState } from 'react';
-import { Button, Col, Container, Form, ProgressBar, Row, Stack } from 'react-bootstrap';
-import { ParsePurl } from '../components/Toolbox/ParsePurl';
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { PackageURL } from "packageurl-js";
+import { useEffect, useState } from "react";
+import {
+  Button,
+  Col,
+  Container,
+  Form,
+  ProgressBar,
+  Row,
+  Stack,
+} from "react-bootstrap";
+import { ParsePurl } from "../components/Toolbox/ParsePurl";
+import ProjectSelector from "../components/Workspace/ProjectSelector";
 
 const Toolbox = () => {
-  const [purlString, setPurlString] = useState('');
-  const [purlOutput, setPurlOutput] = useState('');
+  const [purlString, setPurlString] = useState("");
+  const [purlOutput, setPurlOutput] = useState("");
   const handlePurl = async () => {
     setPurlOutput(await JSON.stringify(PackageURL.fromString(purlString)));
     console.log(purlOutput);
   };
   const handleVuln = async () => {
-    const res = await fetch('/api/vuln');
+    const res = await fetch("/api/vuln");
     console.log(res);
   };
 
@@ -42,6 +51,9 @@ const Toolbox = () => {
       <Row>Query param is {router.query.test}</Row>
       <Row>
         <ProgressBar className="" animated now={45} label={`${45}%`} />
+      </Row>
+      <Row>
+        <ProjectSelector />
       </Row>
     </Container>
   );
