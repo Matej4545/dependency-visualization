@@ -99,13 +99,17 @@ const Workspace = () => {
 
   const paintRing = useCallback(
     (currNode, ctx) => {
-      if (node) {
-        // add ring just for highlighted nodes
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, node.size | 1, 0, 2 * Math.PI, false);
-        ctx.fillStyle = currNode === node ? "red" : "orange";
-        ctx.fill();
-      }
+      ctx.beginPath();
+      ctx.arc(
+        currNode.x,
+        currNode.y,
+        (Math.sqrt(currNode.size) * 4 + 1) | 1,
+        0,
+        2 * Math.PI,
+        false
+      );
+      ctx.fillStyle = currNode === node ? "red" : "";
+      ctx.fill();
     },
     [node]
   );

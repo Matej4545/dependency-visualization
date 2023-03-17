@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import { getProjectVersionsQuery } from "../../helpers/GraphHelper";
 import Dropdown, { DropdownItem } from "../Dropdown/Dropdown";
+import NoProjectFoundError from "../Error/NoProjectFoundError";
 
 type ProjectSelectorProps = {
   onProjectVersionSelect?: (projectVersionId: string) => void;
@@ -40,6 +41,10 @@ const ProjectVersionSelector = (props: ProjectSelectorProps) => {
       displayName: `${pv.name} v${pv.version}`,
     };
   };
+
+  if (!projectsLoading && projects.projectVersions.length == 0) {
+    return <NoProjectFoundError />;
+  }
   return (
     <Container>
       {!projectsLoading && (
