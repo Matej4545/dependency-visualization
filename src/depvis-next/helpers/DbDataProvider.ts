@@ -198,7 +198,8 @@ export async function CreateComponents(
 export async function updateComponentDependency(
   dependencies: Dependency[],
   projectVersionId: string,
-  mainComponentPurl: string
+  mainComponentPurl: string,
+  progressUpdateFn: Function
 ) {
   if (!dependencies || dependencies.length == 0) {
     console.log("Updating dependencies - No dependencies provided!");
@@ -250,6 +251,7 @@ export async function updateComponentDependency(
       connect: dependencyQueryList[index].connect,
     });
     dependencyCount += data.name.info.relationshipsCreated;
+    progressUpdateFn(index / dependencies.length);
   }
   console.log("Created %s relationships", dependencyCount);
   return dependencyCount;

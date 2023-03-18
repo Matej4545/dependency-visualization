@@ -31,25 +31,32 @@ export async function ImportSbom(
   projectVersion: string,
   updateProgressCallback
 ) {
-  /**
-   * Simple wrapper function that is responsible for updating status for job worker
-   * @param percent Status in percent (0-100)
-   * @param message Short description what is happening
-   */
-  const updateProgress = async (percent, message) => {
-    await updateProgressCallback({ message: message, percent: percent });
-  };
-  console.log("Here the project version is: %s", projectVersion);
   const importInfo = {
     project: undefined,
     projectVersion: undefined,
     createdComponents: [],
     createdVulnerabilitiesIds: [],
+    currentPhase: ImportPhase.Init,
+  };
+
+  /**
+   * Simple wrapper function that is responsible for updating status for job worker
+   * @param percent Status in percent (0-100)
+   */
+  const updateProgress = async (percent) => {
+    const obj = {
+      message: importInfo.currentPhase,
+      percent: CalculateProgress(importInfo.currentPhase, percent),
+    };
+    console.log(obj);
+    await updateProgressCallback(obj);
   };
 
   try {
-    // Find project information on backend
-    await updateProgress(0, "Creating new project version");
+    // Get project & project version
+    // Both project and project version will be created if it does not exist yet
+    importInfo.currentPhase = ImportPhase.CreateProject;
+    await updateProgress(0);
     importInfo.project = await GetProject(projectInput);
     const tmpProjectVersion = projectVersion
       ? projectVersion
@@ -64,20 +71,18 @@ export async function ImportSbom(
       importInfo.project,
       projectVersionInput
     );
-    console.log(importInfo);
+    updateProgress(5);
 
-    // Create components for new version
-
-    // Prepare dependencies
+    // Prepare necessary objects - if it fails, no objects in DB are created yet
     let dependencies = GetDependencies(bom.dependencies.dependency);
-
-    // Create all objects in DB
-    // Prepare components
     const mainComponent: Component = createMainComponent(
       bom.metadata.component
     );
     let components: Component[] = GetComponents(bom);
     components.push(mainComponent);
+
+    // Create components in DB
+    importInfo.currentPhase = ImportPhase.CreateComponents;
 
     importInfo.createdComponents = await processBatchAsync(
       components,
@@ -85,25 +90,32 @@ export async function ImportSbom(
       {
         chunkSize: 5,
         updateProgressFn: updateProgress,
-        message: "Updating components",
         fnArg2: importInfo.projectVersion,
       }
     );
+
+    // Connect dependencies
+    importInfo.currentPhase = ImportPhase.ConnectDependencies;
     const dependenciesResult = await updateComponentDependency(
       dependencies,
       importInfo.projectVersion,
-      mainComponent.purl
+      mainComponent.purl,
+      updateProgress
     );
-    await updateProgress(70, "Fetching vulnerabilities");
-    //Vulnerabilities
+
+    // Find vulnerabilities
+    importInfo.currentPhase = ImportPhase.FindVulnerabilities;
     const purlList = components.map((c) => {
       return c.purl;
     });
     const r = await processBatchAsync<any[]>(purlList, VulnFetcherHandler, {
       chunkSize: 10,
+      updateProgressFn: updateProgress,
     });
-    await updateProgress(90, "Creating vulnerabilities in DB");
-    r.forEach(async (component) => {
+
+    // Create or connect vulnerabilities
+    r.forEach(async (component, index) => {
+      updateProgress(index / r.length);
       if (component.vulnerabilities.length > 0) {
         console.log(
           "Creating %d vulns for %s",
@@ -116,9 +128,13 @@ export async function ImportSbom(
         );
       }
     });
+    importInfo.currentPhase = ImportPhase.Completed;
   } catch (error) {
     console.error("Recovery needed");
     console.error(error);
+    if (importInfo.projectVersion) {
+      await DeleteProjectVersion(importInfo.projectVersion);
+    }
   }
 }
 function GetComponents(bom: any) {
@@ -291,3 +307,41 @@ function createMainComponent(inputComponent) {
     publisher: inputComponent.publisher,
   };
 }
+
+enum ImportPhase {
+  CreateProject = "Creating project version",
+  CreateComponents = "Creating components",
+  ConnectDependencies = "Connecting dependencies",
+  FindVulnerabilities = "Looking for vulnerabilities",
+  CreateVulnerabilities = "Adding vulnerabilities",
+  Completed = "Import is completed",
+  Init = "Starting import",
+}
+
+const CalculateProgress = (importPhase: ImportPhase, phasePercent: number) => {
+  switch (importPhase) {
+    case ImportPhase.CreateProject:
+      return CalculateProgressFn(0, 5, phasePercent);
+    case ImportPhase.CreateComponents:
+      return CalculateProgressFn(5, 40, phasePercent);
+    case ImportPhase.ConnectDependencies:
+      return CalculateProgressFn(40, 60, phasePercent);
+    case ImportPhase.FindVulnerabilities:
+      return CalculateProgressFn(60, 85, phasePercent);
+    case ImportPhase.CreateVulnerabilities:
+      return CalculateProgressFn(85, 100, phasePercent);
+    default:
+      return 0;
+  }
+};
+
+const CalculateProgressFn = (
+  offset: number,
+  maximum: number,
+  percent: number
+): number => {
+  const multiplier = percent > 100 ? 100 : percent;
+  const result = offset + (maximum - offset) * multiplier;
+  if (result < 0) return 0;
+  return Number.parseInt(result.toFixed(0));
+};

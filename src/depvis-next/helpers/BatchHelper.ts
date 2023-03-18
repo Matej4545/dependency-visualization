@@ -23,7 +23,7 @@ export async function processBatchAsync<T>(
   try {
     for (let i = 0; i < inputList.length; i += chunkSize) {
       if (options.updateProgressFn) {
-        options.updateProgressFn((i / inputList.length) * 100, options.message);
+        options.updateProgressFn(i / inputList.length);
       }
       const chunk = inputList.slice(i, i + chunkSize);
       const chunkRes = await fn(chunk, options.fnArg2);
