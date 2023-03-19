@@ -158,7 +158,7 @@ export const getProjectVersionsQuery = gql`
 // const severeVulnColor = "#bb3e03";
 // const systemComponent = "#0f0f0f";
 
-const vulnerabilityColorByCVSS = (cvssScore: number) => {
+export const vulnerabilityColorByCVSS = (cvssScore: number) => {
   if (cvssScore >= 9) return vulnerabilityCriticalColor;
   if (cvssScore >= 7) return vulnerabilityHighColor;
   if (cvssScore >= 4) return vulnerabilityMediumColor;
