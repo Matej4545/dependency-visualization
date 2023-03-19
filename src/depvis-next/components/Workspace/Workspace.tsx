@@ -24,6 +24,7 @@ import Sidebar from "../Layout/Sidebar";
 import ProjectSelector from "./ProjectSelector";
 import { DropdownItem } from "../Dropdown/Dropdown";
 import ProjectVersionSelector from "./ProjectVersionSelector";
+import { graphSelectedNode } from "../../types/colorPalette";
 
 const defaultGraphConfig: GraphConfig = {
   zoomLevel: 1,
@@ -108,7 +109,7 @@ const Workspace = () => {
         2 * Math.PI,
         false
       );
-      ctx.fillStyle = currNode === node ? "red" : "";
+      ctx.fillStyle = currNode === node ? graphSelectedNode : "";
       ctx.fill();
     },
     [node]

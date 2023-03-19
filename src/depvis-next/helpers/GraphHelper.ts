@@ -1,4 +1,13 @@
 import { gql } from "@apollo/client";
+import {
+  graphExcludedNode,
+  graphNode,
+  graphUIGrey,
+  vulnerabilityCriticalColor,
+  vulnerabilityHighColor,
+  vulnerabilityLowColor,
+  vulnerabilityMediumColor,
+} from "../types/colorPalette";
 
 /**
  * Function responsible for transforming the data to format that can be visualized
@@ -143,21 +152,29 @@ export const getProjectVersionsQuery = gql`
     }
   }
 `;
-const componentColor = "#005f73";
-const vulnColor = "#ee9b00";
-const otherColor = "#001219";
-const severeVulnColor = "#bb3e03";
-const systemComponent = "#0f0f0f";
+// const componentColor = "#005f73";
+// const vulnColor = "#ee9b00";
+// const otherColor = "#001219";
+// const severeVulnColor = "#bb3e03";
+// const systemComponent = "#0f0f0f";
 
+const vulnerabilityColorByCVSS = (cvssScore: number) => {
+  if (cvssScore >= 9) return vulnerabilityCriticalColor;
+  if (cvssScore >= 7) return vulnerabilityHighColor;
+  if (cvssScore >= 4) return vulnerabilityMediumColor;
+  return vulnerabilityLowColor;
+};
+
+const nodeExcludeRegex = new RegExp(
+  process.env.NEXT_PUBLIC_GRAPH_EXCLUDED_REGEX
+);
 export const getNodeColor = (node) => {
-  if (!node) return otherColor;
+  if (!node) return graphUIGrey;
   if (node.__typename === "Vulnerability")
-    return node.cvssScore > 5 ? severeVulnColor : vulnColor;
-  if (node.selected) return "#6500ff";
-  if (node.name && node.name.toLowerCase().includes("system"))
-    return systemComponent;
-  if (node.__typename === "Component") return componentColor;
-  return otherColor;
+    return vulnerabilityColorByCVSS(node.cvssScore);
+  if (node.name && nodeExcludeRegex.test(node.name)) return graphExcludedNode;
+  if (node.__typename === "Component") return graphNode;
+  return graphUIGrey;
 };
 
 const getNodeTier = (
