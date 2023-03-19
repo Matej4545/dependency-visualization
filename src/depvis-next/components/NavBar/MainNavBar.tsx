@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { Button } from "react-bootstrap";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
@@ -7,6 +8,12 @@ import NavDropdown from "react-bootstrap/NavDropdown";
 import { DeleteAllData } from "../../helpers/DbDataHelper";
 import { gqlUrlPath } from "../../pages/api/graphql";
 const MainNavbar = () => {
+  const router = useRouter();
+
+  const handleDeleteAllData = async () => {
+    await DeleteAllData();
+    router.reload();
+  };
   return (
     <Navbar bg="dark" expand="lg" variant="dark">
       <Container>
@@ -30,7 +37,7 @@ const MainNavbar = () => {
                 className="mx-3"
                 variant="danger"
                 onClick={() => {
-                  DeleteAllData();
+                  handleDeleteAllData();
                 }}
               >
                 Delete all data in DB

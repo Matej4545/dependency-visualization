@@ -1,13 +1,13 @@
-import { processBatch } from "../../../helpers/BatchHelper";
-import {
-  CreateUpdateVulnerability,
-  GetComponents,
-} from "../../../helpers/DbDataHelper";
+import { processBatchAsync } from "../../../helpers/BatchHelper";
+import { GetComponents } from "../../../helpers/DbDataHelper";
+import { CreateUpdateVulnerability } from "../../../helpers/DbDataProvider";
 import { VulnFetcherHandler } from "../../../vulnerability-mgmt/VulnFetcherHandler";
 export default async function handler(req, res) {
   const { components } = await GetComponents();
   const purlList = components.map((c) => c.purl);
-  const r = await processBatch(purlList, VulnFetcherHandler, 100);
+  const r = await processBatchAsync<any[]>(purlList, VulnFetcherHandler, {
+    chunkSize: 100,
+  });
 
   //Use queue here
   r.forEach(async (component) => {

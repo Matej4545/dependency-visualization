@@ -5,18 +5,34 @@
  * @param chunkSize How many items are used per one batch. Default is 10
  * @returns Concatenated results of each function call.
  */
-export async function processBatch<T>(
+
+export type processBatchOptions = {
+  fnArg2?: any;
+  updateProgressFn?: Function;
+  message?: any;
+  chunkSize: number;
+};
+export async function processBatchAsync<T>(
   inputList: any[],
   fn: Function,
-  chunkSize: number = 10
-) {
+  options: processBatchOptions
+): Promise<T> {
   if (!inputList) return;
   let res = [];
-  for (let i = 0; i < inputList.length; i += chunkSize) {
-    const chunk = inputList.slice(i, i + chunkSize);
-    const chunkRes = await fn(chunk);
-    res = res.concat(chunkRes);
+  const chunkSize = options.chunkSize || 10;
+  try {
+    for (let i = 0; i < inputList.length; i += chunkSize) {
+      if (options.updateProgressFn) {
+        options.updateProgressFn(i / inputList.length);
+      }
+      const chunk = inputList.slice(i, i + chunkSize);
+      const chunkRes = await fn(chunk, options.fnArg2);
+      res = res.concat(chunkRes);
+    }
+  } catch (error) {
+    console.error("While processing batch, error was encountered!");
+    console.error(error);
   }
   console.log("Total items processed %d", res.length);
-  return res;
+  return res as T;
 }

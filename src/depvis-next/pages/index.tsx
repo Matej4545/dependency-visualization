@@ -1,4 +1,4 @@
-import Workspace from '../components/Layout/Workspace';
+import Workspace from "../components/Workspace/Workspace";
 
 const index = () => {
   return <Workspace />;

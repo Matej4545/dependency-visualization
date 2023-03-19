@@ -10,15 +10,19 @@ const GraphControl = (props) => {
 
   useEffect(() => {
     props.onGraphConfigChange(graphConfig);
+    console.log(graphConfig);
   }, [graphConfig]);
 
   const handleNodeValToggle = (e) => {
     if (typeof graphConfig.nodeVal === 'function') {
       setGraphConfig({ ...graphConfig, nodeVal: 1 });
-      console.log(graphConfig);
     } else {
       setGraphConfig({ ...graphConfig, nodeVal: getNodeValue });
     }
+  };
+
+  const handleShowOnlyVulnerableToggle = (e) => {
+    setGraphConfig({ ...graphConfig, showOnlyVulnerable: !graphConfig.showOnlyVulnerable });
   };
 
   return (
@@ -33,6 +37,17 @@ const GraphControl = (props) => {
             handleNodeValToggle(e);
           }}
           checked={typeof graphConfig.nodeVal === 'function'}
+        />
+      </Stack>
+      <Stack direction="horizontal">
+        <Form.Label>Show only affected components</Form.Label>
+        <Form.Check
+          className="ms-auto"
+          type="switch"
+          onChange={(e) => {
+            handleShowOnlyVulnerableToggle(e);
+          }}
+          checked={graphConfig.showOnlyVulnerable as boolean}
         />
       </Stack>
       <Form.Label>Length of links</Form.Label>

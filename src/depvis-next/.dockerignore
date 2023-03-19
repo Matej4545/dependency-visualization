@@ -5,3 +5,8 @@ npm-debug.log
 README.md
 .next
 .git
+
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local

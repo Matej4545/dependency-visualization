@@ -32,3 +32,7 @@
   overflow: hidden;
   white-space: nowrap;
 }
+
+.import-preview {
+  max-height: 25rem;
+}

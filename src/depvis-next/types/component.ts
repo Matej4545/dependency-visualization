@@ -1,6 +1,6 @@
-import { Project } from './project';
-import { Reference } from './reference';
-import { Vulnerability } from './vulnerability';
+import { Project } from "./project";
+import { Reference } from "./reference";
+import { Vulnerability } from "./vulnerability";
 
 export type Component = {
   /**
@@ -38,17 +38,28 @@ export type Component = {
   /**
    * List of all components that are direct dependencies for given component
    */
-  dependsOn?: [Component];
+  dependsOn?: Component[];
   /**
    * References to external resources
    */
-  references?: [Reference];
+  references?: Reference[];
   /**
    * List of vulnerabilities for given component
    */
-  vulnerabilities?: [Vulnerability];
+  vulnerabilities?: Vulnerability[];
   /**
    * Reference to a project that contains given component
    */
   project?: Project;
+};
+
+export type ComponentDto = Component & {
+  projectVersion: any;
+};
+
+export type Dependency = {
+  purl: string;
+  dependsOn: {
+    purl: string;
+  }[];
 };
