@@ -7,14 +7,14 @@ import { gqlUrlPath } from "../pages/api/graphql";
  * @returns ApolloClient object
  */
 export const createApolloClient = () => {
-  if (!process.env.NEXT_PUBLIC_SERVER_URI) {
+  const serverUri = !(typeof window === "object") //decide if using browser or console
+    ? process.env.BACKEND_SERVER_URI
+    : process.env.NEXT_PUBLIC_SERVER_URI;
+  if (!serverUri) {
     console.error("No server URI was provided, using default connection");
   }
-  const uri = urlJoin(
-    process.env.NEXT_PUBLIC_SERVER_URI || "http://localhost:3000",
-    gqlUrlPath
-  );
-  // console.log(`Creating GQL Client (connection to ${uri})`);
+  const uri = urlJoin(serverUri || "http://localhost:3000", gqlUrlPath);
+  console.log(`Creating GQL Client (connection to ${uri})`);
   const link = new HttpLink({
     uri: uri,
     fetchOptions: {
