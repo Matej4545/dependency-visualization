@@ -158,16 +158,15 @@ const Workspace = () => {
 
           <Details data={node} title="Development details" />
         </Sidebar>
-        {!loading && (
-          <GraphContainer
-            nodeCanvasObject={paintRing}
-            selectedNode={node}
-            isLoading={loading}
-            graphData={graphData}
-            onNodeClick={(node) => handleNodeClick(node)}
-            graphConfig={graphConfig}
-          />
-        )}
+
+        <GraphContainer
+          nodeCanvasObject={paintRing}
+          selectedNode={node}
+          isLoading={loading}
+          graphData={graphData}
+          onNodeClick={(node) => handleNodeClick(node)}
+          graphConfig={graphConfig}
+        />
       </Row>
     </Container>
   );

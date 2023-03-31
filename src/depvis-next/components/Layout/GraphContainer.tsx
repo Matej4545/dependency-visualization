@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Col } from "react-bootstrap";
+import { Col, Container } from "react-bootstrap";
 import { ForceGraphMethods } from "react-force-graph-2d";
 import { getNodeColor, getNodeValue } from "../../helpers/GraphHelper";
 import { GraphConfig } from "../Graph/GraphConfig";
@@ -31,7 +31,11 @@ const GraphContainer = (props) => {
 
   return (
     <Col className="workspace-graph-nospace" ref={graphContainerRef}>
-      {props.isLoading && <Loading detail="Retrieving data from server" />}
+      {props.isLoading && (
+        <Container className="py-5">
+          <Loading detail="Retrieving data from server" />
+        </Container>
+      )}
       {!props.isLoading && (
         <NoSSRGraphWrapper
           nodeCanvasObjectMode={() => "after"}
