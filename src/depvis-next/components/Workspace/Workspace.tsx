@@ -94,7 +94,7 @@ const Workspace = () => {
     p.forEach((item) => {
       const index = graphData.nodes.findIndex((n) => n.id == item);
       console.log({ item: item, index: index });
-      if (index) graphData.nodes[index].highlight = true;
+      if (index >= 0) graphData.nodes[index].highlight = true;
     });
     setNode(node);
   };

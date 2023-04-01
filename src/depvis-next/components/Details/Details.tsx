@@ -1,5 +1,13 @@
-import { useState } from 'react';
-import { Button, Col, Collapse, Container, Row, Stack, Table } from 'react-bootstrap';
+import { useState } from "react";
+import {
+  Button,
+  Col,
+  Collapse,
+  Container,
+  Row,
+  Stack,
+  Table,
+} from "react-bootstrap";
 
 export default function Details(props) {
   const [open, setOpen] = useState(false);
@@ -20,16 +28,20 @@ export default function Details(props) {
         </Button>
       </Stack>
       <Collapse in={open}>
-        <Table bordered hover className={props.className || ''}>
+        <Table bordered hover className={props.className || ""}>
           <tbody>
             {props.data &&
               Object.entries(props.data).map(([key, value]) => (
                 <tr key={key}>
-                  <td style={{ wordBreak: 'break-all' }}>
+                  <td style={{ wordBreak: "break-all" }}>
                     <b>{key}</b>
                   </td>
-                  <td style={{ wordBreak: 'break-all' }}>
-                    {typeof value === 'object' ? JSON.stringify(value) : (value as String)}
+                  <td style={{ wordBreak: "break-all" }}>
+                    {typeof value === "boolean"
+                      ? String(value)
+                      : typeof value === "object"
+                      ? JSON.stringify(value)
+                      : (value as String)}
                   </td>
                 </tr>
               ))}
