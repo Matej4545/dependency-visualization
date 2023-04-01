@@ -26,29 +26,21 @@ const MainNavbar = () => {
             <Link href="/upload" passHref>
               <Nav.Link>Upload</Nav.Link>
             </Link>
-            <Link href="/toolbox" passHref>
-              <Nav.Link>Toolbox</Nav.Link>
-            </Link>
             <Link href={gqlUrlPath} passHref>
               <Nav.Link>GraphQL Playground</Nav.Link>
             </Link>
+            <Link href="/projects" passHref>
+              <Nav.Link>Manage Projects</Nav.Link>
+            </Link>
             <NavDropdown title="Other" id="basic-nav-dropdown">
-              <Button
-                className="mx-3"
-                variant="danger"
+              <NavDropdown.Item
+                as={Button}
                 onClick={() => {
                   handleDeleteAllData();
                 }}
               >
                 Delete all data in DB
-              </Button>
-              <NavDropdown.Item href="/update-db">
-                Update Database
               </NavDropdown.Item>
-              <NavDropdown.Item href="/projects">
-                Manage Projects
-              </NavDropdown.Item>
-              <NavDropdown.Divider />
               <NavDropdown.Item href="/about">About</NavDropdown.Item>
             </NavDropdown>
           </Nav>

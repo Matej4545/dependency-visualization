@@ -1,18 +1,18 @@
-import { useRouter } from 'next/router';
-import { useState } from 'react';
-import { Alert, Button, Container, Form, Row } from 'react-bootstrap';
-import { ImportResult } from './ImportResult';
-import { ImportFormData } from './types';
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { Alert, Button, Container, Form, Row } from "react-bootstrap";
+import { ImportResult } from "./ImportResult";
+import { ImportFormData } from "./types";
 
 const allowedExtensionsRegex = /(\.json|\.xml)$/i;
 
 const ImportForm = (props) => {
   const { onSubmitCallback } = props;
   const [file, setFile] = useState<File>(undefined);
-  const [preview, setPreview] = useState<string>('');
+  const [preview, setPreview] = useState<string>("");
   const [validated, setValidated] = useState<boolean>(false);
-  const [projectName, setProjectName] = useState<string>('');
-  const [projectVersion, setProjectVersion] = useState<string>('1.0.1');
+  const [projectName, setProjectName] = useState<string>("");
+  const [projectVersion, setProjectVersion] = useState<string>("1.0.0");
 
   const handleFiles = (e: any) => {
     const files = e.target.files;
@@ -22,7 +22,7 @@ const ImportForm = (props) => {
     if (!allowedExtensionsRegex.exec(file.name)) {
       setFile(undefined);
       setValidated(true);
-      e.target.value = '';
+      e.target.value = "";
       return;
     }
     setFile(file);
@@ -65,7 +65,9 @@ const ImportForm = (props) => {
             }}
             value={projectName}
           ></Form.Control>
-          <Form.Control.Feedback type="invalid">Please select any XML / JSON file with SBOM.</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">
+            Please select any XML / JSON file with SBOM.
+          </Form.Control.Feedback>
         </Form.Group>
         <Form.Group controlId="file">
           <Form.Label>Project version</Form.Label>
@@ -78,7 +80,9 @@ const ImportForm = (props) => {
             }}
             value={projectVersion}
           ></Form.Control>
-          <Form.Control.Feedback type="invalid">Please select any XML / JSON file with SBOM.</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">
+            Please select any XML / JSON file with SBOM.
+          </Form.Control.Feedback>
         </Form.Group>
         <Form.Group controlId="file">
           <Form.Label>SBOM File</Form.Label>
@@ -92,21 +96,29 @@ const ImportForm = (props) => {
               handleFiles(e);
             }}
           ></Form.Control>
-          <Form.Control.Feedback type="invalid">Please select any XML / JSON file with SBOM.</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">
+            Please select any XML / JSON file with SBOM.
+          </Form.Control.Feedback>
         </Form.Group>
         <Button
           type="submit"
           onClick={(e) => handleSubmit(e)}
           className="my-3"
-          disabled={projectName === '' || projectVersion === '' || file === undefined}
+          disabled={
+            projectName === "" || projectVersion === "" || file === undefined
+          }
         >
           Submit form
         </Button>
-        <Button variant="secondary" onClick={(e) => handlePreview(e)} className="mx-1">
+        <Button
+          variant="secondary"
+          onClick={(e) => handlePreview(e)}
+          className="mx-1"
+        >
           Preview
         </Button>
       </Form>
-      {preview && (
+      {preview && file.name && (
         <Alert variant="secondary">
           Contents of file <b>{file.name}</b>
           <hr />

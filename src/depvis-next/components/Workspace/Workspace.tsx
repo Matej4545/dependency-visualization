@@ -4,8 +4,11 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { Container, Row } from "react-bootstrap";
 import {
+  findParentNodes,
   formatData,
   getAllComponentsQuery,
+  getLinkColor,
+  getLinkSize,
   getNodeColor,
   getNodeValue,
   getProjectsQuery,
@@ -25,6 +28,7 @@ import ProjectSelector from "./ProjectSelector";
 import { DropdownItem } from "../Dropdown/Dropdown";
 import ProjectVersionSelector from "./ProjectVersionSelector";
 import { graphSelectedNode } from "../../types/colorPalette";
+import usePrevious from "../../helpers/usePreviousHook";
 
 const defaultGraphConfig: GraphConfig = {
   zoomLevel: 1,
@@ -33,7 +37,7 @@ const defaultGraphConfig: GraphConfig = {
   linkDirectionalArrowLength: 5,
   linkDirectionalRelPos: 0,
   linkLength: 10,
-  nodeVal: getNodeValue,
+  nodeVal: 1,
   showOnlyVulnerable: false,
 };
 
@@ -41,6 +45,7 @@ const Workspace = () => {
   const [node, setNode] = useState(undefined);
   const [graphConfig, setGraphConfig] =
     useState<GraphConfig>(defaultGraphConfig);
+  const prevGraphConfig = usePrevious<GraphConfig>(graphConfig);
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [selectedProjectVersion, setSelectedProjectVersion] = useState<
     string | undefined
@@ -48,7 +53,6 @@ const Workspace = () => {
   const [getGraphData, { loading, error, data }] = useLazyQuery(
     getAllComponentsQuery
   );
-
   const router = useRouter();
 
   useEffect(() => {
@@ -64,15 +68,34 @@ const Workspace = () => {
       console.log("Getting data");
       getGraphData({
         variables: { projectVersionId: selectedProjectVersion },
-        pollInterval: 1000,
+        // pollInterval: 1000,
       });
     }
   }, [selectedProjectVersion]);
+
   useEffect(() => {
-    handleShowOnlyVulnerableToggle();
+    if (
+      prevGraphConfig &&
+      prevGraphConfig.showOnlyVulnerable !== graphConfig.showOnlyVulnerable
+    )
+      handleShowOnlyVulnerableToggle();
   }, [graphConfig]);
 
+  const resetHighlight = (nodes: any[]) => {
+    for (let index = 0; index < nodes.length; index++) {
+      nodes[index].highlight = false;
+    }
+  };
   const handleNodeClick = (node) => {
+    const p = findParentNodes(graphData.links, node.id);
+    p.add(node.id);
+    console.log(p);
+    resetHighlight(graphData.nodes);
+    p.forEach((item) => {
+      const index = graphData.nodes.findIndex((n) => n.id == item);
+      console.log({ item: item, index: index });
+      if (index) graphData.nodes[index].highlight = true;
+    });
     setNode(node);
   };
 
@@ -89,10 +112,9 @@ const Workspace = () => {
     setNode(object);
   };
 
-  const handleNodeValToggle = (e) => {
+  const handleNodeValToggle = () => {
     if (typeof graphConfig.nodeVal === "function") {
       setGraphConfig({ ...graphConfig, nodeVal: 1 });
-      console.log(graphConfig);
     } else {
       setGraphConfig({ ...graphConfig, nodeVal: getNodeValue });
     }
@@ -156,7 +178,9 @@ const Workspace = () => {
             <VulnerabilityDetails vulnerabilityId={node.id} />
           )}
 
-          <Details data={node} title="Development details" />
+          {process.env.NODE_ENV === "development" && (
+            <Details data={node} title="Development details" />
+          )}
         </Sidebar>
 
         <GraphContainer
@@ -165,6 +189,8 @@ const Workspace = () => {
           isLoading={loading}
           graphData={graphData}
           onNodeClick={(node) => handleNodeClick(node)}
+          linkColor={(link) => getLinkColor(link)}
+          linkWidth={(link) => getLinkSize(link)}
           graphConfig={graphConfig}
         />
       </Row>

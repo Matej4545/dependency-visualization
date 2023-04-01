@@ -1,7 +1,11 @@
 import { gql } from "@apollo/client";
 import {
   graphExcludedNode,
+  graphHighlightedLink,
+  graphHighlightedNode,
+  graphLink,
   graphNode,
+  graphSelectedNode,
   graphUIGrey,
   vulnerabilityCriticalColor,
   vulnerabilityHighColor,
@@ -53,18 +57,6 @@ export const formatData = (components) => {
           __typename: v.__typename,
           references: v.references,
         });
-        // if (v.references) {
-        //   v.references.forEach((r) => {
-        //     links.push({
-        //       source: v.id,
-        //       target: r.url,
-        //     });
-        //     nodes.push({
-        //       id: r.url,
-        //       __typename: r.__typename,
-        //     });
-        //   });
-        // }
       });
     }
   });
@@ -172,20 +164,32 @@ export const getNodeColor = (node) => {
   if (!node) return graphUIGrey;
   if (node.__typename === "Vulnerability")
     return vulnerabilityColorByCVSS(node.cvssScore);
+  if (node.highlight) return graphHighlightedNode;
   if (node.name && nodeExcludeRegex.test(node.name)) return graphExcludedNode;
   if (node.__typename === "Component") return graphNode;
   return graphUIGrey;
 };
 
-const getNodeTier = (
-  score: number,
-  tresholds: { 1: 10; 0.75: 7; 0.5: 5; 0.25: 3; 0.1: 1 }
-) => {
-  const limits = Object.keys(tresholds);
-  limits.forEach((l) => {
-    if (score < Number.parseFloat(l)) return tresholds[l];
-  });
+export const getLinkColor = (link) => {
+  if (link.target && link.target.highlight) return graphHighlightedLink;
+  return graphLink;
 };
+
+export const getLinkSize = (link) => {
+  if (link.target && link.target.highlight) return 4;
+  return 1;
+};
+
+// const getNodeTier = (
+//   score: number,
+//   tresholds: { 1: 10; 0.75: 7; 0.5: 5; 0.25: 3; 0.1: 1 }
+// ) => {
+//   const limits = Object.keys(tresholds);
+//   limits.forEach((l) => {
+//     if (score < Number.parseFloat(l)) return tresholds[l];
+//   });
+// };
+
 export const getNodeValue = (node) => {
   if (!node) return 1;
   // if (node.__typename === 'Vulnerability') return node.cvssScore * 3 || 5;
@@ -209,3 +213,22 @@ function genGraphTree() {
   };
 }
 
+export const findParentNodes = (links: any, nodeId: string) => {
+  const parentNodes = new Set<string>();
+  const queue = [nodeId];
+  while (queue.length > 0) {
+    const currNodeId = queue.shift()!;
+
+    links.forEach((link) => {
+      if (link.target.id === currNodeId) {
+        const sourceNodeId = link.source.id;
+        if (!parentNodes.has(sourceNodeId)) {
+          parentNodes.add(sourceNodeId);
+          queue.push(sourceNodeId);
+        }
+      }
+    });
+  }
+
+  return parentNodes;
+};

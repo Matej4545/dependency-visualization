@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
-import { Button, Container, Form, Stack } from 'react-bootstrap';
-import { getNodeValue } from '../../helpers/GraphHelper';
-import { GraphConfig } from '../Graph/GraphConfig';
+import { useEffect, useState } from "react";
+import { Button, Container, Form, Stack } from "react-bootstrap";
+import { getNodeValue } from "../../helpers/GraphHelper";
+import { GraphConfig } from "../Graph/GraphConfig";
 
 const GraphControl = (props) => {
   const { defaultGraphConfig, onRefetchGraphClick } = props;
 
-  const [graphConfig, setGraphConfig] = useState<GraphConfig>(defaultGraphConfig);
+  const [graphConfig, setGraphConfig] =
+    useState<GraphConfig>(defaultGraphConfig);
 
   useEffect(() => {
     props.onGraphConfigChange(graphConfig);
@@ -14,7 +15,8 @@ const GraphControl = (props) => {
   }, [graphConfig]);
 
   const handleNodeValToggle = (e) => {
-    if (typeof graphConfig.nodeVal === 'function') {
+    console.log(e);
+    if (typeof graphConfig.nodeVal === "function") {
       setGraphConfig({ ...graphConfig, nodeVal: 1 });
     } else {
       setGraphConfig({ ...graphConfig, nodeVal: getNodeValue });
@@ -22,7 +24,10 @@ const GraphControl = (props) => {
   };
 
   const handleShowOnlyVulnerableToggle = (e) => {
-    setGraphConfig({ ...graphConfig, showOnlyVulnerable: !graphConfig.showOnlyVulnerable });
+    setGraphConfig({
+      ...graphConfig,
+      showOnlyVulnerable: !graphConfig.showOnlyVulnerable,
+    });
   };
 
   return (
@@ -36,7 +41,7 @@ const GraphControl = (props) => {
           onChange={(e) => {
             handleNodeValToggle(e);
           }}
-          checked={typeof graphConfig.nodeVal === 'function'}
+          checked={typeof graphConfig.nodeVal === "function"}
         />
       </Stack>
       <Stack direction="horizontal">
