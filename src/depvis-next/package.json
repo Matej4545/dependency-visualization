@@ -16,7 +16,7 @@
     "bootstrap": "^5.2.1",
     "bullmq": "^3.6.2",
     "d3-force": "^3.0.0",
-    "fast-xml-parser": "^4.0.10",
+    "fast-xml-parser": "^4.1.2",
     "graphql": "^16.6.0",
     "multiparty": "^4.2.3",
     "neo4j-driver": "^5.0.1",
