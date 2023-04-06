@@ -1,7 +1,5 @@
 # Depvis-next
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
 A language-independent package dependencies visualization tool that use [CycloneDX](https://cyclonedx.org/) SBOM formatted files as input and creates graphic visualization that can help identify vulnerabilities and software structure.
 
 ## Deployment
