@@ -1,5 +1,8 @@
+import { Driver } from "neo4j-driver";
 import { env } from "process";
-import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
+import neo4j from "neo4j-driver";
+
+export const GraphQLUri = "/api/graphql";
 
 export const setCorsPolicy = (fn) => async (req, res) => {
   res.setHeader("Access-Control-Allow-Credentials", true);
@@ -26,14 +29,21 @@ export const setCorsPolicy = (fn) => async (req, res) => {
  */
 const IsGQLDevToolsEnabled = env.GQL_ALLOW_DEV_TOOLS === "true";
 
-export const GetNeo4JConfig = () => {
+const GetNeo4JConfig = () => {
   return {
-    neo4jHost: env.NEO4J_HOST || "neo4j://localhost:7687",
-    neo4jUsername: env.NEO4J_USER || "neo4j",
-    neo4jPassword: env.NEO4J_PASSWORD || "",
+    uri: env.NEO4J_HOST || "neo4j://localhost:7687",
+    username: env.NEO4J_USER || "neo4j",
+    password: env.NEO4J_PASSWORD || "",
     introspection: IsGQLDevToolsEnabled,
-    plugins: IsGQLDevToolsEnabled
-      ? [ApolloServerPluginLandingPageGraphQLPlayground]
-      : [],
   };
+};
+
+let driver: Driver;
+export const getDriver = () => {
+  const { uri, username, password } = GetNeo4JConfig();
+  if (!driver) {
+    driver = neo4j.driver(uri, neo4j.auth.basic(username, password));
+  }
+
+  return driver;
 };

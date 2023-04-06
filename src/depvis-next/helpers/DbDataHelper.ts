@@ -1,10 +1,11 @@
 import { DocumentNode, gql } from "@apollo/client";
 import { randomBytes } from "crypto";
+import { initializeHttpApollo } from "../apollo/ApolloClient";
 import { Component, ComponentDto } from "../types/component";
 import { Project } from "../types/project";
 import { Vulnerability } from "../types/vulnerability";
-import { createApolloClient } from "./ApolloClientHelper";
 const chunkSize = 100;
+const client = initializeHttpApollo();
 
 /**
  * Function wrapper responsible for sending GraphQL queries.
@@ -15,10 +16,9 @@ const chunkSize = 100;
  */
 export async function sendGQLQuery(query: DocumentNode, variables?: Object) {
   console.log(
-    `GQL Query: ${query} with variables ${await JSON.stringify(variables)}`
+    `GQL Query: ${query} with variables ${JSON.stringify(variables)}`
   );
   console.dir({ query: query, variables: variables });
-  const client = createApolloClient();
   const res = await client.query({ query: query, variables: variables });
   if (res.errors) {
     throw Error(res.errors.toString());
@@ -31,12 +31,9 @@ export async function sendGQLMutation(
   variables?: Object
 ) {
   console.log(
-    `GQL Mutation: ${mutation} with variables ${await JSON.stringify(
-      variables
-    )}`
+    `GQL Mutation: ${mutation} with variables ${JSON.stringify(variables)}`
   );
   console.dir({ mutation: mutation, variables: variables });
-  const client = createApolloClient();
   const res = await client.mutate({ mutation: mutation, variables: variables });
   if (res.errors) {
     console.error(res.errors.map((e) => e.message).toString());

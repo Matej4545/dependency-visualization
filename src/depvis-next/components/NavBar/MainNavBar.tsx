@@ -6,7 +6,6 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import { DeleteAllData } from "../../helpers/DbDataHelper";
-import { gqlUrlPath } from "../../pages/api/graphql";
 const MainNavbar = () => {
   const router = useRouter();
 
@@ -26,7 +25,7 @@ const MainNavbar = () => {
             <Link href="/upload" passHref>
               <Nav.Link>Upload</Nav.Link>
             </Link>
-            <Link href={gqlUrlPath} passHref>
+            <Link href={"/api/graphql"} passHref>
               <Nav.Link>GraphQL Playground</Nav.Link>
             </Link>
             <Link href="/projects" passHref>
