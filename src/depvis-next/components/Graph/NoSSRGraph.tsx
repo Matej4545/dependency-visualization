@@ -23,7 +23,7 @@ export default function NoSSRGraph(props) {
       .distance(
         (link) => link.source.size + link.target.size + props.linkLength
       )
-      .strength(1);
+      .strength(0.1);
     r.d3Force("charge", forceManyBody().strength(-50));
   }, [props, graphRef]);
 

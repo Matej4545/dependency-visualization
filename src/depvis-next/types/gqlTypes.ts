@@ -68,10 +68,8 @@ export const typeDefs = gql`
     allComponents: [Component!]!
       @cypher(
         statement: """
-        MATCH (this)-->(c)-[:DEPENDS_ON*0..]->(c2)
-        WITH collect(c) + collect(c2) as all
-        UNWIND all as single
-        RETURN  distinct single
+        MATCH (this)<-[:BELONGS_TO]->(c)
+        RETURN c
         """
       )
     allVulnerableComponents: [Component!]!
