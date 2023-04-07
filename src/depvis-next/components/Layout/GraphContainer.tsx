@@ -28,7 +28,7 @@ const GraphContainer = (props) => {
   }, []);
 
   const graphConfig: GraphConfig = props.graphConfig;
-
+  console.log(graphConfig);
   return (
     <Col className="workspace-graph-nospace" ref={graphContainerRef}>
       {props.isLoading && (
