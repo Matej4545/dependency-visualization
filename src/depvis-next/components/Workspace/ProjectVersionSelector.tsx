@@ -11,20 +11,20 @@ type ProjectSelectorProps = {
 };
 const ProjectVersionSelector = (props: ProjectSelectorProps) => {
   const { onProjectVersionSelect } = props;
-  const [projectVersion, setProjectVersion] = useState<any>();
+  const [projectVersion, setProjectVersion] = useState<any>(undefined);
   const router = useRouter();
   const { data: projects, loading: projectsLoading } = useQuery(
     getProjectVersionsQuery,
     {
       onCompleted: (data) => {
-        setProjectVersion(data.projectVersions[0].id);
+        selectProjectVersion(data);
       },
     }
   );
 
   useEffect(() => {
     if (projectVersion) {
-      console.log("Fire");
+      console.log({ event: "callback", data: projectVersion });
       onProjectVersionSelect(projectVersion);
     }
   }, [projectVersion]);
@@ -33,13 +33,25 @@ const ProjectVersionSelector = (props: ProjectSelectorProps) => {
     setProjectVersion(e);
   };
 
-  const transformDefault = () => {
-    const pv = projects.projectVersions.find((pv) => pv.id == projectVersion);
-    console.log({ projV: projectVersion, pv: pv });
-    return {
-      id: projectVersion,
-      displayName: `${pv.name} v${pv.version}`,
-    };
+  const selectProjectVersion = (data) => {
+    const { projectName, projectVersion } = router.query;
+    console.log({ pn: projectName, pv: projectVersion, data: data });
+    if (
+      !projectName ||
+      data.projectVersions.filter((p) => p.project.name === projectName)
+        .length == 0
+    ) {
+      console.log("Nope");
+      setProjectVersion(data.projectVersions[0].id);
+      return;
+    }
+    const project = data.projectVersions.find(
+      (p) => p.project.name === projectName
+    );
+    console.log(project);
+    setProjectVersion(
+      data.projectVersions.find((p) => p.project.name === projectName).id
+    );
   };
 
   if (!projectsLoading && projects.projectVersions.length == 0) {
@@ -47,7 +59,7 @@ const ProjectVersionSelector = (props: ProjectSelectorProps) => {
   }
   return (
     <Container>
-      {!projectsLoading && (
+      {!projectsLoading && projectVersion && (
         <Dropdown
           title="Select project"
           options={projects.projectVersions.map((p) => {
@@ -59,6 +71,21 @@ const ProjectVersionSelector = (props: ProjectSelectorProps) => {
       )}
     </Container>
   );
+};
+
+const selectVersion = (project, queryProjectVersion) => {
+  if (project.versions.length == 0) {
+    console.log("Project %s does not have any versions", project.id);
+    return;
+  }
+  if (
+    !queryProjectVersion ||
+    project.versions.filter((v) => v.version === queryProjectVersion).length ==
+      0
+  ) {
+    return project.versions[0];
+  }
+  return project.versions.filter((v) => v.version === queryProjectVersion)[0];
 };
 
 export default ProjectVersionSelector;

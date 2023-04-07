@@ -62,7 +62,10 @@ const Workspace = () => {
     }
   }, [data]);
   useEffect(() => {
-    console.log(`Detected change, val ${selectedProjectVersion}`);
+    console.log({
+      event: "Workspace detected projectVersion change",
+      data: selectedProjectVersion,
+    });
 
     if (selectedProjectVersion) {
       console.log("Getting data");

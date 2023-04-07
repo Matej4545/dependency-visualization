@@ -77,9 +77,9 @@ const selectProject = (projects, queryProjectName) => {
   if (
     !queryProjectName ||
     projects.filter((p) => p.name === queryProjectName).length == 0
-  )
-    console.log("Fuck you");
-  return projects[0];
+  ) {
+    return projects[0];
+  }
   return projects.find((p) => p.name === queryProjectName);
 };
 
