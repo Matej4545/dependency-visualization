@@ -24,7 +24,6 @@ const ProjectVersionSelector = (props: ProjectSelectorProps) => {
 
   useEffect(() => {
     if (projectVersion) {
-      console.log({ event: "callback", data: projectVersion });
       onProjectVersionSelect(projectVersion);
     }
   }, [projectVersion]);
@@ -35,20 +34,17 @@ const ProjectVersionSelector = (props: ProjectSelectorProps) => {
 
   const selectProjectVersion = (data) => {
     const { projectName, projectVersion } = router.query;
-    console.log({ pn: projectName, pv: projectVersion, data: data });
     if (
       !projectName ||
       data.projectVersions.filter((p) => p.project.name === projectName)
         .length == 0
     ) {
-      console.log("Nope");
       setProjectVersion(data.projectVersions[0].id);
       return;
     }
     const project = data.projectVersions.find(
       (p) => p.project.name === projectName
     );
-    console.log(project);
     setProjectVersion(
       data.projectVersions.find((p) => p.project.name === projectName).id
     );

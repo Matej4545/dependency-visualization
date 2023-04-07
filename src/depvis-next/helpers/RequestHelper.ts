@@ -8,7 +8,12 @@ export async function request(
   url: string,
   config: RequestInit = {}
 ): Promise<any> {
-  console.log("Response to %s with config\n%s", url, config);
+  console.log(
+    "Sending %s request to %s with body %s",
+    config.method,
+    url,
+    config.body
+  );
   const response = await fetch(url, config);
   if (!response.ok) {
     console.error(

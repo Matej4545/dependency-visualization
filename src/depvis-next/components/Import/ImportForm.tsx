@@ -18,7 +18,6 @@ const ImportForm = (props) => {
     const files = e.target.files;
     if (!files) return;
     const file = files[0];
-    console.log(file);
     if (!allowedExtensionsRegex.exec(file.name)) {
       setFile(undefined);
       setValidated(true);

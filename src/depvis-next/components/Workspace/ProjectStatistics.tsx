@@ -5,8 +5,6 @@ import { Component } from "../../types/component";
 const ProjectStatistics = (props) => {
   const projectInfo = createProjectInfo(props.data);
 
-  console.log(projectInfo);
-
   const getCVSSScoresAsArray = (vulnerableComponents) => {
     const c = vulnerableComponents
       .map((c) => c.vulnerabilities.map((v) => v.cvssScore))
@@ -62,7 +60,6 @@ type projectInfo = {
 };
 
 const createProjectInfo = (data): projectInfo | undefined => {
-  console.log({ data: data });
   if (!data || !data.projectVersions) return undefined;
   const projectVersion = data.projectVersions[0];
   return {

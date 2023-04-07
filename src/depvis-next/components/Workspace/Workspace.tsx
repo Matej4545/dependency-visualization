@@ -60,7 +60,6 @@ const Workspace = () => {
 
   useEffect(() => {
     if (data) {
-      console.log(data);
       setGraphData(formatData(data.projectVersions[0].allComponents));
     }
   }, [data]);
@@ -71,7 +70,6 @@ const Workspace = () => {
     });
 
     if (selectedProjectVersion) {
-      console.log("Getting data");
       getGraphData({
         variables: { projectVersionId: selectedProjectVersion },
         // pollInterval: 1000,
@@ -95,11 +93,9 @@ const Workspace = () => {
   const handleNodeClick = (node) => {
     const p = findParentNodes(graphData.links, node.id);
     p.add(node.id);
-    console.log(p);
     resetHighlight(graphData.nodes);
     p.forEach((item) => {
       const index = graphData.nodes.findIndex((n) => n.id == item);
-      console.log({ item: item, index: index });
       if (index >= 0) graphData.nodes[index].highlight = true;
     });
     // Reset position

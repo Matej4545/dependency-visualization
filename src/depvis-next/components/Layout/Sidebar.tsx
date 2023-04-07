@@ -19,7 +19,6 @@ export const SidebarItem = (props) => {
       <Stack
         direction="horizontal"
         onClick={() => {
-          console.log(open);
           setOpen(!open);
         }}
       >
