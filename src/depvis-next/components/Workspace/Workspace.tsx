@@ -99,6 +99,9 @@ const Workspace = () => {
       console.log({ item: item, index: index });
       if (index >= 0) graphData.nodes[index].highlight = true;
     });
+    // Reset position
+    node.fx = undefined;
+    node.fy = undefined;
     setNode(node);
   };
 
@@ -115,27 +118,21 @@ const Workspace = () => {
     setNode(object);
   };
 
-  const handleNodeValToggle = () => {
-    if (typeof graphConfig.nodeVal === "function") {
-      setGraphConfig({ ...graphConfig, nodeVal: 1 });
-    } else {
-      setGraphConfig({ ...graphConfig, nodeVal: getNodeValue });
-    }
-  };
-
   const paintRing = useCallback(
     (currNode, ctx) => {
-      ctx.beginPath();
-      ctx.arc(
-        currNode.x,
-        currNode.y,
-        (Math.sqrt(currNode.size) * 4 + 1) | 1,
-        0,
-        2 * Math.PI,
-        false
-      );
-      ctx.fillStyle = currNode === node ? graphSelectedNode : "";
-      ctx.fill();
+      if (node && node.id === currNode.id) {
+        ctx.beginPath();
+        ctx.arc(
+          currNode.x,
+          currNode.y,
+          (Math.sqrt(currNode.size) * 4 + 1) | 1,
+          0,
+          2 * Math.PI,
+          false
+        );
+        ctx.fillStyle = currNode === node ? graphSelectedNode : "";
+        ctx.fill();
+      }
     },
     [node]
   );
@@ -195,6 +192,10 @@ const Workspace = () => {
           linkColor={(link) => getLinkColor(link)}
           linkWidth={(link) => getLinkSize(link)}
           graphConfig={graphConfig}
+          onNodeDragEnd={(node) => {
+            node.fx = node.x;
+            node.fy = node.y;
+          }}
         />
       </Row>
     </Container>
