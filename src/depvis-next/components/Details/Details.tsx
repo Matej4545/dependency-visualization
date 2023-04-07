@@ -13,7 +13,7 @@ export default function Details(props) {
   const [open, setOpen] = useState(false);
 
   return (
-    <Container className="">
+    <>
       <Stack direction="horizontal">
         <h5>{props.title}</h5>
 
@@ -48,6 +48,6 @@ export default function Details(props) {
           </tbody>
         </Table>
       </Collapse>
-    </Container>
+    </>
   );
 }
