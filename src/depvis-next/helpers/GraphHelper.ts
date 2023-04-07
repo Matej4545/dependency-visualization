@@ -70,6 +70,10 @@ export const formatData = (components) => {
 export const getAllComponentsQuery = gql`
   query getProjectComponents($projectVersionId: ID) {
     projectVersions(where: { id: $projectVersionId }) {
+      project {
+        name
+      }
+      version
       allVulnerableComponents {
         id
         name
