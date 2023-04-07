@@ -23,12 +23,15 @@ import ImportForm from "../Import/ImportForm";
 import Loading from "../Loading/Loading";
 import Search from "../Search/Search";
 import GraphContainer from "../Layout/GraphContainer";
-import Sidebar from "../Layout/Sidebar";
+import Sidebar, { SidebarItem } from "../Layout/Sidebar";
 import ProjectSelector from "./ProjectSelector";
 import { DropdownItem } from "../Dropdown/Dropdown";
 import ProjectVersionSelector from "./ProjectVersionSelector";
-import { graphSelectedNode } from "../../types/colorPalette";
+import { graphNode, graphSelectedNode } from "../../types/colorPalette";
 import usePrevious from "../../helpers/usePreviousHook";
+import ProjectStatistics from "./ProjectStatistics";
+import { DL, DLItem } from "../Details/DescriptionList";
+import Legend from "./Legend";
 
 const defaultGraphConfig: GraphConfig = {
   zoomLevel: 1,
@@ -141,6 +144,10 @@ const Workspace = () => {
     setSelectedProjectVersion(projectVersion);
   };
 
+  const renderLegend = () => {
+    return <></>;
+  };
+
   if (!selectedProjectVersion)
     return (
       <ProjectVersionSelector onProjectVersionSelect={handleProjectVersion} />
@@ -149,38 +156,52 @@ const Workspace = () => {
     <Container fluid>
       <Row className="workspace-main">
         <Sidebar>
-          <ProjectVersionSelector
-            onProjectVersionSelect={handleProjectVersion}
-          />
-          <Search
-            objects={graphData.nodes}
-            searchResultCallback={(obj) => handleSelectedSearchResult(obj)}
-          />
-          <GraphControl
-            defaultGraphConfig={defaultGraphConfig}
-            onGraphConfigChange={(val) => {
-              setGraphConfig(val);
-            }}
-            onRefetchGraphClick={() => {
-              getGraphData({
-                variables: { projectId: selectedProjectVersion },
-                fetchPolicy: "no-cache",
-              });
-            }}
-          />
-          {node && node.__typename === "Component" && (
-            <ComponentDetails
-              componentId={node.id}
-              projectId={selectedProjectVersion}
+          <SidebarItem title="Select project">
+            <ProjectVersionSelector
+              onProjectVersionSelect={handleProjectVersion}
             />
-          )}
-          {node && node.__typename === "Vulnerability" && (
-            <VulnerabilityDetails vulnerabilityId={node.id} />
-          )}
+          </SidebarItem>
+          <SidebarItem title="Project details" collapse={true}>
+            <ProjectStatistics data={data} />
+          </SidebarItem>
+          <SidebarItem title="Search nodes">
+            <Search
+              objects={graphData.nodes}
+              searchResultCallback={(obj) => handleSelectedSearchResult(obj)}
+            />
+          </SidebarItem>
+          <SidebarItem title="Graph controls" collapse>
+            <GraphControl
+              defaultGraphConfig={defaultGraphConfig}
+              onGraphConfigChange={(val) => {
+                setGraphConfig(val);
+              }}
+              onRefetchGraphClick={() => {
+                getGraphData({
+                  variables: { projectId: selectedProjectVersion },
+                  fetchPolicy: "no-cache",
+                });
+              }}
+            />
+          </SidebarItem>
+          <SidebarItem title="Node detail">
+            {node && node.__typename === "Component" && (
+              <ComponentDetails
+                componentId={node.id}
+                projectId={selectedProjectVersion}
+              />
+            )}
+            {node && node.__typename === "Vulnerability" && (
+              <VulnerabilityDetails vulnerabilityId={node.id} />
+            )}
 
-          {process.env.NODE_ENV === "development" && (
-            <Details data={node} title="Development details" />
-          )}
+            {process.env.NODE_ENV === "development" && (
+              <Details data={node} title="Development details" />
+            )}
+          </SidebarItem>
+          <SidebarItem title="Legend">
+            <Legend />
+          </SidebarItem>
         </Sidebar>
 
         <GraphContainer

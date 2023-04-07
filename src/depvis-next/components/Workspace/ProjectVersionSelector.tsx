@@ -58,10 +58,9 @@ const ProjectVersionSelector = (props: ProjectSelectorProps) => {
     return <NoProjectFoundError />;
   }
   return (
-    <Container>
+    <>
       {!projectsLoading && projectVersion && (
         <Dropdown
-          title="Select project"
           options={projects.projectVersions.map((p) => {
             return { id: p.id, displayName: `${p.project.name} v${p.version}` };
           })}
@@ -69,7 +68,7 @@ const ProjectVersionSelector = (props: ProjectSelectorProps) => {
           defaultValue={projectVersion}
         />
       )}
-    </Container>
+    </>
   );
 };
 

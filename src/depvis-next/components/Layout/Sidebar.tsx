@@ -1,4 +1,9 @@
-import { Col } from 'react-bootstrap';
+import { faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { useState } from "react";
+import { Col, Collapse, Container, Stack } from "react-bootstrap";
+import { graphUIGrey } from "../../types/colorPalette";
 
 const Sidebar = (props) => (
   <Col className="workspace-sidebar px-0" xl={3} md={4} sm={5}>
@@ -6,4 +11,30 @@ const Sidebar = (props) => (
   </Col>
 );
 
+export const SidebarItem = (props) => {
+  const { title, collapse } = props;
+  const [open, setOpen] = useState<boolean>(!collapse);
+  return (
+    <Container>
+      <Stack
+        direction="horizontal"
+        onClick={() => {
+          console.log(open);
+          setOpen(!open);
+        }}
+      >
+        <h6>{title}</h6>
+        <FontAwesomeIcon
+          icon={open ? faCaretUp : faCaretDown}
+          className="ms-auto"
+          color={graphUIGrey}
+        />
+      </Stack>
+
+      <Collapse in={open}>
+        <div>{props.children}</div>
+      </Collapse>
+    </Container>
+  );
+};
 export default Sidebar;

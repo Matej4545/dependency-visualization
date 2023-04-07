@@ -32,7 +32,6 @@ const GraphControl = (props) => {
 
   return (
     <Container id="control" className="px-0">
-      <h5>Graph settings</h5>
       <Stack direction="horizontal">
         <Form.Label>Size by dependencies</Form.Label>
         <Form.Check
