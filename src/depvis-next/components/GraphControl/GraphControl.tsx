@@ -11,11 +11,9 @@ const GraphControl = (props) => {
 
   useEffect(() => {
     props.onGraphConfigChange(graphConfig);
-    console.log(graphConfig);
   }, [graphConfig]);
 
   const handleNodeValToggle = (e) => {
-    console.log(e);
     if (typeof graphConfig.nodeVal === "function") {
       setGraphConfig({ ...graphConfig, nodeVal: 1 });
     } else {

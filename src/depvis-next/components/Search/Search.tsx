@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Button, Container, Dropdown, Form } from 'react-bootstrap';
-import DropdownContext from 'react-bootstrap/esm/DropdownContext';
-import DropdownItem from 'react-bootstrap/esm/DropdownItem';
+import React, { useState } from "react";
+import { Button, Container, Dropdown, Form } from "react-bootstrap";
+import DropdownContext from "react-bootstrap/esm/DropdownContext";
+import DropdownItem from "react-bootstrap/esm/DropdownItem";
 
 const SearchComponent = (props) => {
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
   const [filteredObjects, setFilteredObjects] = useState([]);
 
   const handleSearchInputChanges = (e) => {
@@ -18,7 +18,7 @@ const SearchComponent = (props) => {
   const callSearchFunction = (e) => {
     e.preventDefault();
     const { objects } = props;
-    if (searchValue == '') {
+    if (searchValue == "") {
       setFilteredObjects([]);
     } else {
       const filteredObjects = searchFunction(searchValue, objects);
@@ -27,7 +27,6 @@ const SearchComponent = (props) => {
   };
 
   const handleObjectClick = (object) => {
-    console.log(object);
     props.searchResultCallback(object);
     setFilteredObjects([]);
   };
@@ -38,7 +37,10 @@ const SearchComponent = (props) => {
         <Dropdown.Menu show className="search-results-container">
           <Container>Total results: {filteredObjects.length}</Container>
           {filteredObjects.map((object, index) => (
-            <Dropdown.Item key={index} onClick={() => handleObjectClick(object)}>
+            <Dropdown.Item
+              key={index}
+              onClick={() => handleObjectClick(object)}
+            >
               {object.name || object.id} <i>({object.__typename})</i>
             </Dropdown.Item>
           ))}
@@ -74,13 +76,17 @@ const SearchComponent = (props) => {
 };
 
 const searchFunction = (searchValue, objects) => {
-  const searchableProperties = ['id', 'name', 'description', 'cve', 'ghsa'];
+  const searchableProperties = ["id", "name", "description", "cve", "ghsa"];
   const filteredObjects = objects.filter((object) => {
-    const objectProperties = Object.keys(object).filter((key) => searchableProperties.includes(key));
-    console.log(objectProperties);
+    const objectProperties = Object.keys(object).filter((key) =>
+      searchableProperties.includes(key)
+    );
     return objectProperties.some((property) => {
       const propertyValue = object[property];
-      return typeof propertyValue === 'string' && propertyValue.toLowerCase().includes(searchValue.toLowerCase());
+      return (
+        typeof propertyValue === "string" &&
+        propertyValue.toLowerCase().includes(searchValue.toLowerCase())
+      );
     });
   });
   return filteredObjects;
