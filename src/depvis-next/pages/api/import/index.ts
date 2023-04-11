@@ -59,10 +59,7 @@ export default async function handler(req, res) {
         .status(400)
         .json({ isError: true, error: "Request body is malformed!" });
     }
-    console.log("Received following body: %s", JSON.stringify(body));
-
     const projects = await GetProjectByName(body.projectName);
-    console.log(projects);
     if (projects.length != 0 && projects[0].versions) {
       const highestVersionProject = getLatestProjectVersion(
         projects[0].versions
@@ -86,7 +83,6 @@ export default async function handler(req, res) {
 
     //Clear vuln queue
     emptyQueue(GetVulnQueue);
-    console.log("Creating new job with following input: %s", body);
     // Create new job
     const job = await ImportQueue.add(body.projectName.toString(), {
       sbom: result.sbom,

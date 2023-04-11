@@ -72,12 +72,20 @@ export async function ImportSbom(
       projectVersionInput
     );
     updateProgress(5);
+    const getMainComponenData = () => {
+      const providedComponent = bom.metadata.component;
+      if (
+        providedComponent &&
+        providedComponent.name &&
+        providedComponent.version
+      )
+        return providedComponent;
 
+      return { name: projectInput.name!, version: projectVersionInput.version };
+    };
     // Prepare necessary objects - if it fails, no objects in DB are created yet
     let dependencies = GetDependencies(bom.dependencies.dependency);
-    const mainComponent: Component = createMainComponent(
-      bom.metadata.component
-    );
+    const mainComponent: Component = createMainComponent(getMainComponenData());
     let components: Component[] = GetComponents(bom);
     components.push(mainComponent);
 
@@ -299,7 +307,7 @@ function createMainComponent(inputComponent) {
   const purl =
     inputComponent.purl || `${inputComponent.name}@${inputComponent.version}`;
   return {
-    type: inputComponent.type,
+    type: inputComponent.type || "library",
     name: inputComponent.name,
     purl: purl,
     version: inputComponent.version,

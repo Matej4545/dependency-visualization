@@ -41,7 +41,6 @@ const ProjectSelector = (props: ProjectSelectorProps) => {
   };
 
   const handleProjectVersionSelect = (e: any) => {
-    console.log({ selectedVersion: e });
     onProjectVersionSelect && onProjectVersionSelect(e.id);
     setProjectVersion(e);
   };
@@ -73,13 +72,12 @@ const ProjectSelector = (props: ProjectSelectorProps) => {
 };
 
 const selectProject = (projects, queryProjectName) => {
-  console.log({ projects: projects, query: queryProjectName });
   if (
     !queryProjectName ||
     projects.filter((p) => p.name === queryProjectName).length == 0
-  )
-    console.log("Fuck you");
-  return projects[0];
+  ) {
+    return projects[0];
+  }
   return projects.find((p) => p.name === queryProjectName);
 };
 

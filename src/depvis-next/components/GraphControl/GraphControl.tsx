@@ -11,11 +11,9 @@ const GraphControl = (props) => {
 
   useEffect(() => {
     props.onGraphConfigChange(graphConfig);
-    console.log(graphConfig);
   }, [graphConfig]);
 
   const handleNodeValToggle = (e) => {
-    console.log(e);
     if (typeof graphConfig.nodeVal === "function") {
       setGraphConfig({ ...graphConfig, nodeVal: 1 });
     } else {
@@ -32,7 +30,6 @@ const GraphControl = (props) => {
 
   return (
     <Container id="control" className="px-0">
-      <h5>Graph settings</h5>
       <Stack direction="horizontal">
         <Form.Label>Size by dependencies</Form.Label>
         <Form.Check

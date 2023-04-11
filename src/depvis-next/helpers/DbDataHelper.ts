@@ -15,10 +15,7 @@ const client = initializeHttpApollo();
  * @throws Error if there were some error during fetch
  */
 export async function sendGQLQuery(query: DocumentNode, variables?: Object) {
-  console.log(
-    `GQL Query: ${query} with variables ${JSON.stringify(variables)}`
-  );
-  console.dir({ query: query, variables: variables });
+  console.dir({ gqlRequestType: "query", variables: variables });
   const res = await client.query({ query: query, variables: variables });
   if (res.errors) {
     throw Error(res.errors.toString());
@@ -30,10 +27,7 @@ export async function sendGQLMutation(
   mutation: DocumentNode,
   variables?: Object
 ) {
-  console.log(
-    `GQL Mutation: ${mutation} with variables ${JSON.stringify(variables)}`
-  );
-  console.dir({ mutation: mutation, variables: variables });
+  console.dir({ gqlRequestType: "mutation", variables: variables });
   const res = await client.mutate({ mutation: mutation, variables: variables });
   if (res.errors) {
     console.error(res.errors.map((e) => e.message).toString());

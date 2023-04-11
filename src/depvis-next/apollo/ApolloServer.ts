@@ -23,18 +23,11 @@ export const setCorsPolicy = (fn) => async (req, res) => {
   return await fn(req, res);
 };
 
-/**
- * Neo4j configuration settings
- * Use .env file to provide custom values!
- */
-const IsGQLDevToolsEnabled = env.GQL_ALLOW_DEV_TOOLS === "true";
-
 const GetNeo4JConfig = () => {
   return {
-    uri: env.NEO4J_HOST || "neo4j://localhost:7687",
-    username: env.NEO4J_USER || "neo4j",
-    password: env.NEO4J_PASSWORD || "",
-    introspection: IsGQLDevToolsEnabled,
+    uri: env.NEO4J_HOST,
+    username: env.NEO4J_USER,
+    password: env.NEO4J_PASSWORD,
   };
 };
 
