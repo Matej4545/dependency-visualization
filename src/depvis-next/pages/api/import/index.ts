@@ -65,11 +65,12 @@ export default async function handler(req, res) {
         projects[0].versions
       );
       if (
+        highestVersionProject &&
         compareVersions(body.projectVersion, highestVersionProject.version) != 1
       ) {
         return res.status(400).json({
           isError: true,
-          error: `Project must have higher version than ${highestVersionProject.version}`,
+          errorMessage: `Project must have higher version than ${highestVersionProject.version}`,
         });
       }
     }
@@ -119,19 +120,6 @@ function validateSbomXml(parsedXml): ImportResult {
       errorMessage:
         "Validation failed - Missing 'metadata' parameter in the file.",
     };
-  if (!sbom.components)
-    return {
-      isError: true,
-      errorMessage:
-        "Validation failed - Missing 'components' parameter in the file.",
-    };
-  if (!sbom.dependencies)
-    return {
-      isError: true,
-      errorMessage:
-        "Validation failed - Missing 'dependencies' parameter in the file.",
-    };
-
   return { isError: false, sbom: sbom };
 }
 
