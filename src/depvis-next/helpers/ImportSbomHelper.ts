@@ -84,7 +84,7 @@ export async function ImportSbom(
       return { name: projectInput.name!, version: projectVersionInput.version };
     };
     // Prepare necessary objects - if it fails, no objects in DB are created yet
-    let dependencies = GetDependencies(bom.dependencies.dependency);
+    let dependencies = GetDependencies(bom);
     const mainComponent: Component = createMainComponent(getMainComponenData());
     let components: Component[] = GetComponents(bom);
     components.push(mainComponent);
@@ -146,6 +146,7 @@ export async function ImportSbom(
   }
 }
 function GetComponents(bom: any) {
+  if (!bom.components || !bom.components.component) return [];
   let components: any[] = bom.components.component;
   // Component data transformation
   components = components.map((c) => {
@@ -161,8 +162,9 @@ function GetComponents(bom: any) {
   return components;
 }
 
-function GetDependencies(dependencies: any): Dependency[] {
-  if (!dependencies) return;
+function GetDependencies(bom: any): Dependency[] {
+  if (!bom.dependencies || !bom.dependencies.dependency) return [];
+  const dependencies = bom.dependencies.dependency;
   const res: Dependency[] = dependencies
     .map((d) => {
       if (d.dependency != undefined) {

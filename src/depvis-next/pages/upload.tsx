@@ -13,7 +13,7 @@ const Upload = () => {
 
   const handleSubmit = async (data) => {
     const res = await fetch(ImportApiUrl, {
-      body: await JSON.stringify(data),
+      body: JSON.stringify(data),
       headers: { "Content-Type": "application/json" },
       method: "POST",
     });
@@ -32,7 +32,7 @@ const Upload = () => {
     <Container>
       {serverResponse && (
         <Alert variant="danger">
-          Form can not be submitted - {serverResponse.error}
+          Form can not be submitted - {serverResponse.errorMessage}
         </Alert>
       )}
       <Alert variant="info" className="mt-3">
