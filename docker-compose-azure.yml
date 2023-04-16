@@ -25,21 +25,6 @@ services:
       - cache:/data
     ports:
       - ${REDIS_PORT}:6379
-    # links:
-    #   - redis-commander
-
-  # redis-commander:
-  #   image: rediscommander/redis-commander:latest
-  #   restart: unless-stopped
-  #   environment:
-  #     REDIS_HOSTS: redis-cache
-  #     REDIS_HOST: redis-cache
-  #     REDIS_PORT: redis-cache:6379
-  #     REDIS_PASSWORD: ${REDIS_PASSWORD}
-  #     HTTP_USER: root
-  #     HTTP_PASSWORD: root
-  #   ports:
-  #     - 8081:8081
 
   depvis-next:
     depends_on:

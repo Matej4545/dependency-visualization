@@ -9,13 +9,21 @@ This tool was developed as part of Master's thesis "Visualization of Vulnerabili
 - Docker & Docker Compose
 - Node (> v16)
 
-## Installation
+## Deployment
+
+### Using Docker locally
 
 - Clone this repository
 - _Optional_ Change login credentials for neo4j by editing [docker-compose.yml](./docker-compose.yml)
 - Create environment variables file according to sample file in Next.js app - [example](./src/depvis-next/.env.production.example)
 - To start all services use `docker-compose up`
 - For more details follow installation steps for Next.js app [here](./src/depvis-next/README.md)
+
+### Using Azure containers
+
+- Clone this repository
+- Follow [official guide](https://learn.microsoft.com/en-us/azure/container-instances/tutorial-docker-compose) to create Azure container repository (ACR), publish DepVis image and create new Docker context
+- Use [./docker-compose-azure.yml] to deploy containers in Azure (you'll need to update name of the container according to your ACR)
 
 ## Repository content
 
