@@ -13,12 +13,14 @@ import {
 } from "react-bootstrap";
 import { ParsePurl } from "../components/Toolbox/ParsePurl";
 import ProjectSelector from "../components/Workspace/ProjectSelector";
+import ListItem from "../components/Listing/ListItem";
+import List from "../components/Listing/List";
 
 const Toolbox = () => {
   const [purlString, setPurlString] = useState("");
   const [purlOutput, setPurlOutput] = useState("");
   const handlePurl = async () => {
-    setPurlOutput(await JSON.stringify(PackageURL.fromString(purlString)));
+    setPurlOutput(JSON.stringify(PackageURL.fromString(purlString)));
     console.log(purlOutput);
   };
   const handleVuln = async () => {
@@ -33,7 +35,7 @@ const Toolbox = () => {
   }, [router]);
   return (
     <Container className="mx-5 my-2">
-      <Row>
+      {/* <Row>
         <Col xs="auto">
           <h3>Generic actions</h3>
           <Stack gap={2}>
@@ -54,8 +56,30 @@ const Toolbox = () => {
       </Row>
       <Row>
         <ProjectSelector />
+      </Row> */}
+      <Row>
+        <List listItems={demoItems(10)} />
+        {/* <ListItem
+          item={demoItems()}
+          editAction={testFn}
+          deleteAction={testFn}
+          viewAction={testFn}
+        /> */}
       </Row>
     </Container>
   );
 };
 export default Toolbox;
+
+const demoItems = (length) => {
+  const text = () => Math.random().toString(36).slice(2, 10);
+  let res = [];
+  for (let index = 0; index < length; index++) {
+    res.push({ name: `test-${index}`, detail: text(), id: index });
+  }
+  return res;
+};
+
+const testFn = (input) => {
+  alert(input);
+};

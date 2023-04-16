@@ -11,3 +11,4 @@ export const graphExcludedNode = "#81A4CD";
 export const graphUIGrey = "#423E3B";
 export const graphHighlightedLink = "#068911";
 export const graphLink = "#6F7173";
+export const deleteRed = "#931621";
