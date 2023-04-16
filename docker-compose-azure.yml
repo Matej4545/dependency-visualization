@@ -1,4 +1,4 @@
-version: "3"
+version: "3.9"
 
 services:
   neo4j:
@@ -7,9 +7,7 @@ services:
       - 7474:7474
       - 7687:7687
     volumes:
-      - ./runtime/data:/data
-      - ./runtime/logs:/logs
-      - ./runtime/plugins:/var/lib/neo4j/plugins
+      - neo4j:/data
     restart: unless-stopped
     environment:
       - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
@@ -27,28 +25,28 @@ services:
       - cache:/data
     ports:
       - ${REDIS_PORT}:6379
-    links:
-      - redis-commander
+    # links:
+    #   - redis-commander
 
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    restart: unless-stopped
-    environment:
-      REDIS_HOSTS: redis-cache
-      REDIS_HOST: redis-cache
-      REDIS_PORT: redis-cache:6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-      HTTP_USER: root
-      HTTP_PASSWORD: root
-    ports:
-      - 8081:8081
+  # redis-commander:
+  #   image: rediscommander/redis-commander:latest
+  #   restart: unless-stopped
+  #   environment:
+  #     REDIS_HOSTS: redis-cache
+  #     REDIS_HOST: redis-cache
+  #     REDIS_PORT: redis-cache:6379
+  #     REDIS_PASSWORD: ${REDIS_PASSWORD}
+  #     HTTP_USER: root
+  #     HTTP_PASSWORD: root
+  #   ports:
+  #     - 8081:8081
 
   depvis-next:
     depends_on:
       - neo4j
       - redis-cache
     build: ./src/depvis-next
-    image: depvis-next:latest
+    image: depvisacr.azurecr.io/depvis-next:latest
     ports:
       - ${DEPVIS_PORT}:3000
     restart: always
@@ -63,4 +61,12 @@ services:
       NEXT_PUBLIC_SERVER_URI: ${NEXT_PUBLIC_SERVER_URI}
 volumes:
   cache:
-    driver: local
+    driver: azure_file
+    driver_opts:
+      share_name: depviscache
+      storage_account_name: depvissa
+  neo4j:
+    driver: azure_file
+    driver_opts:
+      share_name: depvisneo4j
+      storage_account_name: depvissa
