@@ -7,7 +7,7 @@ const About = () => {
       <p>
         Welcome to DepVis tool. DepVis is a open source third party dependencies
         and vulnerabilities visualization tool, which was developed as part of a
-        Master's thesis.
+        Master&apos;s thesis.
       </p>
       <p>
         Main goal is to help developers and security professionals with open
@@ -21,6 +21,7 @@ const About = () => {
         <a
           href="https://github.com/vasturiano/react-force-graph"
           target="_blank"
+          rel="noreferrer"
         >
           react-force-graph
         </a>
@@ -29,10 +30,10 @@ const About = () => {
       <h4>About Author</h4>
       <p>
         My name is Matěj Groman and I study of Software Security Management at{" "}
-        <a href="https://www.fi.muni.cz/" target="_blank">
+        <a href="https://www.fi.muni.cz/" target="_blank" rel="noreferrer">
           FI MUNI
         </a>
-        . I created this application as part of my Master's thesis
+        . I created this application as part of my Master&apos;s thesis
       </p>
       <strong>
         Visualization of Vulnerabilities in Open Source Software Dependencies
