@@ -154,6 +154,7 @@ function GetComponents(bom: any) {
       type: c.type,
       name: c.name,
       purl: c.purl,
+      ref: c.bomref,
       version: `${c.version}`,
       author: c.author,
       publisher: c.publisher,
@@ -163,6 +164,7 @@ function GetComponents(bom: any) {
 }
 
 function GetDependencies(bom: any): Dependency[] {
+  console.log(bom);
   if (!bom.dependencies || !bom.dependencies.dependency) return [];
   const dependencies = bom.dependencies.dependency;
   const res: Dependency[] = dependencies
@@ -170,9 +172,9 @@ function GetDependencies(bom: any): Dependency[] {
       if (d.dependency != undefined) {
         if (!(d.dependency instanceof Array)) d.dependency = [d.dependency];
         return {
-          purl: d.ref,
+          ref: d.ref,
           dependsOn: d.dependency.map((d) => {
-            return { purl: d.ref };
+            return { ref: d.ref };
           }),
         };
       }
@@ -312,6 +314,7 @@ function createMainComponent(inputComponent) {
     type: inputComponent.type || "library",
     name: inputComponent.name,
     purl: purl,
+    ref: inputComponent.bomref || purl,
     version: inputComponent.version,
     author: inputComponent.author,
     publisher: inputComponent.publisher,
