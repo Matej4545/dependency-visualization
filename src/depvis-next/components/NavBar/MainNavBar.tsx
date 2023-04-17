@@ -25,13 +25,13 @@ const MainNavbar = () => {
             <Link href="/upload" passHref>
               <Nav.Link>Upload</Nav.Link>
             </Link>
-            <Link href={"/api/graphql"} passHref>
-              <Nav.Link>GraphQL Playground</Nav.Link>
-            </Link>
-            <Link href="/projects" passHref>
-              <Nav.Link>Manage Projects</Nav.Link>
-            </Link>
-            <NavDropdown title="Other" id="basic-nav-dropdown">
+            {process.env.NODE_ENV === "development" && (
+              <Link href={"/api/graphql"} passHref>
+                <Nav.Link>GraphQL Playground</Nav.Link>
+              </Link>
+            )}
+
+            <NavDropdown title="Other actions" id="basic-nav-dropdown">
               <NavDropdown.Item
                 as={Button}
                 onClick={() => {
@@ -40,8 +40,10 @@ const MainNavbar = () => {
               >
                 Delete all data in DB
               </NavDropdown.Item>
-              <NavDropdown.Item href="/about">About</NavDropdown.Item>
             </NavDropdown>
+            <Link href="/about" passHref>
+              <Nav.Link>About</Nav.Link>
+            </Link>
           </Nav>
         </Navbar.Collapse>
       </Container>

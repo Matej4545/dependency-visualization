@@ -10,6 +10,7 @@ export const typeDefs = gql`
     projectVersion: ProjectVersion
       @relationship(type: "BELONGS_TO", direction: OUT)
     purl: String
+    ref: String
     name: String
     type: String
     version: String
@@ -24,6 +25,12 @@ export const typeDefs = gql`
         """
       )
     dependsOn: [Component!]! @relationship(type: "DEPENDS_ON", direction: OUT)
+    isDirectDependency: Boolean
+      @cypher(
+        statement: """
+        RETURN not exists((this)<-[:DEPENDS_ON]-(:Component))
+        """
+      )
     references: [Reference!]!
       @relationship(type: "HAS_REFERENCE", direction: OUT)
     vulnerabilities: [Vulnerability!]!

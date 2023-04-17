@@ -341,7 +341,7 @@ export function BuildAddDependencyQuery(
   return dependencies.map((d) => {
     if (!d.dependsOn) return; //No dependency
     return {
-      where: { purl: d.purl, projectVersion: { id: projectVersionId } },
+      where: { ref: d.ref, projectVersion: { id: projectVersionId } },
       connect: {
         dependsOn: {
           where: {
@@ -356,8 +356,8 @@ export function BuildAddDependencyQuery(
 }
 
 function getDependencyWherePurlPart(dependsOn: any[], projectVersionId) {
-  const purls = dependsOn.map((d) => {
-    return d.purl;
+  const refs = dependsOn.map((d) => {
+    return d.ref;
   });
-  return { purl_IN: purls, projectVersion: { id: projectVersionId } };
+  return { ref_IN: refs, projectVersion: { id: projectVersionId } };
 }

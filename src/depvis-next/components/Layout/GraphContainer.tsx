@@ -5,6 +5,8 @@ import { getNodeColor, getNodeValue } from "../../helpers/GraphHelper";
 import { GraphConfig } from "../Graph/GraphConfig";
 import NoSSRGraphWrapper from "../Graph/NoSSRGraphWrapper";
 import Loading from "../Loading/Loading";
+import GenericError from "../Error/GenericError";
+import GraphError from "../Error/GraphError";
 const GraphContainer = (props) => {
   const [graphDimensions, setGraphDimensions] = useState({
     width: 0,
@@ -28,6 +30,13 @@ const GraphContainer = (props) => {
   }, []);
 
   const graphConfig: GraphConfig = props.graphConfig;
+  if (
+    !props.isLoading &&
+    (!props.graphData ||
+      !props.graphData.nodes ||
+      props.graphData.nodes.length == 0)
+  )
+    return <GraphError message="No data" />;
   return (
     <Col className="workspace-graph-nospace" ref={graphContainerRef}>
       {props.isLoading && (

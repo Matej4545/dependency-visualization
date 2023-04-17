@@ -21,10 +21,19 @@ export const config = {
   },
 };
 
+const alwaysArray = [
+  "bom.dependencies.dependency",
+  "bom.dependencies.dependency.dependency",
+];
 const XMLParserOptions = {
   ignoreAttributes: false,
   attributeNamePrefix: "",
   ignoreDeclaration: true,
+  transformAttributeName: (attributeName: string) =>
+    attributeName.replace(/-/g, ""),
+  isArray: (name, jpath, isLeafNode, isAttribute) => {
+    if (alwaysArray.indexOf(jpath) !== -1) return true;
+  },
 };
 
 //Bull queue
@@ -92,7 +101,7 @@ export default async function handler(req, res) {
     } as ImportSbomJobData);
 
     //Return response
-    const response: ImportResult = { jobId: job.id, isError: false };
+    const response = { jobId: job.id, isError: false, bom: result.sbom };
     return res.status(200).json(response);
   } catch (err) {
     console.error(err);

@@ -6,5 +6,6 @@ export type GraphConfig = {
   linkDirectionalRelPos: number;
   nodeVal: number | Function;
   linkLength: number;
-  showOnlyVulnerable: Boolean;
+  showOnlyVulnerable: boolean;
+  connectNodesToRoot: boolean;
 };

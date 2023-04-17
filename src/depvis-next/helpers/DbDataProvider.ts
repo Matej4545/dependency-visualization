@@ -192,13 +192,13 @@ export async function CreateComponents(
  * Adds dependency relationship for components and connects main component to project version
  * @param dependencies List of dependencies
  * @param projectVersionId ID of the project version
- * @param mainComponentPurl purl of the main component that will be connected to projectVersion
+ * @param mainComponentRef purl of the main component that will be connected to projectVersion
  * @returns number of dependencies created
  */
 export async function updateComponentDependency(
   dependencies: Dependency[],
   projectVersionId: string,
-  mainComponentPurl: string,
+  mainComponentRef: string,
   progressUpdateFn: Function
 ) {
   if (!dependencies || dependencies.length == 0) {
@@ -206,13 +206,13 @@ export async function updateComponentDependency(
     return;
   }
   const mainComponentsMutation = gql`
-    mutation UpdateProjectVersion($projectVersionId: ID, $purl: String) {
+    mutation UpdateProjectVersion($projectVersionId: ID, $ref: String) {
       updateProjectVersions(
         where: { id: $projectVersionId }
         connect: {
           component: {
             where: {
-              node: { purl: $purl, projectVersion: { id: $projectVersionId } }
+              node: { ref: $ref, projectVersion: { id: $projectVersionId } }
             }
           }
         }
@@ -238,7 +238,7 @@ export async function updateComponentDependency(
   // Connect main component
   const mainComponentRes = await sendGQLMutation(mainComponentsMutation, {
     projectVersionId: projectVersionId,
-    purl: mainComponentPurl,
+    ref: mainComponentRef,
   });
   const dependencyQueryList: any[] = BuildAddDependencyQuery(
     dependencies,

@@ -1,5 +1,4 @@
 import { useLazyQuery, useQuery } from "@apollo/client";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { Container, Row } from "react-bootstrap";
@@ -11,7 +10,6 @@ import {
   getLinkSize,
   getNodeColor,
   getNodeValue,
-  getProjectsQuery,
 } from "../../helpers/GraphHelper";
 import ComponentDetails from "../Details/ComponentDetails";
 import Details from "../Details/Details";
@@ -19,19 +17,15 @@ import VulnerabilityDetails from "../Details/VulnerabilityDetails";
 import NoProjectFoundError from "../Error/NoProjectFoundError";
 import { GraphConfig } from "../Graph/GraphConfig";
 import GraphControl from "../GraphControl/GraphControl";
-import ImportForm from "../Import/ImportForm";
-import Loading from "../Loading/Loading";
 import Search from "../Search/Search";
 import GraphContainer from "../Layout/GraphContainer";
 import Sidebar, { SidebarItem } from "../Layout/Sidebar";
-import ProjectSelector from "./ProjectSelector";
-import { DropdownItem } from "../Dropdown/Dropdown";
 import ProjectVersionSelector from "./ProjectVersionSelector";
-import { graphNode, graphSelectedNode } from "../../types/colorPalette";
+import { graphSelectedNode } from "../../types/colorPalette";
 import usePrevious from "../../helpers/usePreviousHook";
 import ProjectStatistics from "./ProjectStatistics";
-import { DL, DLItem } from "../Details/DescriptionList";
 import Legend from "./Legend";
+import GenericError from "../Error/GenericError";
 
 const defaultGraphConfig: GraphConfig = {
   zoomLevel: 1,
@@ -40,8 +34,9 @@ const defaultGraphConfig: GraphConfig = {
   linkDirectionalArrowLength: 5,
   linkDirectionalRelPos: 0,
   linkLength: 10,
-  nodeVal: 1,
+  nodeVal: getNodeValue,
   showOnlyVulnerable: false,
+  connectNodesToRoot: false,
 };
 
 const Workspace = () => {
@@ -49,6 +44,7 @@ const Workspace = () => {
   const [graphConfig, setGraphConfig] =
     useState<GraphConfig>(defaultGraphConfig);
   const prevGraphConfig = usePrevious<GraphConfig>(graphConfig);
+  const [filteredData, setFilteredData] = useState<any>(undefined);
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [selectedProjectVersion, setSelectedProjectVersion] = useState<
     string | undefined
@@ -60,9 +56,20 @@ const Workspace = () => {
 
   useEffect(() => {
     if (data) {
-      setGraphData(formatData(data.projectVersions[0].allComponents));
+      const selectedData =
+        prevGraphConfig && prevGraphConfig.showOnlyVulnerable
+          ? data.projectVersions[0].allVulnerableComponents
+          : data.projectVersions[0].allComponents;
+      setFilteredData(selectedData);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (filteredData) {
+      setGraphData(formatData(filteredData, graphConfig.connectNodesToRoot));
+    }
+  }, [filteredData]);
+
   useEffect(() => {
     console.log({
       event: "Workspace detected projectVersion change",
@@ -83,6 +90,11 @@ const Workspace = () => {
       prevGraphConfig.showOnlyVulnerable !== graphConfig.showOnlyVulnerable
     )
       handleShowOnlyVulnerableToggle();
+    if (
+      prevGraphConfig &&
+      prevGraphConfig.connectNodesToRoot !== graphConfig.connectNodesToRoot
+    )
+      setGraphData(formatData(filteredData, graphConfig.connectNodesToRoot));
   }, [graphConfig]);
 
   const resetHighlight = (nodes: any[]) => {
@@ -107,9 +119,9 @@ const Workspace = () => {
   const handleShowOnlyVulnerableToggle = () => {
     if (!data) return;
     if (graphConfig.showOnlyVulnerable) {
-      setGraphData(formatData(data.projectVersions[0].allVulnerableComponents));
+      setFilteredData(data.projectVersions[0].allVulnerableComponents);
     } else {
-      setGraphData(formatData(data.projectVersions[0].allComponents));
+      setFilteredData(data.projectVersions[0].allComponents);
     }
   };
 
@@ -120,11 +132,13 @@ const Workspace = () => {
   const paintRing = useCallback(
     (currNode, ctx) => {
       if (node && node.id === currNode.id) {
+        const nodeSize =
+          typeof graphConfig.nodeVal === "function" ? currNode.size : 1;
         ctx.beginPath();
         ctx.arc(
           currNode.x,
           currNode.y,
-          (Math.sqrt(currNode.size) * 4 + 1) | 1,
+          (Math.sqrt(nodeSize) * 4 + 1) | 1,
           0,
           2 * Math.PI,
           false
@@ -140,27 +154,25 @@ const Workspace = () => {
     setSelectedProjectVersion(projectVersion);
   };
 
-  const renderLegend = () => {
-    return <></>;
-  };
-
   if (!selectedProjectVersion)
     return (
       <ProjectVersionSelector onProjectVersionSelect={handleProjectVersion} />
     );
+
+  if (error) return <GenericError error={error} />;
   return (
     <Container fluid>
       <Row className="workspace-main">
         <Sidebar>
-          <SidebarItem title="Select project">
+          <SidebarItem title="Select project" fixed>
             <ProjectVersionSelector
               onProjectVersionSelect={handleProjectVersion}
             />
           </SidebarItem>
-          <SidebarItem title="Project details" collapse={true}>
+          <SidebarItem title="Project details">
             <ProjectStatistics data={data} />
           </SidebarItem>
-          <SidebarItem title="Search nodes">
+          <SidebarItem title="Search nodes" fixed>
             <Search
               objects={graphData.nodes}
               searchResultCallback={(obj) => handleSelectedSearchResult(obj)}
