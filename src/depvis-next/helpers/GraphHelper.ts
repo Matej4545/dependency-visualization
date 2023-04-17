@@ -18,19 +18,32 @@ import {
  * @param components List of components
  * @returns Object containing list of nodes and links
  */
-export const formatData = (components) => {
+export const formatData = (components, connectDirect = false) => {
   const nodes = [];
   let links = [];
   if (!components) return { nodes, links };
   const componentsCount = components.length / 20;
+  // Create root component
+  const root = {
+    id: "root",
+    name: "Project root component",
+    size: 20,
+    dependsOnCount: componentsCount,
+    __typename: "Root",
+  };
+  connectDirect && nodes.push(root);
   components.forEach((c) => {
     nodes.push({
       id: c.purl,
       name: c.name,
       dependsOnCount: c.dependsOnCount,
       size: 1 + c.dependsOnCount / componentsCount,
+      isDirectDependency: c.isDirectDependency,
       __typename: c.__typename,
     });
+    if (connectDirect && c.isDirectDependency) {
+      links.push({ source: root.id, target: c.purl, isFake: true });
+    }
     if (c.dependsOn) {
       c.dependsOn.forEach((d) => {
         links.push({
@@ -78,6 +91,7 @@ export const getAllComponentsQuery = gql`
         id
         name
         version
+        isDirectDependency
         __typename
         purl
         dependsOnCount
@@ -101,6 +115,7 @@ export const getAllComponentsQuery = gql`
         id
         name
         version
+        isDirectDependency
         __typename
         purl
         dependsOnCount

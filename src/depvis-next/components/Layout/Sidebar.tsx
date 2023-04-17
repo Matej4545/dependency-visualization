@@ -12,27 +12,36 @@ const Sidebar = (props) => (
 );
 
 export const SidebarItem = (props) => {
-  const { title, collapse } = props;
+  const { title, collapse, fixed } = props;
   const [open, setOpen] = useState<boolean>(!collapse);
   return (
     <Container>
-      <Stack
-        direction="horizontal"
-        onClick={() => {
-          setOpen(!open);
-        }}
-      >
-        <h6>{title}</h6>
-        <FontAwesomeIcon
-          icon={open ? faCaretUp : faCaretDown}
-          className="ms-auto"
-          color={graphUIGrey}
-        />
-      </Stack>
+      {fixed ? (
+        <>
+          <h6>{title}</h6>
+          {props.children}
+        </>
+      ) : (
+        <>
+          <Stack
+            direction="horizontal"
+            onClick={() => {
+              setOpen(!open);
+            }}
+          >
+            <h6>{title}</h6>
+            <FontAwesomeIcon
+              icon={open ? faCaretUp : faCaretDown}
+              className="ms-auto"
+              color={graphUIGrey}
+            />
+          </Stack>
 
-      <Collapse in={open}>
-        <div>{props.children}</div>
-      </Collapse>
+          <Collapse in={open}>
+            <div>{props.children}</div>
+          </Collapse>
+        </>
+      )}
     </Container>
   );
 };

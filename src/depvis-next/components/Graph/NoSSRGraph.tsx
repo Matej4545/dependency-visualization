@@ -20,7 +20,7 @@ export default function NoSSRGraph(props) {
     r.d3Force("y", forceY().strength(0.1));
     r.d3Force("link")
       .distance((link) => link.source.size + link.target.size)
-      .strength(props.linkLength / 100 + 0.1);
+      .strength(1 - props.linkLength / 100);
     r.d3Force("charge", forceManyBody().strength(-40));
   }, [props, graphRef]);
   return <ReactForceGraph2d {...props} ref={graphRef} warmupTicks={100} />;
