@@ -19,6 +19,7 @@ const ProjectVersionSelector = (props: ProjectSelectorProps) => {
       onCompleted: (data) => {
         selectProjectVersion(data);
       },
+      fetchPolicy: "network-only",
     }
   );
 

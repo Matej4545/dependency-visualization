@@ -110,12 +110,19 @@ const Workspace = () => {
       const index = graphData.nodes.findIndex((n) => n.id == item);
       if (index >= 0) graphData.nodes[index].highlight = true;
     });
-    // Reset position
-    node.fx = undefined;
-    node.fy = undefined;
+
     setNode(node);
   };
 
+  const resetNodeFix = (node) => {
+    node.fx = undefined;
+    node.fy = undefined;
+  };
+
+  const unselectNode = () => {
+    resetHighlight(graphData.nodes);
+    setNode(undefined);
+  };
   const handleShowOnlyVulnerableToggle = () => {
     if (!data) return;
     if (graphConfig.showOnlyVulnerable) {
@@ -126,7 +133,7 @@ const Workspace = () => {
   };
 
   const handleSelectedSearchResult = (object) => {
-    setNode(object);
+    handleNodeClick(object);
   };
 
   const paintRing = useCallback(
@@ -224,6 +231,12 @@ const Workspace = () => {
           onNodeDragEnd={(node) => {
             node.fx = node.x;
             node.fy = node.y;
+          }}
+          onNodeRightClick={(node) => {
+            resetNodeFix(node);
+          }}
+          onBackgroundClick={() => {
+            unselectNode();
           }}
         />
       </Row>

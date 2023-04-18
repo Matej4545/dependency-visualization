@@ -82,7 +82,7 @@ export const typeDefs = gql`
     allVulnerableComponents: [Component!]!
       @cypher(
         statement: """
-        MATCH a=(v:Vulnerability)<-[:HAS_VULNERABILITY]-(c1:Component)<-[:DEPENDS_ON*0..]-(c2)<-[:DEPENDS_ON]-(this)
+        MATCH a=(v:Vulnerability)<-[:HAS_VULNERABILITY]-(c1:Component)<-[:DEPENDS_ON*0..]-(c2)--(this)
         WITH NODES(a) AS nodes
         UNWIND nodes AS n
         WITH n
