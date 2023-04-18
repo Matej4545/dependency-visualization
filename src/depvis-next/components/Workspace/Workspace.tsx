@@ -26,6 +26,7 @@ import usePrevious from "../../helpers/usePreviousHook";
 import ProjectStatistics from "./ProjectStatistics";
 import Legend from "./Legend";
 import GenericError from "../Error/GenericError";
+import Loading from "../Loading/Loading";
 
 const defaultGraphConfig: GraphConfig = {
   zoomLevel: 1,

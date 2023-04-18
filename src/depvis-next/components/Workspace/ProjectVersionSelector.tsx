@@ -5,6 +5,8 @@ import { Container } from "react-bootstrap";
 import { getProjectVersionsQuery } from "../../helpers/GraphHelper";
 import Dropdown, { DropdownItem } from "../Dropdown/Dropdown";
 import NoProjectFoundError from "../Error/NoProjectFoundError";
+import Loading from "../Loading/Loading";
+import GenericError from "../Error/GenericError";
 
 type ProjectSelectorProps = {
   onProjectVersionSelect?: (projectVersionId: string) => void;
@@ -13,15 +15,16 @@ const ProjectVersionSelector = (props: ProjectSelectorProps) => {
   const { onProjectVersionSelect } = props;
   const [projectVersion, setProjectVersion] = useState<any>(undefined);
   const router = useRouter();
-  const { data: projects, loading: projectsLoading } = useQuery(
-    getProjectVersionsQuery,
-    {
-      onCompleted: (data) => {
-        selectProjectVersion(data);
-      },
-      fetchPolicy: "network-only",
-    }
-  );
+  const {
+    data: projects,
+    loading: projectsLoading,
+    error,
+  } = useQuery(getProjectVersionsQuery, {
+    onCompleted: (data) => {
+      selectProjectVersion(data);
+    },
+    fetchPolicy: "network-only",
+  });
 
   useEffect(() => {
     if (projectVersion) {
@@ -50,6 +53,9 @@ const ProjectVersionSelector = (props: ProjectSelectorProps) => {
       data.projectVersions.find((p) => p.project.name === projectName).id
     );
   };
+
+  if (projectsLoading) return <Loading detail="Loading projects" />;
+  if (error) return <GenericError error={error} />;
 
   if (!projectsLoading && projects.projectVersions.length == 0) {
     return <NoProjectFoundError />;
