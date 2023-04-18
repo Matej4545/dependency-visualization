@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Col, Container } from "react-bootstrap";
-import { ForceGraphMethods } from "react-force-graph-2d";
-import { getNodeColor, getNodeValue } from "../../helpers/GraphHelper";
 import { GraphConfig } from "../Graph/GraphConfig";
 import NoSSRGraphWrapper from "../Graph/NoSSRGraphWrapper";
 import Loading from "../Loading/Loading";
-import GenericError from "../Error/GenericError";
 import GraphError from "../Error/GraphError";
 const GraphContainer = (props) => {
   const [graphDimensions, setGraphDimensions] = useState({
@@ -16,7 +13,7 @@ const GraphContainer = (props) => {
 
   const setSize = () => {
     setGraphDimensions({
-      width: graphContainerRef.current && graphContainerRef.current.clientWidth,
+      width: graphContainerRef.current && graphContainerRef.current.offsetWidth,
       height: window.innerHeight - 56,
     });
   };

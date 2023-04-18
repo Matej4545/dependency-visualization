@@ -6,7 +6,7 @@ import { Col, Collapse, Container, Stack } from "react-bootstrap";
 import { graphUIGrey } from "../../types/colorPalette";
 
 const Sidebar = (props) => (
-  <Col className="workspace-sidebar px-0" xl={3} md={4} sm={5}>
+  <Col className="workspace-sidebar px-0" xl={3} md={4} sm={5} id="sidebar">
     {props.children}
   </Col>
 );
