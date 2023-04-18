@@ -21,11 +21,15 @@ import Search from "../Search/Search";
 import GraphContainer from "../Layout/GraphContainer";
 import Sidebar, { SidebarItem } from "../Layout/Sidebar";
 import ProjectVersionSelector from "./ProjectVersionSelector";
-import { graphSelectedNode } from "../../types/colorPalette";
+import {
+  graphSelectedNode,
+  vulnerabilityHighlightedColor,
+} from "../../types/colorPalette";
 import usePrevious from "../../helpers/usePreviousHook";
 import ProjectStatistics from "./ProjectStatistics";
 import Legend from "./Legend";
 import GenericError from "../Error/GenericError";
+import Loading from "../Loading/Loading";
 
 const defaultGraphConfig: GraphConfig = {
   zoomLevel: 1,
@@ -37,6 +41,7 @@ const defaultGraphConfig: GraphConfig = {
   nodeVal: getNodeValue,
   showOnlyVulnerable: false,
   connectNodesToRoot: false,
+  graphForce: 0.1,
 };
 
 const Workspace = () => {
@@ -110,12 +115,19 @@ const Workspace = () => {
       const index = graphData.nodes.findIndex((n) => n.id == item);
       if (index >= 0) graphData.nodes[index].highlight = true;
     });
-    // Reset position
-    node.fx = undefined;
-    node.fy = undefined;
+
     setNode(node);
   };
 
+  const resetNodeFix = (node) => {
+    node.fx = undefined;
+    node.fy = undefined;
+  };
+
+  const unselectNode = () => {
+    resetHighlight(graphData.nodes);
+    setNode(undefined);
+  };
   const handleShowOnlyVulnerableToggle = () => {
     if (!data) return;
     if (graphConfig.showOnlyVulnerable) {
@@ -126,9 +138,15 @@ const Workspace = () => {
   };
 
   const handleSelectedSearchResult = (object) => {
-    setNode(object);
+    handleNodeClick(object);
   };
 
+  const getHighlightedColor = (currNode) => {
+    if (currNode !== node) return "";
+    return currNode.__typename === "Component"
+      ? graphSelectedNode
+      : vulnerabilityHighlightedColor;
+  };
   const paintRing = useCallback(
     (currNode, ctx) => {
       if (node && node.id === currNode.id) {
@@ -143,7 +161,7 @@ const Workspace = () => {
           2 * Math.PI,
           false
         );
-        ctx.fillStyle = currNode === node ? graphSelectedNode : "";
+        ctx.fillStyle = getHighlightedColor(currNode);
         ctx.fill();
       }
     },
@@ -224,6 +242,12 @@ const Workspace = () => {
           onNodeDragEnd={(node) => {
             node.fx = node.x;
             node.fy = node.y;
+          }}
+          onNodeRightClick={(node) => {
+            resetNodeFix(node);
+          }}
+          onBackgroundClick={() => {
+            unselectNode();
           }}
         />
       </Row>

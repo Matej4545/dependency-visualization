@@ -4,10 +4,12 @@ import {
   graphHighlightedLink,
   graphHighlightedNode,
   graphLink,
+  graphMainComponentNode,
   graphNode,
   graphSelectedNode,
   vulnerabilityCriticalColor,
   vulnerabilityHighColor,
+  vulnerabilityHighlightedColor,
   vulnerabilityLowColor,
   vulnerabilityMediumColor,
 } from "../../types/colorPalette";
@@ -20,12 +22,17 @@ const Legend = () => {
     { color: vulnerabilityHighColor, label: "High vulnerability" },
     { color: vulnerabilityMediumColor, label: "Medium vulnerability" },
     { color: vulnerabilityLowColor, label: "Low vulnerability" },
+    {
+      color: vulnerabilityHighlightedColor,
+      label: "Highlighted vulnerability",
+    },
   ];
   const nodeItems = [
-    { color: graphNode, label: "Node" },
-    { color: graphSelectedNode, label: "Selected node" },
-    { color: graphHighlightedNode, label: "Highlighted node" },
-    { color: graphExcludedNode, label: "Excluded node" },
+    { color: graphMainComponentNode, label: "Project" },
+    { color: graphNode, label: "Component" },
+    { color: graphSelectedNode, label: "Selected component" },
+    { color: graphHighlightedNode, label: "Highlighted component" },
+    { color: graphExcludedNode, label: "Excluded component" },
   ];
   const linkItems = [
     { color: graphLink, label: "Link" },
@@ -35,16 +42,21 @@ const Legend = () => {
   const controlItems = [
     { action: "Zoom In / Out", command: "Mouse wheel up / down" },
     {
-      action: "Move node",
+      action: "Move & Pin node",
       command: "Mouse click and drag",
       tooltip:
-        "Node will stay in a fixed spot. You can unfix it by clicking on it.",
+        "Node can be dragged and pinned in specific spot. Use right click to unpin it.",
+    },
+    {
+      action: "Unpin node",
+      command: "Mouse Right Click",
+      tooltip: "Right click on pinend node to unpin it",
     },
     {
       action: "Open information",
-      command: "Mouse click",
+      command: "Mouse Left click",
       tooltip:
-        "By clicking on node, a path from the node to root node will be highlighted.",
+        "By clicking on node, a path from the node to root node will be highlighted. Click outside to reset highlight.",
     },
   ];
 
@@ -78,7 +90,7 @@ const Legend = () => {
             <span style={{ fontWeight: "600" }} className="mx-`">
               {c.action}:
             </span>
-            <span>{c.command}</span>
+            <span className="mx-2">{c.command}</span>
           </Stack>
         </OverlayTrigger>
       );
@@ -86,7 +98,7 @@ const Legend = () => {
   };
   return (
     <>
-      <strong>Nodes</strong>
+      <strong>Components & Project</strong>
       {mapItems(nodeItems)}
       <strong>Links</strong>
       {mapItems(linkItems)}
