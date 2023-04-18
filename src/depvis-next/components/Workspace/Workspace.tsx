@@ -21,7 +21,10 @@ import Search from "../Search/Search";
 import GraphContainer from "../Layout/GraphContainer";
 import Sidebar, { SidebarItem } from "../Layout/Sidebar";
 import ProjectVersionSelector from "./ProjectVersionSelector";
-import { graphSelectedNode } from "../../types/colorPalette";
+import {
+  graphSelectedNode,
+  vulnerabilityHighlightedColor,
+} from "../../types/colorPalette";
 import usePrevious from "../../helpers/usePreviousHook";
 import ProjectStatistics from "./ProjectStatistics";
 import Legend from "./Legend";
@@ -138,6 +141,12 @@ const Workspace = () => {
     handleNodeClick(object);
   };
 
+  const getHighlightedColor = (currNode) => {
+    if (currNode !== node) return "";
+    return currNode.__typename === "Component"
+      ? graphSelectedNode
+      : vulnerabilityHighlightedColor;
+  };
   const paintRing = useCallback(
     (currNode, ctx) => {
       if (node && node.id === currNode.id) {
@@ -152,7 +161,7 @@ const Workspace = () => {
           2 * Math.PI,
           false
         );
-        ctx.fillStyle = currNode === node ? graphSelectedNode : "";
+        ctx.fillStyle = getHighlightedColor(currNode);
         ctx.fill();
       }
     },

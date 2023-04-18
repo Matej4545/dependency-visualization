@@ -4,6 +4,7 @@ import {
   graphHighlightedLink,
   graphHighlightedNode,
   graphLink,
+  graphMainComponentNode,
   graphNode,
   graphSelectedNode,
   graphUIGrey,
@@ -176,6 +177,13 @@ export const vulnerabilityColorByCVSS = (cvssScore: number) => {
   return vulnerabilityLowColor;
 };
 
+const componentColor = (node) => {
+  console.log(node);
+  if (node.name && nodeExcludeRegex.test(node.name)) return graphExcludedNode;
+  if (node.isDirectDependency) return graphMainComponentNode;
+  if (node.highlight) return graphHighlightedNode;
+  return graphNode;
+};
 const nodeExcludeRegex = new RegExp(
   process.env.NEXT_PUBLIC_GRAPH_EXCLUDED_REGEX
 );
@@ -183,9 +191,7 @@ export const getNodeColor = (node) => {
   if (!node) return graphUIGrey;
   if (node.__typename === "Vulnerability")
     return vulnerabilityColorByCVSS(node.cvssScore);
-  if (node.highlight) return graphHighlightedNode;
-  if (node.name && nodeExcludeRegex.test(node.name)) return graphExcludedNode;
-  if (node.__typename === "Component") return graphNode;
+  if (node.__typename === "Component") return componentColor(node);
   return graphUIGrey;
 };
 
