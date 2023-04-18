@@ -38,6 +38,7 @@ const defaultGraphConfig: GraphConfig = {
   nodeVal: getNodeValue,
   showOnlyVulnerable: false,
   connectNodesToRoot: false,
+  graphForce: 0.1,
 };
 
 const Workspace = () => {

@@ -6,6 +6,7 @@ import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEarth,
+  faLocationCrosshairs,
   faMagnifyingGlassMinus,
   faMagnifyingGlassPlus,
 } from "@fortawesome/free-solid-svg-icons";
@@ -25,8 +26,9 @@ export default function NoSSRGraph(props) {
         .radius((node) => node.size | 1)
         .strength(0.1)
     );
-    r.d3Force("x", forceX().strength(0.001));
-    r.d3Force("y", forceY().strength(0.001));
+    const force = props.graphConfig.graphForce / 1000;
+    r.d3Force("x", forceX().strength(force));
+    r.d3Force("y", forceY().strength(force));
     r.d3Force("link")
       .distance((link) => link.source.size + link.target.size + 20)
       .strength(1 - props.linkLength / 100);
@@ -43,8 +45,23 @@ export default function NoSSRGraph(props) {
         <Button
           variant="hidden"
           onClick={() => {
+            graphRef.current &&
+              props.selectedNode &&
+              graphRef.current.centerAt(
+                props.selectedNode.x,
+                props.selectedNode.y,
+                500
+              );
+          }}
+        >
+          <FontAwesomeIcon icon={faLocationCrosshairs} />
+        </Button>
+        <Button
+          variant="hidden"
+          onClick={() => {
             const delta = currentZoom.k > 1 ? 2 : 0.2;
-            graphRef.current && graphRef.current.zoom(currentZoom.k + 2, 200);
+            graphRef.current &&
+              graphRef.current.zoom(currentZoom.k + delta, 200);
           }}
         >
           <FontAwesomeIcon icon={faMagnifyingGlassPlus} />

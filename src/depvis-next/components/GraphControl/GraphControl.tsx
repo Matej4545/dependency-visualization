@@ -123,6 +123,29 @@ const GraphControl = (props) => {
           <span>{graphConfig.linkLength} %</span>
         </Stack>
       </OverlayTrigger>
+      <OverlayTrigger
+        placement="right"
+        overlay={
+          <Tooltip id="tooltip">
+            Sets how much are nodes pulled to the centre of graph.
+          </Tooltip>
+        }
+      >
+        <Stack direction="horizontal">
+          <Form.Label>Force strength</Form.Label>
+          <Form.Range
+            onChange={(e) => {
+              setGraphConfig({
+                ...graphConfig,
+                graphForce: parseInt(e.target.value, 10),
+              });
+            }}
+            style={{ width: "50%" }}
+            className="mx-2"
+          />
+          <span>{graphConfig.graphForce} %</span>
+        </Stack>
+      </OverlayTrigger>
       <Stack gap={2}>
         <Button
           onClick={() => {

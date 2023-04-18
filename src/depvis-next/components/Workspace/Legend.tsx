@@ -35,16 +35,21 @@ const Legend = () => {
   const controlItems = [
     { action: "Zoom In / Out", command: "Mouse wheel up / down" },
     {
-      action: "Move node",
+      action: "Move & Pin node",
       command: "Mouse click and drag",
       tooltip:
-        "Node will stay in a fixed spot. You can unfix it by clicking on it.",
+        "Node can be dragged and pinned in specific spot. Use right click to unpin it.",
+    },
+    {
+      action: "Unpin node",
+      command: "Mouse Right Click",
+      tooltip: "Right click on pinend node to unpin it",
     },
     {
       action: "Open information",
-      command: "Mouse click",
+      command: "Mouse Left click",
       tooltip:
-        "By clicking on node, a path from the node to root node will be highlighted.",
+        "By clicking on node, a path from the node to root node will be highlighted. Click outside to reset highlight.",
     },
   ];
 
@@ -78,7 +83,7 @@ const Legend = () => {
             <span style={{ fontWeight: "600" }} className="mx-`">
               {c.action}:
             </span>
-            <span>{c.command}</span>
+            <span className="mx-2">{c.command}</span>
           </Stack>
         </OverlayTrigger>
       );

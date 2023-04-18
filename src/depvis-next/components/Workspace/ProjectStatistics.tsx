@@ -19,32 +19,43 @@ const ProjectStatistics = (props) => {
       2
     );
   };
+
+  const getImpactScore = () => {
+    return Math.round(
+      (projectInfo.vulnerableComponents.length / projectInfo.componentsCount) *
+        100
+    ).toFixed(1);
+  };
   if (!projectInfo) return <></>;
   return (
     <Container>
       <DL>
-        <DLItem label="Total components" value={projectInfo.componentsCount} />
+        <DLItem
+          label="Total components"
+          value={projectInfo.componentsCount}
+          horizontal
+        />
         <DLItem
           label="Vulnerable components"
           value={projectInfo.vulnerableComponents.length}
           tooltipText="Components that depends on vulnerable component or contain vulnerability"
+          horizontal
         />
         <DLItem
           label="Vulnerabilities"
           value={getCVSSScoresAsArray(projectInfo.vulnerableComponents).length}
+          horizontal
         />
         <DLItem
           label="Impact factor"
-          value={`${Math.round(
-            (projectInfo.vulnerableComponents.length /
-              projectInfo.componentsCount) *
-              100
-          ).toPrecision(1)} %`}
+          value={`${getImpactScore()} %`}
           tooltipText="Specify how many % of project use components with at least 1 vulnerability"
+          horizontal
         />
         <DLItem
           label="Average CVSS score"
           value={getCVSSAvg(projectInfo.vulnerableComponents)}
+          horizontal
         />
       </DL>
     </Container>

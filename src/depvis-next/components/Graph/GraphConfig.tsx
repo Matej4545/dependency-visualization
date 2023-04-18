@@ -8,4 +8,5 @@ export type GraphConfig = {
   linkLength: number;
   showOnlyVulnerable: boolean;
   connectNodesToRoot: boolean;
+  graphForce: number;
 };
