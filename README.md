@@ -1,8 +1,8 @@
 # Dependency visualization - DepVis
 
-Tool for visualization of open source dependencies and vulnerabilities from Software Bill of Materials (SBOM).
+DepVis is a Proof-of-Concept tool for visualization of open source dependencies and vulnerabilities using Software Bill of Materials (SBOM) as the input.
 
-This tool was developed as part of Master's thesis "Visualization of Vulnerabilities in Open Source Software Dependencies" at FI MUNI.
+This tool was developed as part of Master's thesis "Visualization of Vulnerabilities in Open Source Software Dependencies" by Matej Groman at FI MUNI.
 
 ## Prerequisites
 
@@ -11,22 +11,60 @@ This tool was developed as part of Master's thesis "Visualization of Vulnerabili
 
 ## Deployment
 
+Deployment is realized using three Docker containers. Following Figure presents the DepVis architecture.
+
+- The Web Client and Web Server is running as one container using [Next.js framework](https://nextjs.org/).
+- Data are stored in a [Neo4J Database](https://neo4j.com/) running as second container
+- A Redis Cache is used by import queue, realized by third container.
+
+![DepVis Architecture Diagram](./figures/depvis-architecture.png)
+
+To make deployment easier, a `docker-compose.yml` files are used to define complete infrastructure.
+
 ### Using Docker locally
 
 - Clone this repository
-- _Optional_ Change login credentials for neo4j by editing [docker-compose.yml](./docker-compose.yml)
-- Create environment variables file according to sample file in Next.js app - [example](./src/depvis-next/.env.production.example)
-- To start all services use `docker-compose up`
+- Create environment variables file for docker compose - check [example](./.env.example) for supported variables.
+  - Minimum required are: `NEO4J_PASSWORD` and `REDIS_PASSWORD`.
+  - Optionally you can create environment variables file according to sample file in Next.js app - [example](./src/depvis-next/.env.production.example) and edit `docker-compose.yml` accordingly.
+- To build all services use `docker-compose build`
+- Start all services using `docker-compose up`
 - For more details follow installation steps for Next.js app [here](./src/depvis-next/README.md)
 
 ### Using Azure containers
 
+It is also possible to deploy the container stack into Azure. Follow [official guide](https://learn.microsoft.com/en-us/azure/container-instances/tutorial-docker-compose) to:
+
 - Clone this repository
-- Follow [official guide](https://learn.microsoft.com/en-us/azure/container-instances/tutorial-docker-compose) to create Azure container repository (ACR), publish DepVis image and create new Docker context
-- Use [./docker-compose-azure.yml] to deploy containers in Azure (you'll need to update name of the container according to your ACR)
+- Create Azure Container Registry
+- Login into Azure Container Registry (ACR) using `az acr login --name <acrName>`
+- Create environment variables file for docker compose - check [example](./.env.example) for supported variables.
+  - Minimum required are: `NEO4J_PASSWORD`, `REDIS_PASSWORD` and `ACR_NAME`.
+- Build docker image (in default Docker Context) using [Azure Docker Compose file](./docker-compose-azure.yml) and push image to ACR created earlier
+
+```
+> docker-compose -f ./docker-compose-azure.yml build
+> docker-compose push
+```
+
+- Create new Docker context and switch to it using
+
+```
+> docker login azure
+> docker context create aci depvis
+> docker context use depvis
+```
+
+- Publish new container stack in new context using `docker compose up`
+
+- See `docker ps` for details
 
 ## Repository content
 
 - [sample_bom](./sample_bom/): Contains sample SBOM files for quick testing purposes
 - [src/depvis-next](./src/depvis-next/): Next.js web application
 - [docker-compose.yml](./docker-compose.yml): Create containers necessary for proper functionality
+
+```
+
+```

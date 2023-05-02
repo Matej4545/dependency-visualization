@@ -10,42 +10,44 @@ services:
       - neo4j:/data
     restart: unless-stopped
     environment:
-      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:?error}
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
-      - NEO4JLABS_PLUGINS=["apoc"]
+      - NEO4J_PLUGINS=["apoc"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,algo.*
 
   redis-cache:
     image: redis:latest
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${REDIS_PASSWORD:?error}
     restart: unless-stopped
     volumes:
       - cache:/data
     ports:
-      - ${REDIS_PORT}:6379
+      - ${REDIS_PORT:-6379}:6379
 
   depvis-next:
     depends_on:
       - neo4j
       - redis-cache
-    build: ./src/depvis-next
-    image: depvisacr.azurecr.io/depvis-next:latest
+    build:
+      context: ./src/depvis-next/
+    image: ${ACR_NAME:?error}/depvis-next:latest
     ports:
       - ${DEPVIS_PORT}:3000
     restart: always
-    domainname: depvis
+    domainname: ${AZURE_DOMAIN_NAME:-depvis}
     environment:
-      NEO4J_USER: ${NEO4J_USER}
-      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
-      NEO4J_HOST: ${NEO4J_HOST}
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:?error}
+      NEO4J_HOST: ${NEO4J_HOST:-neo4j://neo4j:7687}
       REDIS_HOST: redis-cache
-      REDIS_PORT: ${REDIS_PORT}
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?error}
       NEXT_PUBLIC_SONATYPE_OSS_AUTH: ${SONATYPE_OSS_AUTH}
-      NEXT_PUBLIC_SERVER_URI: ${NEXT_PUBLIC_SERVER_URI}
-      NEXT_PUBLIC_GRAPH_EXCLUDED_REGEX: ${GRAPH_EXCLUDED_REGEX}
+      NEXT_PUBLIC_SERVER_URI: ${NEXT_PUBLIC_SERVER_URI:-http://localhost:3000}
+      VULN_DB: ${VULN_DB:-Sonatype}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
 volumes:
   cache:
     driver: azure_file

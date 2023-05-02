@@ -11,7 +11,7 @@ import urlJoin from "url-join";
 let httpApolloClient;
 let ssrApolloClient;
 const ssrHttpLink = createHttpLink({
-  uri: urlJoin(process.env.NEXT_PUBLIC_SERVER_URI, GraphQLUri),
+  uri: urlJoin(process.env.NEXT_PUBLIC_SERVER_URI || "", GraphQLUri),
   credentials: "same-origin",
   fetchOptions: {
     mode: "cors",

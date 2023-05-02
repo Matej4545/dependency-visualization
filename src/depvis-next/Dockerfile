@@ -45,7 +45,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy .env production variables
-COPY .env.production .
+COPY *.env.production .
 
 USER nextjs
 
