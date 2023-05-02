@@ -19,7 +19,7 @@ export default function Dropdown(props) {
       <Form>
         {title && <Form.Label>{title}</Form.Label>}
         <Form.Select
-          value={selectedId && selectedId}
+          value={selectedId || ""}
           disabled={disabled}
           onChange={(e) => {
             setSelectedId(e.target.value);

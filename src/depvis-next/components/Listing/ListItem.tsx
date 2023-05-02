@@ -5,7 +5,7 @@ import { deleteRed, graphUIGrey } from "../../types/colorPalette";
 
 export type Item = {
   name: string;
-  detail: string;
+  detail: any[];
   [key: string]: any;
 };
 type ListItemProps = {
@@ -19,7 +19,7 @@ const ListItem = (props: ListItemProps) => {
 
   const getActions = () => {
     return (
-      <ButtonGroup>
+      <ButtonGroup className="float-end">
         <Button
           variant="light"
           disabled={deleteAction === undefined}
@@ -46,9 +46,15 @@ const ListItem = (props: ListItemProps) => {
   };
   return (
     <tr>
-      <td id="name">{item.name}</td>
-      <td id="detail">{item.detail}</td>
-      <td id="actions">{getActions()}</td>
+      <td id="name" className="col-md-4">
+        {item.name}
+      </td>
+      {item.detail.map((i) => (
+        <td>{i}</td>
+      ))}
+      <td id="actions" className="col-md-1">
+        {getActions()}
+      </td>
     </tr>
   );
 };

@@ -30,7 +30,9 @@ const MainNavbar = () => {
                 <Nav.Link>GraphQL Playground</Nav.Link>
               </Link>
             )}
-
+            <Link href="/projects" passHref>
+              <Nav.Link>Projects</Nav.Link>
+            </Link>
             <NavDropdown title="Other actions" id="basic-nav-dropdown">
               <NavDropdown.Item
                 as={Button}

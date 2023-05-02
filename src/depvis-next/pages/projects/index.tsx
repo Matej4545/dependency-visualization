@@ -4,9 +4,11 @@ import { Container, Modal, Table } from "react-bootstrap";
 import ListItem from "../../components/Listing/ListItem";
 import { useState } from "react";
 import { DL, DLItem } from "../../components/Details/DescriptionList";
+import Link from "next/link";
+import { DeleteProject } from "../../helpers/DbDataProvider";
 
 const projectsQuery = gql`
-  query ExampleQuery {
+  query projectsQuery {
     projects {
       id
       name
@@ -19,14 +21,33 @@ const projectsQuery = gql`
 `;
 
 const Projects = () => {
-  const { loading, data, error } = useQuery(projectsQuery);
+  const { loading, data, error, refetch } = useQuery(projectsQuery);
   const [showModal, setShowModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(undefined);
+
+  const projectVersionList = (projectVersions) => {
+    return (
+      <ul>
+        {projectVersions.map((pv, i) => {
+          const href = `/components?projectVersion=${pv.id}`;
+          return (
+            <li key={i}>
+              <Link href={href}>{pv.version}</Link>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  };
 
   const processItems = (projects) => {
     console.log(projects);
     return projects.map((p) => {
-      return { id: p.id, name: p.name, detail: p.versions.length };
+      return {
+        id: p.id,
+        name: p.name,
+        detail: [projectVersionList(p.versions)],
+      };
     });
   };
 
@@ -36,23 +57,16 @@ const Projects = () => {
     setShowModal(true);
   };
 
-  const deleteAction = (id) => {};
-
-  const generateVersionsList = (versions) => {
-    if (!versions) return;
-    return (
-      <ul>
-        {versions.map((v) => {
-          return <li key={v.id}>v.version</li>;
-        })}
-      </ul>
-    );
+  const deleteAction = async (id) => {
+    const response = await DeleteProject(id);
+    refetch();
   };
+
   if (!loading)
     return (
       <Container>
-        <h2>Projects</h2>
-        <Table hover bordered>
+        <h2 className="mt-2">Projects ({data.projects.length})</h2>
+        <List detailHeaders={["Project Versions"]}>
           {processItems(data.projects).map((item, i) => (
             <ListItem
               key={i}
@@ -61,7 +75,7 @@ const Projects = () => {
               deleteAction={deleteAction}
             />
           ))}
-        </Table>
+        </List>
         {selectedProject && (
           <Modal show={showModal} onHide={handleModalClose}>
             <Modal.Header closeButton>
@@ -72,7 +86,7 @@ const Projects = () => {
                 <DLItem label="Id" value={selectedProject.id} />
                 <DLItem
                   label="Versions"
-                  value={generateVersionsList(selectedProject.versions)}
+                  value={projectVersionList(selectedProject.versions)}
                 />
               </DL>
             </Modal.Body>

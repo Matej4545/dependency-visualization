@@ -84,6 +84,26 @@ export async function GetProjectById(projectId: string): Promise<Project[]> {
   return data.projects;
 }
 
+export async function DeleteProject(projectId: string): Promise<any> {
+  const deleteProjectMutation = gql`
+    mutation DeleteComponents($id: ID) {
+      deleteComponents(where: { projectVersion: { project: { id: $id } } }) {
+        nodesDeleted
+      }
+      deleteProjects(
+        where: { id: $id }
+        delete: { versions: [{ where: {} }] }
+      ) {
+        nodesDeleted
+      }
+    }
+  `;
+  const { data } = await sendGQLMutation(deleteProjectMutation, {
+    id: projectId,
+  });
+  return data;
+}
+
 /**
  * Creates new version for a given project
  * @param projectId Project ID

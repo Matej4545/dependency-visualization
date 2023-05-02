@@ -1,20 +1,19 @@
-import { Container, Table } from "react-bootstrap";
-import ListItem, { Item } from "./ListItem";
-type ListProps = {
-  listItems: Item;
-  editAction?: Function;
-  viewAction?: Function;
-  deleteAction?: Function;
-};
-const List = (props: ListProps) => {
-  const { listItems, editAction, viewAction, deleteAction } = props;
+import { Table } from "react-bootstrap";
+
+const List = (props) => {
+  const { children, detailHeaders } = props;
   return (
     <Table bordered hover>
-      <tr>
-        <th>Name</th>
-        <th>Detail</th>
-        <th>Actions</th>
-      </tr>
+      <thead>
+        <tr>
+          <th>Name</th>
+          {detailHeaders.map((dh) => (
+            <th>{dh}</th>
+          ))}
+          <th className="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>{children}</tbody>
     </Table>
   );
 };
