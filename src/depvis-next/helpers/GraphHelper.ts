@@ -255,10 +255,16 @@ export const findParentNodes = (links: any, nodeId: string) => {
 };
 
 export const generateLabel = (node) => {
-  return `<div><span>Name: ${node.name}</span><br> \
+  if (node.__typename === "Component") {
+    return `<div><span>Name: ${node.name}</span><br> \
   <span>Version: ${node.version}</span><br> \
   <span># of Dependencies: ${node.dependsOnCount}</span><br> \
   <i>Click to see details</i></div>`;
+  } else {
+    return `<div><span>Name: ${node.name}</span><br> \
+  <span>CVSS: ${node.cvssScore}</span><br> \
+  <i>Click to see details</i></div>`;
+  }
 };
 
 export const getHighlightedColor = (currNode, node) => {
