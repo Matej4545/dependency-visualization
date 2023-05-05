@@ -1,3 +1,4 @@
+import { PackageURL } from "packageurl-js";
 import { Component, Dependency } from "../types/component";
 import { Project, ProjectVersion } from "../types/project";
 import { VulnFetcherHandler } from "../vulnerability-mgmt/VulnFetcherHandler";
@@ -153,7 +154,7 @@ function GetComponents(bom: any) {
     return {
       type: c.type,
       name: c.name,
-      purl: c.purl,
+      purl: removePurlQualifiers(c.purl),
       ref: c.bomref,
       version: `${c.version}`,
       author: c.author,
@@ -313,13 +314,17 @@ function createMainComponent(inputComponent) {
   return {
     type: inputComponent.type || "library",
     name: inputComponent.name,
-    purl: purl,
+    purl: removePurlQualifiers(purl),
     ref: inputComponent.bomref || purl,
     version: inputComponent.version,
     author: inputComponent.author,
     publisher: inputComponent.publisher,
   };
 }
+
+const removePurlQualifiers = (purlString: string) => {
+  return purlString && purlString.split("?")[0];
+};
 
 enum ImportPhase {
   CreateProject = "Creating project version",
