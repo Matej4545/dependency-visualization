@@ -12,10 +12,14 @@ const GraphContainer = (props) => {
   const graphContainerRef = useRef<HTMLElement>();
 
   const setSize = () => {
-    setGraphDimensions({
-      width: graphContainerRef.current && graphContainerRef.current.offsetWidth,
+    const size = {
+      width: graphContainerRef.current
+        ? graphContainerRef.current.clientWidth
+        : window.innerWidth - document.getElementById("sidebar").offsetWidth,
       height: window.innerHeight - 56,
-    });
+    };
+    console.log(size);
+    setGraphDimensions(size);
   };
 
   useEffect(() => {
@@ -33,7 +37,11 @@ const GraphContainer = (props) => {
       !props.graphData.nodes ||
       props.graphData.nodes.length == 0)
   )
-    return <GraphError message="No data" />;
+    return (
+      <Col>
+        <GraphError message="No data" />
+      </Col>
+    );
   return (
     <Col className="workspace-graph-nospace" ref={graphContainerRef}>
       {props.isLoading && (
