@@ -5,31 +5,29 @@ import { Container, Row } from "react-bootstrap";
 import {
   findParentNodes,
   formatData,
+  generateLabel,
   getAllComponentsQuery,
+  getHighlightedColor,
   getLinkColor,
   getLinkSize,
   getNodeColor,
   getNodeValue,
+  resetHighlight,
+  resetNodeFix,
 } from "../../helpers/GraphHelper";
 import ComponentDetails from "../Details/ComponentDetails";
 import Details from "../Details/Details";
 import VulnerabilityDetails from "../Details/VulnerabilityDetails";
-import NoProjectFoundError from "../Error/NoProjectFoundError";
 import { GraphConfig } from "../Graph/GraphConfig";
 import GraphControl from "../GraphControl/GraphControl";
 import Search from "../Search/Search";
 import GraphContainer from "../Layout/GraphContainer";
 import Sidebar, { SidebarItem } from "../Layout/Sidebar";
 import ProjectVersionSelector from "./ProjectVersionSelector";
-import {
-  graphSelectedNode,
-  vulnerabilityHighlightedColor,
-} from "../../types/colorPalette";
 import usePrevious from "../../helpers/usePreviousHook";
 import ProjectStatistics from "./ProjectStatistics";
 import Legend from "./Legend";
 import GenericError from "../Error/GenericError";
-import Loading from "../Loading/Loading";
 
 const defaultGraphConfig: GraphConfig = {
   zoomLevel: 1,
@@ -84,7 +82,6 @@ const Workspace = () => {
     if (selectedProjectVersion) {
       getGraphData({
         variables: { projectVersionId: selectedProjectVersion },
-        // pollInterval: 1000,
       });
     }
   }, [selectedProjectVersion]);
@@ -102,11 +99,6 @@ const Workspace = () => {
       setGraphData(formatData(filteredData, graphConfig.connectNodesToRoot));
   }, [graphConfig]);
 
-  const resetHighlight = (nodes: any[]) => {
-    for (let index = 0; index < nodes.length; index++) {
-      nodes[index].highlight = false;
-    }
-  };
   const handleNodeClick = (node) => {
     const p = findParentNodes(graphData.links, node.id);
     p.add(node.id);
@@ -117,11 +109,6 @@ const Workspace = () => {
     });
 
     setNode(node);
-  };
-
-  const resetNodeFix = (node) => {
-    node.fx = undefined;
-    node.fy = undefined;
   };
 
   const unselectNode = () => {
@@ -141,12 +128,6 @@ const Workspace = () => {
     handleNodeClick(object);
   };
 
-  const getHighlightedColor = (currNode) => {
-    if (currNode !== node) return "";
-    return currNode.__typename === "Component"
-      ? graphSelectedNode
-      : vulnerabilityHighlightedColor;
-  };
   const paintRing = useCallback(
     (currNode, ctx) => {
       if (node && node.id === currNode.id) {
@@ -161,7 +142,7 @@ const Workspace = () => {
           2 * Math.PI,
           false
         );
-        ctx.fillStyle = getHighlightedColor(currNode);
+        ctx.fillStyle = getHighlightedColor(currNode, node);
         ctx.fill();
       }
     },
@@ -172,6 +153,58 @@ const Workspace = () => {
     setSelectedProjectVersion(projectVersion);
   };
 
+  const renderSidebar = () => {
+    return (
+      <Sidebar>
+        <SidebarItem title="Select project" fixed>
+          <ProjectVersionSelector
+            onProjectVersionSelect={handleProjectVersion}
+          />
+        </SidebarItem>
+        <SidebarItem title="Project details">
+          <ProjectStatistics data={data} />
+        </SidebarItem>
+        <SidebarItem title="Search nodes" fixed>
+          <Search
+            objects={graphData.nodes}
+            searchResultCallback={(obj) => handleSelectedSearchResult(obj)}
+          />
+        </SidebarItem>
+        <SidebarItem title="Graph controls" collapse>
+          <GraphControl
+            defaultGraphConfig={defaultGraphConfig}
+            onGraphConfigChange={(val) => {
+              setGraphConfig(val);
+            }}
+            onRefetchGraphClick={() => {
+              getGraphData({
+                variables: { projectId: selectedProjectVersion },
+                fetchPolicy: "no-cache",
+              });
+            }}
+          />
+        </SidebarItem>
+        <SidebarItem title="Node detail">
+          {node && node.__typename === "Component" && (
+            <ComponentDetails
+              componentId={node.id}
+              projectId={selectedProjectVersion}
+            />
+          )}
+          {node && node.__typename === "Vulnerability" && (
+            <VulnerabilityDetails vulnerabilityId={node.id} />
+          )}
+
+          {process.env.NODE_ENV === "development" && (
+            <Details data={node} title="Development details" />
+          )}
+        </SidebarItem>
+        <SidebarItem title="Legend">
+          <Legend />
+        </SidebarItem>
+      </Sidebar>
+    );
+  };
   if (!selectedProjectVersion)
     return (
       <ProjectVersionSelector onProjectVersionSelect={handleProjectVersion} />
@@ -181,57 +214,11 @@ const Workspace = () => {
   return (
     <Container fluid>
       <Row className="workspace-main">
-        <Sidebar>
-          <SidebarItem title="Select project" fixed>
-            <ProjectVersionSelector
-              onProjectVersionSelect={handleProjectVersion}
-            />
-          </SidebarItem>
-          <SidebarItem title="Project details">
-            <ProjectStatistics data={data} />
-          </SidebarItem>
-          <SidebarItem title="Search nodes" fixed>
-            <Search
-              objects={graphData.nodes}
-              searchResultCallback={(obj) => handleSelectedSearchResult(obj)}
-            />
-          </SidebarItem>
-          <SidebarItem title="Graph controls" collapse>
-            <GraphControl
-              defaultGraphConfig={defaultGraphConfig}
-              onGraphConfigChange={(val) => {
-                setGraphConfig(val);
-              }}
-              onRefetchGraphClick={() => {
-                getGraphData({
-                  variables: { projectId: selectedProjectVersion },
-                  fetchPolicy: "no-cache",
-                });
-              }}
-            />
-          </SidebarItem>
-          <SidebarItem title="Node detail">
-            {node && node.__typename === "Component" && (
-              <ComponentDetails
-                componentId={node.id}
-                projectId={selectedProjectVersion}
-              />
-            )}
-            {node && node.__typename === "Vulnerability" && (
-              <VulnerabilityDetails vulnerabilityId={node.id} />
-            )}
-
-            {process.env.NODE_ENV === "development" && (
-              <Details data={node} title="Development details" />
-            )}
-          </SidebarItem>
-          <SidebarItem title="Legend">
-            <Legend />
-          </SidebarItem>
-        </Sidebar>
+        {renderSidebar()}
 
         <GraphContainer
           nodeCanvasObject={paintRing}
+          nodeLabel={(node) => generateLabel(node)}
           selectedNode={node}
           isLoading={loading}
           graphData={graphData}

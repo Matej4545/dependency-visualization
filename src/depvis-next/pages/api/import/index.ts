@@ -12,6 +12,7 @@ import {
   ImportQueueName,
   ImportSbomJobData,
 } from "../../../queues/ImportQueue";
+import { parseXml } from "../../../helpers/xmlParserHelper";
 
 export const config = {
   api: {
@@ -21,31 +22,9 @@ export const config = {
   },
 };
 
-const alwaysArray = [
-  "bom.dependencies.dependency",
-  "bom.dependencies.dependency.dependency",
-];
-const XMLParserOptions = {
-  ignoreAttributes: false,
-  attributeNamePrefix: "",
-  ignoreDeclaration: true,
-  transformAttributeName: (attributeName: string) =>
-    attributeName.replace(/-/g, ""),
-  isArray: (name, jpath, isLeafNode, isAttribute) => {
-    if (alwaysArray.indexOf(jpath) !== -1) return true;
-  },
-};
-
 //Bull queue
 const ImportQueue = new Queue(ImportQueueName, defaultBullConfig);
 const GetVulnQueue = new Queue(GetVulnQueueName, defaultBullConfig);
-
-type ImportResult = {
-  isError: boolean;
-  errorMessage?: string;
-  jobId?: string;
-  sbom?: any;
-};
 
 type ImportRequestBody = {
   projectName: string;
@@ -85,7 +64,7 @@ export default async function handler(req, res) {
     }
 
     // Parse sbom
-    const result = await parseXml(body.sbom);
+    const result = validateSbomXml(await parseXml(body.sbom));
     if (result.isError) {
       console.log("Import failed with %s", result.errorMessage);
       return res.status(400).json(result);
@@ -114,9 +93,8 @@ function validateImportRequestBody(body: ImportRequestBody) {
     return false;
   return true;
 }
-
 // Function validates that object contains required properties
-function validateSbomXml(parsedXml): ImportResult {
+function validateSbomXml(parsedXml) {
   const sbom = parsedXml.bom;
   if (!sbom)
     return {
@@ -130,12 +108,4 @@ function validateSbomXml(parsedXml): ImportResult {
         "Validation failed - Missing 'metadata' parameter in the file.",
     };
   return { isError: false, sbom: sbom };
-}
-
-// Function takes XML in plain text and transforms it into object
-async function parseXml(inputXml: string) {
-  const parser = new XMLParser(XMLParserOptions);
-  const xmlParsed = parser.parse(inputXml);
-
-  return validateSbomXml(xmlParsed);
 }

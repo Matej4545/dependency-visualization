@@ -10,6 +10,7 @@ import {
   graphUIGrey,
   vulnerabilityCriticalColor,
   vulnerabilityHighColor,
+  vulnerabilityHighlightedColor,
   vulnerabilityLowColor,
   vulnerabilityMediumColor,
 } from "../types/colorPalette";
@@ -37,6 +38,7 @@ export const formatData = (components, connectDirect = false) => {
     nodes.push({
       id: c.purl,
       name: c.name,
+      version: c.version,
       dependsOnCount: c.dependsOnCount,
       size: 1 + c.dependsOnCount / componentsCount,
       isDirectDependency: c.isDirectDependency,
@@ -164,11 +166,6 @@ export const getProjectVersionsQuery = gql`
     }
   }
 `;
-// const componentColor = "#005f73";
-// const vulnColor = "#ee9b00";
-// const otherColor = "#001219";
-// const severeVulnColor = "#bb3e03";
-// const systemComponent = "#0f0f0f";
 
 export const vulnerabilityColorByCVSS = (cvssScore: number) => {
   if (cvssScore >= 9) return vulnerabilityCriticalColor;
@@ -178,7 +175,6 @@ export const vulnerabilityColorByCVSS = (cvssScore: number) => {
 };
 
 const componentColor = (node) => {
-  console.log(node);
   if (node.name && nodeExcludeRegex.test(node.name)) return graphExcludedNode;
   if (node.isDirectDependency) return graphMainComponentNode;
   if (node.highlight) return graphHighlightedNode;
@@ -256,4 +252,29 @@ export const findParentNodes = (links: any, nodeId: string) => {
   }
 
   return parentNodes;
+};
+
+export const generateLabel = (node) => {
+  return `<div><span>Name: ${node.name}</span><br> \
+  <span>Version: ${node.version}</span><br> \
+  <span># of Dependencies: ${node.dependsOnCount}</span><br> \
+  <i>Click to see details</i></div>`;
+};
+
+export const getHighlightedColor = (currNode, node) => {
+  if (currNode !== node) return "";
+  return currNode.__typename === "Component"
+    ? graphSelectedNode
+    : vulnerabilityHighlightedColor;
+};
+
+export const resetNodeFix = (node) => {
+  node.fx = undefined;
+  node.fy = undefined;
+};
+
+export const resetHighlight = (nodes: any[]) => {
+  for (let index = 0; index < nodes.length; index++) {
+    nodes[index].highlight = false;
+  }
 };
