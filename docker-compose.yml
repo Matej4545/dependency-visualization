@@ -7,9 +7,7 @@ services:
       - 7474:7474
       - 7687:7687
     volumes:
-      - ./runtime/data:/data
-      - ./runtime/logs:/logs
-      - ./runtime/plugins:/var/lib/neo4j/plugins
+      -   neo4j:/data
     restart: unless-stopped
     environment:
       - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:?error}
@@ -48,7 +46,11 @@ services:
       NEXT_PUBLIC_SONATYPE_OSS_AUTH: ${SONATYPE_OSS_AUTH}
       NEXT_PUBLIC_SERVER_URI: ${NEXT_PUBLIC_SERVER_URI:-http://localhost:3000}
       VULN_DB: ${VULN_DB:-Sonatype}
+      NEXT_PUBLIC_GRAPH_EXCLUDED_REGEX: ${GRAPH_EXCLUDED_REGEX:-" "}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
 volumes:
   cache:
     driver: local
+  neo4j: 
+    driver: local
+
