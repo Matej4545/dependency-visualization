@@ -1,10 +1,17 @@
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { Alert, Button, Container, Form, Row } from "react-bootstrap";
-import { ImportResult } from "./ImportResult";
 import { ImportFormData } from "./types";
+import { parseXml } from "../../helpers/xmlParserHelper";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck, faX } from "@fortawesome/free-solid-svg-icons";
 
-const allowedExtensionsRegex = /(\.json|\.xml)$/i;
+const allowedExtensionsRegex = /(\.xml)$/i;
+
+interface projectStats {
+  componentsCount: number;
+  dependenciesCount: number;
+  error: boolean;
+}
 
 const ImportForm = (props) => {
   const { onSubmitCallback } = props;
@@ -13,20 +20,38 @@ const ImportForm = (props) => {
   const [validated, setValidated] = useState<boolean>(false);
   const [projectName, setProjectName] = useState<string>("");
   const [projectVersion, setProjectVersion] = useState<string>("1.0.0");
-
-  const handleFiles = (e: any) => {
+  const [projectStats, setProjectStats] = useState<projectStats>(undefined);
+  const handleFiles = async (e: any) => {
     const files = e.target.files;
-    if (!files) return;
-    const file = files[0];
-    if (!allowedExtensionsRegex.exec(file.name)) {
+    if (!files || !files[0] || !allowedExtensionsRegex.exec(files[0].name)) {
       setFile(undefined);
       setValidated(true);
       e.target.value = "";
       return;
     }
+    const file = files[0];
+    setProjectStats(await tryParseFile(await file.text()));
     setFile(file);
   };
 
+  const tryParseFile = async (fileXml): Promise<projectStats> => {
+    try {
+      const parsedXml = await parseXml(fileXml);
+      const dependencies =
+        parsedXml.bom.dependencies &&
+        parsedXml.bom.dependencies.dependency
+          .map((d) => (d.dependency ? d.dependency.length : 0))
+          .reduce((sum, current) => sum + current, 0);
+      console.log(dependencies);
+      return {
+        componentsCount: parsedXml.bom.components.component.length,
+        dependenciesCount: dependencies,
+        error: false,
+      };
+    } catch {
+      return { componentsCount: 0, dependenciesCount: 0, error: true };
+    }
+  };
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -50,8 +75,45 @@ const ImportForm = (props) => {
     preview ? setPreview(undefined) : setPreview(await file.text());
   };
 
+  const renderInfo = () => {
+    return (
+      file && (
+        <Alert variant="secondary">
+          {projectStats && (
+            <>
+              <h4>
+                File <b>{file.name}</b> information:
+              </h4>
+              <span>
+                File can be parsed{" "}
+                {projectStats.error ? (
+                  <FontAwesomeIcon icon={faX} color="#A30015" />
+                ) : (
+                  <FontAwesomeIcon icon={faCheck} color="#34AD6C" />
+                )}
+              </span>
+              <br />
+              <span>Number of components: </span>
+              <span>{projectStats.componentsCount}</span>
+              <br />
+              <span>Number of dependencies: </span>
+              <span>{projectStats.dependenciesCount}</span>
+              <br />
+            </>
+          )}
+          {preview && (
+            <>
+              File Content:
+              <hr />
+              <pre className="import-preview">{preview}</pre>
+            </>
+          )}
+        </Alert>
+      )
+    );
+  };
   return (
-    <Row lg={2} className="justify-content-md-center">
+    <Row className="justify-content-md-center">
       <Form noValidate validated={validated}>
         <Form.Group controlId="file">
           <Form.Label>Project name</Form.Label>
@@ -104,7 +166,10 @@ const ImportForm = (props) => {
           onClick={(e) => handleSubmit(e)}
           className="my-3"
           disabled={
-            projectName === "" || projectVersion === "" || file === undefined
+            projectName === "" ||
+            projectVersion === "" ||
+            file === undefined ||
+            projectStats.error
           }
         >
           Submit form
@@ -117,13 +182,7 @@ const ImportForm = (props) => {
           Preview
         </Button>
       </Form>
-      {preview && file.name && (
-        <Alert variant="secondary">
-          Contents of file <b>{file.name}</b>
-          <hr />
-          <pre className="import-preview">{preview}</pre>
-        </Alert>
-      )}
+      {renderInfo()}
     </Row>
   );
 };
