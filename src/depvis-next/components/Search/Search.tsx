@@ -11,10 +11,6 @@ const SearchComponent = (props) => {
     setSearchValue(e.target.value);
   };
 
-  // const resetInputField = () => {
-  //   setSearchValue('');
-  // };
-
   const callSearchFunction = (e) => {
     e.preventDefault();
     const { objects } = props;

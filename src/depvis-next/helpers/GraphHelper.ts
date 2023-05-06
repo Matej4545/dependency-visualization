@@ -201,20 +201,8 @@ export const getLinkSize = (link) => {
   return 1;
 };
 
-// const getNodeTier = (
-//   score: number,
-//   tresholds: { 1: 10; 0.75: 7; 0.5: 5; 0.25: 3; 0.1: 1 }
-// ) => {
-//   const limits = Object.keys(tresholds);
-//   limits.forEach((l) => {
-//     if (score < Number.parseFloat(l)) return tresholds[l];
-//   });
-// };
-
 export const getNodeValue = (node) => {
   if (!node) return 1;
-  // if (node.__typename === 'Vulnerability') return node.cvssScore * 3 || 5;
-  // return node.dependsOnCount || 1;\
   return node.size;
 };
 

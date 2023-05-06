@@ -28,11 +28,6 @@ const ProjectSelector = (props: ProjectSelectorProps) => {
     }
   );
 
-  // useEffect(() => {
-  //   if (projectVersion) {
-  //     onProjectVersionSelect(projectVersion);
-  //   }
-  // }, [projectVersion]);
   const getProjectVersions = (project) => {
     const projectObj = projects.projects.filter((p) => p.id === project.id)[0];
     return projectObj.versions.map((v) => {

@@ -18,7 +18,7 @@ const Toolbox = () => {
   const [purlString, setPurlString] = useState("");
   const [purlOutput, setPurlOutput] = useState("");
   const handlePurl = async () => {
-    setPurlOutput(await JSON.stringify(PackageURL.fromString(purlString)));
+    setPurlOutput(JSON.stringify(PackageURL.fromString(purlString)));
     console.log(purlOutput);
   };
   const handleVuln = async () => {
