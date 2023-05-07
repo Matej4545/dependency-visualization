@@ -10,7 +10,7 @@ export const XMLParserOptions = {
   ignoreDeclaration: true,
   transformAttributeName: (attributeName: string) =>
     attributeName.replace(/-/g, ""),
-  isArray: (name, jpath, isLeafNode, isAttribute) => {
+  isArray: (jpath) => {
     if (alwaysArray.indexOf(jpath) !== -1) return true;
   },
 };

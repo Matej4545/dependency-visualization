@@ -1,18 +1,16 @@
 import { Queue } from "bullmq";
-import { XMLParser } from "fast-xml-parser";
 import { GetProjectByName } from "../../../helpers/DbDataProvider";
 import {
   compareVersions,
   getLatestProjectVersion,
-  ImportSbom,
 } from "../../../helpers/ImportSbomHelper";
 import { defaultBullConfig, emptyQueue } from "../../../helpers/QueueHelper";
+import { parseXml } from "../../../helpers/xmlParserHelper";
 import { GetVulnQueueName } from "../../../queues/GetVulnQueue";
 import {
   ImportQueueName,
   ImportSbomJobData,
 } from "../../../queues/ImportQueue";
-import { parseXml } from "../../../helpers/xmlParserHelper";
 
 export const config = {
   api: {

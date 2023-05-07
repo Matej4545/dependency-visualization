@@ -1,5 +1,5 @@
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const NoSSRGraphWrapper = dynamic(() => import('./NoSSRGraph'), { ssr: false });
+const NoSSRGraphWrapper = dynamic(() => import("./NoSSRGraph"), { ssr: false });
 
 export default NoSSRGraphWrapper;

@@ -21,6 +21,7 @@ const GraphControl = (props) => {
   }, [graphConfig]);
 
   const handleNodeValToggle = (e) => {
+    e.preventDefault();
     if (typeof graphConfig.nodeVal === "function") {
       setGraphConfig({ ...graphConfig, nodeVal: 1 });
     } else {
@@ -29,6 +30,7 @@ const GraphControl = (props) => {
   };
 
   const handleShowOnlyVulnerableToggle = (e) => {
+    e.preventDefault();
     setGraphConfig({
       ...graphConfig,
       showOnlyVulnerable: !graphConfig.showOnlyVulnerable,
@@ -36,6 +38,7 @@ const GraphControl = (props) => {
   };
 
   const handleShowConnectNodesToRoot = (e) => {
+    e.preventDefault();
     setGraphConfig({
       ...graphConfig,
       connectNodesToRoot: !graphConfig.connectNodesToRoot,

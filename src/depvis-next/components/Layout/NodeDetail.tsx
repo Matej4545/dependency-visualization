@@ -1,5 +1,5 @@
-import { Container } from 'react-bootstrap';
-import Details from '../Details/Details';
+import { Container } from "react-bootstrap";
+import Details from "../Details/Details";
 
 export default function NodeDetail(props) {
   const node = { name: props.name, ...props };

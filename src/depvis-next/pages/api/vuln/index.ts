@@ -2,7 +2,7 @@ import { processBatchAsync } from "../../../helpers/BatchHelper";
 import { GetComponents } from "../../../helpers/DbDataHelper";
 import { CreateUpdateVulnerability } from "../../../helpers/DbDataProvider";
 import { VulnFetcherHandler } from "../../../vulnerability-mgmt/VulnFetcherHandler";
-export default async function handler(req, res) {
+export default async function handler(_, res) {
   const { components } = await GetComponents();
   const purlList = components.map((c) => c.purl);
   const r = await processBatchAsync<any[]>(purlList, VulnFetcherHandler, {

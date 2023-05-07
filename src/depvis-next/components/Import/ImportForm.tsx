@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Alert, Button, Container, Form, Row } from "react-bootstrap";
-import { ImportFormData } from "./types";
-import { parseXml } from "../../helpers/xmlParserHelper";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faX } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useState } from "react";
+import { Alert, Button, Form, Row } from "react-bootstrap";
+import { parseXml } from "../../helpers/xmlParserHelper";
+import { ImportFormData } from "./types";
 
 const allowedExtensionsRegex = /(\.xml)$/i;
 

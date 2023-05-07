@@ -1,3 +1,5 @@
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { OverlayTrigger, Stack, Tooltip } from "react-bootstrap";
 import {
   graphExcludedNode,
@@ -13,8 +15,6 @@ import {
   vulnerabilityLowColor,
   vulnerabilityMediumColor,
 } from "../../types/colorPalette";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle } from "@fortawesome/free-solid-svg-icons";
 
 const Legend = () => {
   const vulnItems = [

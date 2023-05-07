@@ -1,6 +1,5 @@
-import { Driver } from "neo4j-driver";
+import neo4j, { Driver } from "neo4j-driver";
 import { env } from "process";
-import neo4j from "neo4j-driver";
 
 export const GraphQLUri = "/api/graphql";
 

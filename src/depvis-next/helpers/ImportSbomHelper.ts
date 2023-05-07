@@ -1,17 +1,16 @@
-import { PackageURL } from "packageurl-js";
 import { Component, Dependency } from "../types/component";
 import { Project, ProjectVersion } from "../types/project";
 import { VulnFetcherHandler } from "../vulnerability-mgmt/VulnFetcherHandler";
 import { processBatchAsync } from "./BatchHelper";
 import {
+  CreateComponents,
   CreateProject,
   CreateProjectVersion,
+  CreateUpdateVulnerability,
   DeleteProjectVersion,
   GetProjectById,
   GetProjectByName,
-  CreateComponents,
   updateComponentDependency,
-  CreateUpdateVulnerability,
 } from "./DbDataProvider";
 
 type ProjectInput = {
@@ -111,6 +110,7 @@ export async function ImportSbom(
       mainComponent.purl,
       updateProgress
     );
+    console.log(`Created ${dependenciesResult} dependencies.`);
 
     // Find vulnerabilities
     importInfo.currentPhase = ImportPhase.FindVulnerabilities;
@@ -275,7 +275,7 @@ async function GetProjectVersionId(
   project: Project,
   projectVersionInput: ProjectVersionInput
 ) {
-  const { version, date } = projectVersionInput;
+  const { version } = projectVersionInput;
   if (!project || !version) {
     throw Error("Invalid information - missing project or project version");
   }

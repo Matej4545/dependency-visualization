@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/client";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { Button, Container } from "react-bootstrap";
+import { useState } from "react";
+import { Container } from "react-bootstrap";
 import { getProjectsQuery } from "../../helpers/GraphHelper";
 import Dropdown, { DropdownItem } from "../Dropdown/Dropdown";
 

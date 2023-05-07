@@ -206,22 +206,6 @@ export const getNodeValue = (node) => {
   return node.size;
 };
 
-/**
- * Can be used for graph testing purposes
- */
-function genGraphTree() {
-  return {
-    nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }],
-    links: [
-      { source: "A", target: "B" },
-      { source: "A", target: "C" },
-      { source: "B", target: "D" },
-      { source: "D", target: "C" },
-      { source: "C", target: "B" },
-    ],
-  };
-}
-
 export const findParentNodes = (links: any, nodeId: string) => {
   const parentNodes = new Set<string>();
   const queue = [nodeId];
