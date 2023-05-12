@@ -2,6 +2,27 @@
 
 A language-independent package dependencies visualization tool that use [CycloneDX](https://cyclonedx.org/) SBOM formatted files as input and creates graphic visualization that can help identify vulnerabilities and software structure.
 
+## Project Content
+
+- apollo
+  - contains code related to Apollo Client and Apollo Server
+- components
+  - contains code for React components used to build the application
+- helpers
+  - contains helper functions responsible for business logic tasks
+- pages
+  - contains Next.js pages, the web structure is created based on the paths
+  - api
+    - contains API endpoints
+- queues
+  - contains import queue and vulnerability queue used in the DepVis
+- styles
+  - css styles
+- types
+  - contains type definitions for various objects shared across DepVis
+- vulnerability-mgmt
+  - contains logic for vulnerability fetchers
+
 ## Deployment
 
 ### Docker (preferred way)
