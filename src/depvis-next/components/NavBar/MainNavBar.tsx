@@ -17,7 +17,16 @@ const MainNavbar = () => {
     <Navbar bg="dark" expand="lg" variant="dark">
       <Container>
         <Link href="/" passHref>
-          <Navbar.Brand>DepVis</Navbar.Brand>
+          <Navbar.Brand>
+            <img
+              src="/depvis.png"
+              width="30"
+              height="30"
+              className="d-inline-block align-top"
+              alt="React Bootstrap logo"
+            />{" "}
+            DepVis
+          </Navbar.Brand>
         </Link>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse className="justify-content-end">
