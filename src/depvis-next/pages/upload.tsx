@@ -7,6 +7,9 @@ import { ImportResult } from "../components/Import/ImportResult";
 
 const ImportApiUrl = "/api/import";
 
+/**
+ * Page containing the import form and import results
+ */
 const Upload = () => {
   const router = useRouter();
   const [serverResponse, setServerResponse] = useState<any>();

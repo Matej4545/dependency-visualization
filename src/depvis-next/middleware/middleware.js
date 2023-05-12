@@ -1,8 +1,9 @@
-import nextConnect from 'next-connect';
-import multiparty from 'multiparty';
+import multiparty from "multiparty";
+import nextConnect from "next-connect";
 
 const middleware = nextConnect();
 
+// Enables parsing of multipart form
 middleware.use(async (req, res, next) => {
   const form = new multiparty.Form();
 

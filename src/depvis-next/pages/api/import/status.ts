@@ -12,6 +12,11 @@ export type ImportStatusReponse = {
   continueQuery: boolean;
   projectName?: string;
 };
+/**
+ * GET /api/import/status?id=number
+ * Returns current state for provided jobId
+ * @returns Current status of a job
+ */
 export default async function handler(req, res) {
   if (req.method !== "GET") return res.status(405);
   if (!("id" in req.query && !isNaN(req.query.id))) {

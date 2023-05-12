@@ -16,6 +16,7 @@ const GraphControl = (props) => {
   const [graphConfig, setGraphConfig] =
     useState<GraphConfig>(defaultGraphConfig);
 
+  //Callback to parent component when the config change
   useEffect(() => {
     props.onGraphConfigChange(graphConfig);
   }, [graphConfig]);

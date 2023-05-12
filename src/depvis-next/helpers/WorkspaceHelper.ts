@@ -1,11 +1,18 @@
 import { PackageURL } from "packageurl-js";
 import urlJoin from "url-join";
 
+// Define Package Repository endpoints
 const npmUrlBase = "https://www.npmjs.com/package/";
 const nugetUrlBase = "https://www.nuget.org/packages/";
 const pypiUrlBase = "https://pypi.org/project/";
 const mavenUrlBase = "https://mvnrepository.com/artifact/";
 
+/**
+ * Function returns a location of package in the package repository
+ * It is possible the link is not valid, function does not check it
+ * @param purl Package URL
+ * @returns URL with package location in the package repository
+ */
 export function GetComponentRepositoryURL(purl: string) {
   try {
     const component = PackageURL.fromString(purl);

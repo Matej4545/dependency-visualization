@@ -30,6 +30,12 @@ type ImportRequestBody = {
   sbom: string;
 };
 
+/**
+ * POST /api/import
+ * Function which handles the import of new projects
+ * It validates the request, parse XML into an object and create new work item in Queue
+ * @returns object containing jobId, error status and parsed bom
+ */
 export default async function handler(req, res) {
   try {
     //Validate request

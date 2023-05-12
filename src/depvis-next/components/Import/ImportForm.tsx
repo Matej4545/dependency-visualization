@@ -2,16 +2,12 @@ import { faCheck, faX } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Alert, Button, Form, Row } from "react-bootstrap";
-import { parseXml } from "../../helpers/xmlParserHelper";
+import {
+  allowedExtensionsRegex,
+  projectStats,
+  tryParseFile,
+} from "../../helpers/ImportFormHelper";
 import { ImportFormData } from "./types";
-
-const allowedExtensionsRegex = /(\.xml)$/i;
-
-interface projectStats {
-  componentsCount: number;
-  dependenciesCount: number;
-  error: boolean;
-}
 
 const ImportForm = (props) => {
   const { onSubmitCallback } = props;
@@ -21,8 +17,10 @@ const ImportForm = (props) => {
   const [projectName, setProjectName] = useState<string>("");
   const [projectVersion, setProjectVersion] = useState<string>("1.0.0");
   const [projectStats, setProjectStats] = useState<projectStats>(undefined);
+
   const handleFiles = async (e: any) => {
     const files = e.target.files;
+    // Check if there is some issue with the file
     if (!files || !files[0] || !allowedExtensionsRegex.exec(files[0].name)) {
       setFile(undefined);
       setValidated(true);
@@ -34,24 +32,6 @@ const ImportForm = (props) => {
     setFile(file);
   };
 
-  const tryParseFile = async (fileXml): Promise<projectStats> => {
-    try {
-      const parsedXml = await parseXml(fileXml);
-      const dependencies =
-        parsedXml.bom.dependencies &&
-        parsedXml.bom.dependencies.dependency
-          .map((d) => (d.dependency ? d.dependency.length : 0))
-          .reduce((sum, current) => sum + current, 0);
-      console.log(dependencies);
-      return {
-        componentsCount: parsedXml.bom.components.component.length,
-        dependenciesCount: dependencies,
-        error: false,
-      };
-    } catch {
-      return { componentsCount: 0, dependenciesCount: 0, error: true };
-    }
-  };
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const form = e.currentTarget;

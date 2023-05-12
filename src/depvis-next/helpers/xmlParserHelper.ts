@@ -1,9 +1,12 @@
 import { XMLParser } from "fast-xml-parser";
 
+// These tags will be always represented as an array
 const alwaysArray = [
   "bom.dependencies.dependency",
   "bom.dependencies.dependency.dependency",
 ];
+
+// Options for XMLParser
 export const XMLParserOptions = {
   ignoreAttributes: false,
   attributeNamePrefix: "",
