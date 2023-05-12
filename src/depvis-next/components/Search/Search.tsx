@@ -1,7 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button, Container, Dropdown, Form } from "react-bootstrap";
-import DropdownContext from "react-bootstrap/esm/DropdownContext";
-import DropdownItem from "react-bootstrap/esm/DropdownItem";
 
 const SearchComponent = (props) => {
   const [searchValue, setSearchValue] = useState("");
@@ -10,10 +8,6 @@ const SearchComponent = (props) => {
   const handleSearchInputChanges = (e) => {
     setSearchValue(e.target.value);
   };
-
-  // const resetInputField = () => {
-  //   setSearchValue('');
-  // };
 
   const callSearchFunction = (e) => {
     e.preventDefault();

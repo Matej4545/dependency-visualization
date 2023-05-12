@@ -1,5 +1,8 @@
 import { Container } from "react-bootstrap";
 
+/**
+ * Page containing information about the project
+ */
 const About = () => {
   return (
     <Container className="my-5" fluid="sm">

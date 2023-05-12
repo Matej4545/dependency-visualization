@@ -1,6 +1,6 @@
-import { Button, Container, OverlayTrigger, Tooltip } from "react-bootstrap";
-import { DL, DLItem } from "../Details/DescriptionList";
+import { Container } from "react-bootstrap";
 import { Component } from "../../types/component";
+import { DL, DLItem } from "../Details/DescriptionList";
 
 const ProjectStatistics = (props) => {
   const projectInfo = createProjectInfo(props.data);

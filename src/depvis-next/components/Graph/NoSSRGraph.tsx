@@ -1,15 +1,15 @@
-import { forceCollide, forceManyBody, forceX, forceY } from "d3-force";
-import { useEffect, useRef, useState } from "react";
-import ReactForceGraph2d, { ForceGraphMethods } from "react-force-graph-2d";
-import GraphFloatControl from "./GraphFloatControl";
-import { Button } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEarth,
   faLocationCrosshairs,
   faMagnifyingGlassMinus,
   faMagnifyingGlassPlus,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { forceCollide, forceManyBody, forceX, forceY } from "d3-force";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "react-bootstrap";
+import ReactForceGraph2d, { ForceGraphMethods } from "react-force-graph-2d";
+import GraphFloatControl from "./GraphFloatControl";
 
 export default function NoSSRGraph(props) {
   const graphRef = useRef<ForceGraphMethods>();

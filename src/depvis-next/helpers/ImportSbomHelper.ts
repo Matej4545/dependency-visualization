@@ -3,14 +3,14 @@ import { Project, ProjectVersion } from "../types/project";
 import { VulnFetcherHandler } from "../vulnerability-mgmt/VulnFetcherHandler";
 import { processBatchAsync } from "./BatchHelper";
 import {
+  CreateComponents,
   CreateProject,
   CreateProjectVersion,
+  CreateUpdateVulnerability,
   DeleteProjectVersion,
   GetProjectById,
   GetProjectByName,
-  CreateComponents,
   updateComponentDependency,
-  CreateUpdateVulnerability,
 } from "./DbDataProvider";
 
 type ProjectInput = {
@@ -110,6 +110,7 @@ export async function ImportSbom(
       mainComponent.purl,
       updateProgress
     );
+    console.log(`Created ${dependenciesResult} dependencies.`);
 
     // Find vulnerabilities
     importInfo.currentPhase = ImportPhase.FindVulnerabilities;
@@ -145,6 +146,12 @@ export async function ImportSbom(
     }
   }
 }
+
+/**
+ * Function will get all components from input file
+ * @param bom input object, should include a list of components
+ * @returns Array of components if any are found
+ */
 function GetComponents(bom: any) {
   if (!bom.components || !bom.components.component) return [];
   let components: any[] = bom.components.component;
@@ -153,7 +160,7 @@ function GetComponents(bom: any) {
     return {
       type: c.type,
       name: c.name,
-      purl: c.purl,
+      purl: removePurlQualifiers(c.purl),
       ref: c.bomref,
       version: `${c.version}`,
       author: c.author,
@@ -163,8 +170,12 @@ function GetComponents(bom: any) {
   return components;
 }
 
+/**
+ * Function will get all dependencies from input file
+ * @param bom input object, should include a list of dependencies
+ * @returns Array of dependencies if any are found
+ */
 function GetDependencies(bom: any): Dependency[] {
-  console.log(bom);
   if (!bom.dependencies || !bom.dependencies.dependency) return [];
   const dependencies = bom.dependencies.dependency;
   const res: Dependency[] = dependencies
@@ -274,7 +285,7 @@ async function GetProjectVersionId(
   project: Project,
   projectVersionInput: ProjectVersionInput
 ) {
-  const { version, date } = projectVersionInput;
+  const { version } = projectVersionInput;
   if (!project || !version) {
     throw Error("Invalid information - missing project or project version");
   }
@@ -304,6 +315,11 @@ async function GetProjectVersionId(
   return newVersionId;
 }
 
+/**
+ * Function will returned main component in a CycloneDX format
+ * @param inputComponent an object representing input component
+ * @returns input component in CycloneDX format
+ */
 function createMainComponent(inputComponent) {
   if (!inputComponent) {
     throw Error("No main component was provided!");
@@ -313,7 +329,7 @@ function createMainComponent(inputComponent) {
   return {
     type: inputComponent.type || "library",
     name: inputComponent.name,
-    purl: purl,
+    purl: removePurlQualifiers(purl),
     ref: inputComponent.bomref || purl,
     version: inputComponent.version,
     author: inputComponent.author,
@@ -321,6 +337,16 @@ function createMainComponent(inputComponent) {
   };
 }
 
+/**
+ * Function will remove any optional qualifiers from PURL
+ * @param purlString input PURL
+ * @returns PURL without optional qualifiers
+ */
+const removePurlQualifiers = (purlString: string) => {
+  return purlString && purlString.split("?")[0];
+};
+
+// Describes the options for input phases
 enum ImportPhase {
   CreateProject = "Creating project version",
   CreateComponents = "Creating components",
@@ -331,6 +357,12 @@ enum ImportPhase {
   Init = "Starting import",
 }
 
+/**
+ * Function used to log progress during import
+ * @param importPhase Current import phase, must be of type ImportPhase
+ * @param phasePercent Progress (0-100)
+ * @returns Recalculated progress considering current phase
+ */
 const CalculateProgress = (importPhase: ImportPhase, phasePercent: number) => {
   switch (importPhase) {
     case ImportPhase.CreateProject:
@@ -348,6 +380,13 @@ const CalculateProgress = (importPhase: ImportPhase, phasePercent: number) => {
   }
 };
 
+/**
+ * Rescale the progress interval from 0-100 to offset-maximum
+ * @param offset start of interval
+ * @param maximum end of interval
+ * @param percent progress (0-100)
+ * @returns Rescaled progress (offset-maximum)
+ */
 const CalculateProgressFn = (
   offset: number,
   maximum: number,

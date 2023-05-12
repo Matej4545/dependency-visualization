@@ -1,9 +1,19 @@
 import { OverlayTrigger, Stack, Tooltip } from "react-bootstrap";
 
+/**
+ * DataItem Wrapper
+ * @param props React children
+ * @returns
+ */
 const DL = (props) => {
   return <dl>{props.children}</dl>;
 };
 
+/**
+ * Data Item which creates a text with label component
+ * @param props a props object containing label, value, alwaysShow, tooltipText, horizontal attributes
+ * @returns
+ */
 const DLItem = (props) => {
   const { label, value, alwaysShow, tooltipText, horizontal } = props;
   if (!label || (!alwaysShow && !value)) return;

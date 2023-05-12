@@ -1,5 +1,4 @@
-import { useLazyQuery, useQuery } from "@apollo/client";
-import { useRouter } from "next/router";
+import { useLazyQuery } from "@apollo/client";
 import { useCallback, useEffect, useState } from "react";
 import { Container, Row } from "react-bootstrap";
 import {
@@ -15,19 +14,19 @@ import {
   resetHighlight,
   resetNodeFix,
 } from "../../helpers/GraphHelper";
+import usePrevious from "../../helpers/usePreviousHook";
 import ComponentDetails from "../Details/ComponentDetails";
 import Details from "../Details/Details";
 import VulnerabilityDetails from "../Details/VulnerabilityDetails";
+import GenericError from "../Error/GenericError";
 import { GraphConfig } from "../Graph/GraphConfig";
 import GraphControl from "../GraphControl/GraphControl";
-import Search from "../Search/Search";
 import GraphContainer from "../Layout/GraphContainer";
 import Sidebar, { SidebarItem } from "../Layout/Sidebar";
-import ProjectVersionSelector from "./ProjectVersionSelector";
-import usePrevious from "../../helpers/usePreviousHook";
-import ProjectStatistics from "./ProjectStatistics";
+import Search from "../Search/Search";
 import Legend from "./Legend";
-import GenericError from "../Error/GenericError";
+import ProjectStatistics from "./ProjectStatistics";
+import ProjectVersionSelector from "./ProjectVersionSelector";
 
 const defaultGraphConfig: GraphConfig = {
   zoomLevel: 1,
@@ -55,7 +54,6 @@ const Workspace = () => {
   const [getGraphData, { loading, error, data }] = useLazyQuery(
     getAllComponentsQuery
   );
-  const router = useRouter();
 
   useEffect(() => {
     if (data) {

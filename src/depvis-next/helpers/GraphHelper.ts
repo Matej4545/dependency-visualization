@@ -34,6 +34,7 @@ export const formatData = (components, connectDirect = false) => {
     __typename: "Root",
   };
   connectDirect && nodes.push(root);
+  // Process components
   components.forEach((c) => {
     nodes.push({
       id: c.purl,
@@ -47,6 +48,7 @@ export const formatData = (components, connectDirect = false) => {
     if (connectDirect && c.isDirectDependency) {
       links.push({ source: root.id, target: c.purl, isFake: true });
     }
+    // Add link to dependency
     if (c.dependsOn) {
       c.dependsOn.forEach((d) => {
         links.push({
@@ -57,6 +59,7 @@ export const formatData = (components, connectDirect = false) => {
         });
       });
     }
+    // Process vulnerability
     if (c.vulnerabilities) {
       c.vulnerabilities.forEach((v) => {
         links.push({
@@ -83,6 +86,7 @@ export const formatData = (components, connectDirect = false) => {
   return { nodes, links };
 };
 
+// Get components for a project specified as $projectVersionId
 export const getAllComponentsQuery = gql`
   query getProjectComponents($projectVersionId: ID) {
     projectVersions(where: { id: $projectVersionId }) {
@@ -141,19 +145,8 @@ export const getAllComponentsQuery = gql`
     }
   }
 `;
-export const getProjectsQuery = gql`
-  query Project {
-    projects {
-      id
-      name
-      versions {
-        id
-        version
-      }
-    }
-  }
-`;
 
+// Get all project versions
 export const getProjectVersionsQuery = gql`
   {
     projectVersions {
@@ -167,6 +160,7 @@ export const getProjectVersionsQuery = gql`
   }
 `;
 
+// Assign colors based on the CVSS score
 export const vulnerabilityColorByCVSS = (cvssScore: number) => {
   if (cvssScore >= 9) return vulnerabilityCriticalColor;
   if (cvssScore >= 7) return vulnerabilityHighColor;
@@ -174,15 +168,25 @@ export const vulnerabilityColorByCVSS = (cvssScore: number) => {
   return vulnerabilityLowColor;
 };
 
+// Regex for excluded components
+const nodeExcludeRegex = new RegExp(
+  process.env.NEXT_PUBLIC_GRAPH_EXCLUDED_REGEX
+);
+
+// Assign color for the component node
 const componentColor = (node) => {
-  if (node.name && nodeExcludeRegex.test(node.name)) return graphExcludedNode;
+  if (
+    node.name &&
+    process.env.NEXT_PUBLIC_GRAPH_EXCLUDED_REGEX &&
+    nodeExcludeRegex.test(node.name)
+  )
+    return graphExcludedNode;
   if (node.isDirectDependency) return graphMainComponentNode;
   if (node.highlight) return graphHighlightedNode;
   return graphNode;
 };
-const nodeExcludeRegex = new RegExp(
-  process.env.NEXT_PUBLIC_GRAPH_EXCLUDED_REGEX
-);
+
+// Assign color for any node
 export const getNodeColor = (node) => {
   if (!node) return graphUIGrey;
   if (node.__typename === "Vulnerability")
@@ -191,49 +195,25 @@ export const getNodeColor = (node) => {
   return graphUIGrey;
 };
 
+// Assign color for a link
 export const getLinkColor = (link) => {
   if (link.target && link.target.highlight) return graphHighlightedLink;
   return graphLink;
 };
 
+// Return link weight size if highlighted
 export const getLinkSize = (link) => {
   if (link.target && link.target.highlight) return 4;
   return 1;
 };
 
-// const getNodeTier = (
-//   score: number,
-//   tresholds: { 1: 10; 0.75: 7; 0.5: 5; 0.25: 3; 0.1: 1 }
-// ) => {
-//   const limits = Object.keys(tresholds);
-//   limits.forEach((l) => {
-//     if (score < Number.parseFloat(l)) return tresholds[l];
-//   });
-// };
-
+// Return the value of node if defined, otherwise 1
 export const getNodeValue = (node) => {
   if (!node) return 1;
-  // if (node.__typename === 'Vulnerability') return node.cvssScore * 3 || 5;
-  // return node.dependsOnCount || 1;\
   return node.size;
 };
 
-/**
- * Can be used for graph testing purposes
- */
-function genGraphTree() {
-  return {
-    nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }],
-    links: [
-      { source: "A", target: "B" },
-      { source: "A", target: "C" },
-      { source: "B", target: "D" },
-      { source: "D", target: "C" },
-      { source: "C", target: "B" },
-    ],
-  };
-}
-
+// Function will return a set of parent nodes for a given node
 export const findParentNodes = (links: any, nodeId: string) => {
   const parentNodes = new Set<string>();
   const queue = [nodeId];
@@ -254,13 +234,21 @@ export const findParentNodes = (links: any, nodeId: string) => {
   return parentNodes;
 };
 
+// Function will generate label based on node type
 export const generateLabel = (node) => {
-  return `<div><span>Name: ${node.name}</span><br> \
+  if (node.__typename === "Component") {
+    return `<div><span>Name: ${node.name}</span><br> \
   <span>Version: ${node.version}</span><br> \
   <span># of Dependencies: ${node.dependsOnCount}</span><br> \
   <i>Click to see details</i></div>`;
+  } else {
+    return `<div><span>Name: ${node.name}</span><br> \
+  <span>CVSS: ${node.cvssScore}</span><br> \
+  <i>Click to see details</i></div>`;
+  }
 };
 
+// Return highlight color based on node type
 export const getHighlightedColor = (currNode, node) => {
   if (currNode !== node) return "";
   return currNode.__typename === "Component"
@@ -268,11 +256,13 @@ export const getHighlightedColor = (currNode, node) => {
     : vulnerabilityHighlightedColor;
 };
 
+// Reset the fixation of a nodes position
 export const resetNodeFix = (node) => {
   node.fx = undefined;
   node.fy = undefined;
 };
 
+// Reset highlight for nodes
 export const resetHighlight = (nodes: any[]) => {
   for (let index = 0; index < nodes.length; index++) {
     nodes[index].highlight = false;

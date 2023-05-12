@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Col, Container } from "react-bootstrap";
+import GraphError from "../Error/GraphError";
 import { GraphConfig } from "../Graph/GraphConfig";
 import NoSSRGraphWrapper from "../Graph/NoSSRGraphWrapper";
 import Loading from "../Loading/Loading";
-import GraphError from "../Error/GraphError";
 const GraphContainer = (props) => {
   const [graphDimensions, setGraphDimensions] = useState({
     width: 0,

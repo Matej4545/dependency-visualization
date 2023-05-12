@@ -1,13 +1,5 @@
 import { useState } from "react";
-import {
-  Button,
-  Col,
-  Collapse,
-  Container,
-  Row,
-  Stack,
-  Table,
-} from "react-bootstrap";
+import { Button, Collapse, Stack, Table } from "react-bootstrap";
 
 export default function Details(props) {
   const [open, setOpen] = useState(false);

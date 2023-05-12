@@ -1,12 +1,7 @@
-import {
-  ApolloClient,
-  createHttpLink,
-  InMemoryCache,
-  NormalizedCacheObject,
-} from "@apollo/client";
-import { GraphQLUri } from "./ApolloServer";
+import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client";
 import { useMemo } from "react";
 import urlJoin from "url-join";
+import { GraphQLUri } from "./ApolloServer";
 
 let httpApolloClient;
 let ssrApolloClient;
@@ -26,7 +21,6 @@ const httpLink = createHttpLink({
 });
 
 const createHttpApolloClient = (ssr: boolean = false) => {
-  const link = ssr ? ssrHttpLink : httpLink;
   console.log("Creating new Apollo Client (ssr: %s)", ssr);
   return new ApolloClient({
     ssrMode: ssr,

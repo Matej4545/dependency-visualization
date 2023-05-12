@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { Alert, Container, ProgressBar, Row, Spinner } from "react-bootstrap";
+import { Alert, Container, ProgressBar, Row } from "react-bootstrap";
 import { ImportStatusReponse } from "../../pages/api/import/status";
 
 const fetchInterval = 500;
