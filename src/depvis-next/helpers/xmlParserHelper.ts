@@ -14,8 +14,6 @@ export const XMLParserOptions = {
   transformAttributeName: (attributeName: string) =>
     attributeName.replace(/-/g, ""),
   isArray: (_, jpath) => {
-    console.log(jpath);
-
     if (alwaysArray.indexOf(jpath) !== -1) {
       return true;
     }

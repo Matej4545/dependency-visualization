@@ -24,7 +24,6 @@ export const tryParseFile = async (fileXml): Promise<projectStats> => {
       parsedXml.bom.dependencies.dependency
         .map((d) => (d.dependency ? d.dependency.length : 0))
         .reduce((sum, current) => sum + current, 0);
-    console.log(dependencies);
     return {
       componentsCount: parsedXml.bom.components.component.length,
       dependenciesCount: dependencies,
