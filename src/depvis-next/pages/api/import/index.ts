@@ -1,18 +1,16 @@
 import { Queue } from "bullmq";
-import { XMLParser } from "fast-xml-parser";
 import { GetProjectByName } from "../../../helpers/DbDataProvider";
 import {
   compareVersions,
   getLatestProjectVersion,
-  ImportSbom,
 } from "../../../helpers/ImportSbomHelper";
 import { defaultBullConfig, emptyQueue } from "../../../helpers/QueueHelper";
+import { parseXml } from "../../../helpers/xmlParserHelper";
 import { GetVulnQueueName } from "../../../queues/GetVulnQueue";
 import {
   ImportQueueName,
   ImportSbomJobData,
 } from "../../../queues/ImportQueue";
-import { parseXml } from "../../../helpers/xmlParserHelper";
 
 export const config = {
   api: {
@@ -32,6 +30,12 @@ type ImportRequestBody = {
   sbom: string;
 };
 
+/**
+ * POST /api/import
+ * Function which handles the import of new projects
+ * It validates the request, parse XML into an object and create new work item in Queue
+ * @returns object containing jobId, error status and parsed bom
+ */
 export default async function handler(req, res) {
   try {
     //Validate request

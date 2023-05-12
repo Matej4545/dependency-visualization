@@ -1,4 +1,4 @@
-import { Job, Worker } from "bullmq";
+import { Worker } from "bullmq";
 import { CreateUpdateVulnerability } from "../helpers/DbDataProvider";
 import { defaultBullConfig } from "../helpers/QueueHelper";
 import { VulnFetcherHandler } from "../vulnerability-mgmt/VulnFetcherHandler";

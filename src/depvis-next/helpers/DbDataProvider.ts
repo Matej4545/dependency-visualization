@@ -1,15 +1,15 @@
 import { gql } from "@apollo/client";
 import { Component, Dependency } from "../types/component";
-import { Project, ProjectVersion, ProjectVersionDto } from "../types/project";
+import { Project, ProjectVersionDto } from "../types/project";
 import { Vulnerability } from "../types/vulnerability";
 import {
-  sendGQLQuery,
-  sendGQLMutation,
+  AddComponentsConnectProjectVersion,
   AddProjectVersionConnectProject,
   BuildAddDependencyQuery,
-  AddComponentsConnectProjectVersion,
-  GetVulnerability,
   CreateVulnerability as CreateVulnerabilities,
+  GetVulnerability,
+  sendGQLMutation,
+  sendGQLQuery,
 } from "./DbDataHelper";
 import { ProjectVersionInput } from "./ImportSbomHelper";
 
@@ -236,7 +236,7 @@ export async function updateComponentDependency(
     }
   `;
   // Connect main component
-  const mainComponentRes = await sendGQLMutation(mainComponentsMutation, {
+  await sendGQLMutation(mainComponentsMutation, {
     projectVersionId: projectVersionId,
     ref: mainComponentRef,
   });

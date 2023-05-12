@@ -1,7 +1,0 @@
-# Sample .env file
-# ----------------
-# NEO4J connection variables
-
-# NEO4J_USER=neo4j
-# NEO4J_PASSWORD=test
-# NEO4J_HOST=neo4j://localhost:7687

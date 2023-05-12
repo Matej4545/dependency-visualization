@@ -1,7 +1,9 @@
-import { Col, Container, Row } from 'react-bootstrap';
-import Link from 'next/link';
-import React from 'react';
+import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
 
+/**
+ * Generic 404 page
+ */
 const PageNotFound = () => {
   return (
     <Container className="p-5 mx-auto">

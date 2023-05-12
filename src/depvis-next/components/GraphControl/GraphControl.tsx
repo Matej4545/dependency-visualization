@@ -15,12 +15,15 @@ const GraphControl = (props) => {
 
   const [graphConfig, setGraphConfig] =
     useState<GraphConfig>(defaultGraphConfig);
+  const [vulnFetch, setVulnFetch] = useState(false);
 
+  //Callback to parent component when the config change
   useEffect(() => {
     props.onGraphConfigChange(graphConfig);
   }, [graphConfig]);
 
   const handleNodeValToggle = (e) => {
+    e.preventDefault();
     if (typeof graphConfig.nodeVal === "function") {
       setGraphConfig({ ...graphConfig, nodeVal: 1 });
     } else {
@@ -29,6 +32,7 @@ const GraphControl = (props) => {
   };
 
   const handleShowOnlyVulnerableToggle = (e) => {
+    e.preventDefault();
     setGraphConfig({
       ...graphConfig,
       showOnlyVulnerable: !graphConfig.showOnlyVulnerable,
@@ -36,11 +40,19 @@ const GraphControl = (props) => {
   };
 
   const handleShowConnectNodesToRoot = (e) => {
+    e.preventDefault();
     setGraphConfig({
       ...graphConfig,
       connectNodesToRoot: !graphConfig.connectNodesToRoot,
     });
   };
+  async function onRefetchVulnsClick() {
+    setVulnFetch(true);
+    fetch("/api/vuln").then(() => {
+      setVulnFetch(false);
+    });
+  }
+
   return (
     <Container id="control" className="px-0">
       <Stack direction="horizontal">
@@ -153,6 +165,16 @@ const GraphControl = (props) => {
           }}
         >
           Refetch graph
+        </Button>
+        <Button
+          onClick={() => {
+            onRefetchVulnsClick();
+          }}
+          disabled={vulnFetch}
+        >
+          {vulnFetch
+            ? "Fetching..."
+            : "Refetch vulnerabilities for all components"}
         </Button>
       </Stack>
     </Container>

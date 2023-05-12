@@ -82,7 +82,7 @@ export async function CreateComponents(
     }
   `;
 
-  const res = [];
+  let res = [];
 
   for (let i = 0; i < components.length; i += chunkSize) {
     const chunk = components.slice(i, i + chunkSize);
@@ -90,7 +90,7 @@ export async function CreateComponents(
     const { data } = await sendGQLMutation(mutation, {
       components: chunkWithProjectId,
     });
-    res.concat(data.components);
+    res = res.concat(data.components);
   }
   return res;
 }
@@ -210,6 +210,7 @@ export async function UpdateProjectDependencies(
       return { purl: c.purl };
     }),
   });
+  return data;
 }
 
 export async function UpdateComponentDependencies(

@@ -1,17 +1,22 @@
 import { XMLParser } from "fast-xml-parser";
 
+// These tags will be always represented as an array
 const alwaysArray = [
   "bom.dependencies.dependency",
   "bom.dependencies.dependency.dependency",
 ];
+
+// Options for XMLParser
 export const XMLParserOptions = {
   ignoreAttributes: false,
   attributeNamePrefix: "",
   ignoreDeclaration: true,
   transformAttributeName: (attributeName: string) =>
     attributeName.replace(/-/g, ""),
-  isArray: (name, jpath, isLeafNode, isAttribute) => {
-    if (alwaysArray.indexOf(jpath) !== -1) return true;
+  isArray: (_, jpath) => {
+    if (alwaysArray.indexOf(jpath) !== -1) {
+      return true;
+    }
   },
 };
 
