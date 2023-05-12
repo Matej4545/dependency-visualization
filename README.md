@@ -4,6 +4,19 @@ DepVis is a Proof-of-Concept tool for visualization of open source dependencies 
 
 This tool was developed as part of Master's thesis "Visualization of Vulnerabilities in Open Source Software Dependencies" by Matej Groman at FI MUNI.
 
+## Contents
+
+- (dir) sample_bom
+  - contains sample CycloneDX SBOM files which can be used for DepVis evaluation
+- (dir) src/depvis-next
+  - contains the DepVis application
+- .env.example
+  - example environmental variables used for `docker-compose`
+- `docker-compose.yml`
+  - A Docker Compose file which can be used for local deployment
+- `docker-compose-azure.yml`
+  - A Docker Compose file which can be used for deplyment into Azure Containers
+
 ## Prerequisites
 
 - Docker & Docker Compose
@@ -25,7 +38,7 @@ To make deployment easier, a `docker-compose.yml` files are used to define compl
 
 - Clone this repository
 - Create environment variables file for docker compose - check [example](./.env.example) for supported variables.
-  - Minimum required are: `NEO4J_PASSWORD` and `REDIS_PASSWORD`.
+  - Minimum required are: `NEO4J_PASSWORD` (8 characters) and `REDIS_PASSWORD`.
   - Optionally you can create environment variables file according to sample file in Next.js app - [example](./src/depvis-next/.env.production.example) and edit `docker-compose.yml` accordingly.
 - To build all services use `docker-compose build`
 - Start all services using `docker-compose up`
