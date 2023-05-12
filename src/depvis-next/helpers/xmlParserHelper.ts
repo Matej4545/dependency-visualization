@@ -13,8 +13,12 @@ export const XMLParserOptions = {
   ignoreDeclaration: true,
   transformAttributeName: (attributeName: string) =>
     attributeName.replace(/-/g, ""),
-  isArray: (jpath) => {
-    if (alwaysArray.indexOf(jpath) !== -1) return true;
+  isArray: (_, jpath) => {
+    console.log(jpath);
+
+    if (alwaysArray.indexOf(jpath) !== -1) {
+      return true;
+    }
   },
 };
 
